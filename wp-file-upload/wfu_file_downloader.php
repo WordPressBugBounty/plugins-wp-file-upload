@@ -18,6 +18,13 @@ else {
 	wfu_download_file();
 }
 
+/**
+ * Download a File.
+ *
+ * This function causes a file to be downloaded.
+ *
+ * @global string $wfu_user_state_handler The user state handler.
+ */
 function wfu_download_file() {
 	global $wfu_user_state_handler;
 	$file_code = (isset($_POST['file']) ? $_POST['file'] : (isset($_GET['file']) ? $_GET['file'] : ''));
@@ -45,6 +52,9 @@ function wfu_download_file() {
 		$file_code = substr($file_code, 10);
 		//$filepath = wfu_get_filepath_from_safe($file_code);
 		$filepath = WFU_USVAR_downloader('wfu_storage_'.$file_code);
+		//validate the file path to avoid directory traversals that could lead
+		//to deletion of the wrong file
+		if ( !wfu_validate_storage_filepath("exportdata", $filepath) ) die();
 		$disposition_name = "wfu_export.csv";
 		$delete_file = true;
 	}
@@ -122,28 +132,73 @@ function wfu_download_file() {
 	}
 }
 
+/**
+ * Update Download Status.
+ *
+ * Stores in user state the new download status.
+ *
+ * @param string $ticket The download ticket.
+ * @param string $new_status The new download status.
+ */
 function wfu_update_download_status($ticket, $new_status) {
 	require_once WFU_USVAR_downloader('wfu_ABSPATH').'wp-load.php';
 	WFU_USVAR_store('wfu_download_status_'.$ticket, $new_status);
 }
 
+/**
+ * Check User State Variable For Existence.
+ *
+ * Checks whether a user state variable exists.
+ *
+ * @global string $wfu_user_state_handler The user state handler.
+ *
+ * @param mixed $var The user state variable to check.
+ * @return bool True if it exists, false otherwise.
+ */
 function WFU_USVAR_exists_downloader($var) {
 	global $wfu_user_state_handler;
 	if ( $wfu_user_state_handler == "dboption" && WFU_VAR("WFU_US_DBOPTION_BASE") == "cookies" ) return isset($_COOKIE[$var]);
 	else return WFU_USVAR_exists_session($var);
 }
 
+/**
+ * Get User State Variable.
+ *
+ * Returns the value of a user state variable. The variable needs to exist.
+ *
+ * @global string $wfu_user_state_handler The user state handler.
+ *
+ * @param mixed $var The user state variable to read.
+ * @return mixed The variable value.
+ */
 function WFU_USVAR_downloader($var) {
 	global $wfu_user_state_handler;
 	if ( $wfu_user_state_handler == "dboption" && WFU_VAR("WFU_US_DBOPTION_BASE") == "cookies" ) return $_COOKIE[$var];
 	else return WFU_USVAR_session($var);
 }
 
+/**
+ * Unset User State Variable.
+ *
+ * Unsets a user state variable.
+ *
+ * @global string $wfu_user_state_handler The user state handler.
+ *
+ * @param mixed $var The user state variable to unset.
+ */
 function WFU_USVAR_unset_downloader($var) {
 	global $wfu_user_state_handler;
 	if ( $wfu_user_state_handler == "session" || $wfu_user_state_handler == "" ) WFU_USVAR_unset_session($var);
 }
 
+/**
+ * Check for File Existence.
+ *
+ * Checks whether a file exists.
+ *
+ * @param string $filepath The full path of the file to check.
+ * @return bool True if the file exists, false otherwise.
+ */
 function wfu_file_exists_for_downloader($filepath) {
 	if ( substr($filepath, 0, 7) != "sftp://" ) return file_exists($filepath);
 	$ret = false;
@@ -161,6 +216,14 @@ function wfu_file_exists_for_downloader($filepath) {
 	return $ret;
 }
 
+/**
+ * Get File Size.
+ *
+ * Return the size of a file.
+ *
+ * @param string $filepath The full path of the file.
+ * @return int|bool The size of the file on success, false on failure.
+ */
 function wfu_filesize_for_downloader($filepath) {
 	if ( substr($filepath, 0, 7) != "sftp://" ) return filesize($filepath);
 	$ret = false;
@@ -178,6 +241,17 @@ function wfu_filesize_for_downloader($filepath) {
 	return $ret;
 }
 
+/**
+ * Get File Handler.
+ *
+ * Returns a file handler for reading the contents of the file. If the file is
+ * in an FTP location, then it is first copied in a memory stream and the
+ * handler of the memory stream is returned.
+ *
+ * @param string $filepath The full path of the file.
+ * @param string $mode The reading mode.
+ * @return resource|bool The file handler on success, false on failure.
+ */
 function wfu_fopen_for_downloader($filepath, $mode) {
 	if ( substr($filepath, 0, 7) != "sftp://" ) return @fopen($filepath, $mode);
 	$ret = false;
@@ -202,6 +276,14 @@ function wfu_fopen_for_downloader($filepath, $mode) {
 	return $ret;
 }
 
+/**
+ * Delete a File.
+ *
+ * Deletes a file. It also supports FTP locations.
+ *
+ * @param string $filepath The full file path of the file to delete.
+ * @return bool True on success, false otherwise.
+ */
 function wfu_unlink_for_downloader($filepath) {
 	if ( substr($filepath, 0, 7) != "sftp://" ) return @unlink($filepath);
 	$ret = false;
@@ -217,4 +299,29 @@ function wfu_unlink_for_downloader($filepath) {
 	}
 	
 	return $ret;
+}
+
+/**
+ * Validate Storage Filepath.
+ *
+ * It validates the filepath that was retrieved from user state storage. For the
+ * moment it works only when the downloaded file is an export of the plugin's
+ * data. It validates that the retrieved filepath is the PHP temp path.
+ *
+ * @since 4.24.12
+ *
+ * @param string $code The download code.
+ * @param string $filepath The retrieved full file path.
+ * @return bool True if validation has passed, false otherwise.
+ */
+function wfu_validate_storage_filepath($code, $filepath) {
+	$result = false;
+	if ( $code === "exportdata" ) {
+		$onlypath = wfu_basedir($filepath);
+		if ( substr($onlypath, -1) !== '/' ) $onlypath .= '/';
+		$exportpath = sys_get_temp_dir();
+		if ( substr($exportpath, -1) !== '/' ) $exportpath .= '/';
+		$result = ( $onlypath === $exportpath );
+	}
+	return $result;
 }

@@ -6548,8 +6548,8 @@ function wfu_set_session_cookie() {
 			WPFILEUPLOAD_COOKIE,
 			$cookie,
 			time() + intval(WFU_VAR("WFU_US_COOKIE_LIFE")) * 3600,
-			COOKIEPATH ? COOKIEPATH : '/',
-			COOKIE_DOMAIN,
+			defined("COOKIEPATH") ? COOKIEPATH : '/',
+			defined("COOKIE_DOMAIN") ? COOKIE_DOMAIN : '/',
 			false,
 			false
 		);
