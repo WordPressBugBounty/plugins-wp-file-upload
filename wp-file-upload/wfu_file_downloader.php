@@ -1,21 +1,63 @@
 <?php
+$downloader_data = wfu_read_downloader_data();
+$GLOBALS["wfu_downloader_data"] = $downloader_data;
 if ( !defined("ABSWPFILEUPLOAD_DIR") ) DEFINE("ABSWPFILEUPLOAD_DIR", dirname(__FILE__).'/');
 if ( !defined("WFU_AUTOLOADER_PHP50600") ) DEFINE("WFU_AUTOLOADER_PHP50600", 'vendor/modules/php5.6/autoload.php');
 include_once( ABSWPFILEUPLOAD_DIR.'lib/wfu_functions.php' );
 include_once( ABSWPFILEUPLOAD_DIR.'lib/wfu_security.php' );
-$handler = (isset($_POST['handler']) ? $_POST['handler'] : (isset($_GET['handler']) ? $_GET['handler'] : '-1'));
-$session_legacy = (isset($_POST['session_legacy']) ? $_POST['session_legacy'] : (isset($_GET['session_legacy']) ? $_GET['session_legacy'] : ''));
-$dboption_base = (isset($_POST['dboption_base']) ? $_POST['dboption_base'] : (isset($_GET['dboption_base']) ? $_GET['dboption_base'] : '-1'));
-$dboption_useold = (isset($_POST['dboption_useold']) ? $_POST['dboption_useold'] : (isset($_GET['dboption_useold']) ? $_GET['dboption_useold'] : ''));
-$wfu_cookie = (isset($_POST['wfu_cookie']) ? $_POST['wfu_cookie'] : (isset($_GET['wfu_cookie']) ? $_GET['wfu_cookie'] : ''));
-if ( $handler == '-1' || $session_legacy == '' || $dboption_base == '-1' || $dboption_useold == '' || $wfu_cookie == '' ) die();
-else {
-	$GLOBALS["wfu_user_state_handler"] = wfu_sanitize_code($handler);
-	$GLOBALS["WFU_GLOBALS"]["WFU_US_SESSION_LEGACY"] = array( "", "", "", ( $session_legacy == '1' ? 'true' : 'false' ), "", true );
-	$GLOBALS["WFU_GLOBALS"]["WFU_US_DBOPTION_BASE"] = array( "", "", "", wfu_sanitize_code($dboption_base), "", true );
-	$GLOBALS["WFU_GLOBALS"]["WFU_US_DBOPTION_USEOLD"] = array( "", "", "", ( $dboption_useold == '1' ? 'true' : 'false' ), "", true );
-	if ( !defined("WPFILEUPLOAD_COOKIE") ) DEFINE("WPFILEUPLOAD_COOKIE", wfu_sanitize_tag($wfu_cookie));
-	wfu_download_file();
+wfu_download_file();
+
+/**
+ * Read Downloader Data.
+ *
+ * This function reads the data that need to be passed to the downloader from a
+ * temporary file. Previously these data were read using user state (either
+ * session or cookies), however it had security issues. Reading from a file has
+ * many benefits: a) the data cannot be altered by an external vector, b) the
+ * temporary file location can be calculated only with core PHP function without
+ * the need to initialize Wordpress.
+ *
+ * @since 4.24.14
+ */
+function wfu_read_downloader_data() {
+	// read the temp file name from URL param
+	$source = (isset($_POST['source']) ? $_POST['source'] : (isset($_GET['source']) ? $_GET['source'] : ''));
+	if ( $source === '' ) die();
+	$filepath = sys_get_temp_dir();
+	if ( substr($filepath, -1) != '/' ) $filepath .= '/';
+	$filepath .= $source;
+	if ( !file_exists($filepath) ) die();
+	// read and decode the data from the file
+	$dataenc = @file_get_contents($filepath);
+	// remove the file immediately so that it cannot be reused
+	@unlink($filepath);
+	if ( $dataenc === false ) die();
+	$data = json_decode($dataenc, true);
+	if ( $data === null ) die();
+	// validate type
+	$type = ( array_key_exists('type', $data) ? $data['type'] : '' );
+	if ( !in_array( $type, array( 'normal', 'exportdata', 'debuglog' ) ) ) die();
+	// validate ticket
+	$ticket = ( array_key_exists('ticket', $data) ? wfu_sanitize_code_downloader($data['ticket']) : '' );
+	if ( empty($ticket) || $ticket !== $data['ticket'] ) die();
+	// validate file
+	$filepath = ( array_key_exists('filepath', $data) ? wfu_sanitize_url_downloader($data['filepath']) : '' );
+	if ( empty($filepath) || $filepath !== $data['filepath'] ) die();
+	// validate user state handler
+	$handler = ( array_key_exists('handler', $data) ? $data['handler'] : null );
+	if ( $handler === null || !in_array( $handler, array( 'session', 'dboption', '' ) ) ) die();
+	// validate expire
+	$expire = ( array_key_exists('expire', $data) ? intval($data['expire']) : 0 );
+	if ( $expire <= 0 ) die();
+	// validate wfu_ABSPATH
+	$wfu_ABSPATH = ( array_key_exists('wfu_ABSPATH', $data) ? wfu_sanitize_url_downloader($data['wfu_ABSPATH']) : '' );
+	if ( empty($wfu_ABSPATH) || $wfu_ABSPATH !== $data['wfu_ABSPATH'] ) die();
+	// validate error messages
+	$notexist = ( array_key_exists('wfu_browser_downloadfile_notexist', $data) ? strip_tags($data['wfu_browser_downloadfile_notexist']) : '' );
+	$failed = ( array_key_exists('wfu_browser_downloadfile_failed', $data) ? strip_tags($data['wfu_browser_downloadfile_failed']) : '' );
+	if ( empty($notexist) || empty($failed) || $notexist !== $data['wfu_browser_downloadfile_notexist'] || $failed !== $data['wfu_browser_downloadfile_failed'] ) die();
+	
+	return $data;
 }
 
 /**
@@ -23,77 +65,50 @@ else {
  *
  * This function causes a file to be downloaded.
  *
- * @global string $wfu_user_state_handler The user state handler.
+ * @global array $wfu_downloader_data The downloader data.
  */
 function wfu_download_file() {
-	global $wfu_user_state_handler;
-	$file_code = (isset($_POST['file']) ? $_POST['file'] : (isset($_GET['file']) ? $_GET['file'] : ''));
-	$ticket = (isset($_POST['ticket']) ? $_POST['ticket'] : (isset($_GET['ticket']) ? $_GET['ticket'] : ''));
-	if ( $file_code == '' || $ticket == '' ) die();
-	
-	wfu_initialize_user_state();
-	
-	$ticket = wfu_sanitize_code($ticket);	
-	$file_code = wfu_sanitize_code($file_code);
+	global $wfu_downloader_data;
+
+	extract($wfu_downloader_data);
+
 	//if download ticket does not exist or is expired die
-	if ( !WFU_USVAR_exists_downloader('wfu_download_ticket_'.$ticket) || time() > WFU_USVAR_downloader('wfu_download_ticket_'.$ticket) ) {
-		WFU_USVAR_unset_downloader('wfu_download_ticket_'.$ticket);
-		WFU_USVAR_unset_downloader('wfu_storage_'.$file_code);
-		wfu_update_download_status($ticket, 'failed');
+	if ( time() > $expire ) {
+		wfu_update_download_status('failed');
 		die();
 	}
-	//destroy ticket so it cannot be used again
-	WFU_USVAR_unset_downloader('wfu_download_ticket_'.$ticket);
 	
 	//if file_code starts with exportdata, then this is a request for export of
 	//uploaded file data, so disposition_name wont be the filename of the file
 	//but wfu_export.csv; also set flag to delete file after download operation
-	if ( substr($file_code, 0, 10) == "exportdata" ) {
-		$file_code = substr($file_code, 10);
-		//$filepath = wfu_get_filepath_from_safe($file_code);
-		$filepath = WFU_USVAR_downloader('wfu_storage_'.$file_code);
-		//validate the file path to avoid directory traversals that could lead
-		//to deletion of the wrong file
-		if ( !wfu_validate_storage_filepath("exportdata", $filepath) ) die();
+	if ( $type == "exportdata" ) {
 		$disposition_name = "wfu_export.csv";
 		$delete_file = true;
 	}
 	//if file_code starts with debuglog, then this is a request for download of
 	//debug_log.txt
-	elseif ( substr($file_code, 0, 8) == "debuglog" ) {
-		$file_code = substr($file_code, 8);
-		//$filepath = wfu_get_filepath_from_safe($file_code);
-		$filepath = WFU_USVAR_downloader('wfu_storage_'.$file_code);
+	elseif ( $type == "debuglog" ) {
 		$disposition_name = wfu_basename($filepath);
 		$delete_file = false;
 	}
 	else {
-		//$filepath = wfu_get_filepath_from_safe($file_code);
-		$filepath = WFU_USVAR_downloader('wfu_storage_'.$file_code);
-		if ( $filepath === false ) {
-			WFU_USVAR_unset_downloader('wfu_storage_'.$file_code);
-			wfu_update_download_status($ticket, 'failed');
-			die();
-		}
 		$filepath = wfu_flatten_path($filepath);
 		if ( substr($filepath, 0, 1) == "/" ) $filepath = substr($filepath, 1);
-		$filepath = ( substr($filepath, 0, 6) == 'ftp://' || substr($filepath, 0, 7) == 'ftps://' || substr($filepath, 0, 7) == 'sftp://' ? $filepath : WFU_USVAR_downloader('wfu_ABSPATH').$filepath );
+		$filepath = ( substr($filepath, 0, 6) == 'ftp://' || substr($filepath, 0, 7) == 'ftps://' || substr($filepath, 0, 7) == 'sftp://' ? $filepath : $wfu_ABSPATH.$filepath );
 		$disposition_name = wfu_basename($filepath);
 		$delete_file = false;
 	}
-	//destroy file code as it is no longer needed
-	WFU_USVAR_unset_downloader('wfu_storage_'.$file_code);
 	//check that file exists
 	if ( !wfu_file_exists_for_downloader($filepath) ) {
-		wfu_update_download_status($ticket, 'failed');
-		die('<script language="javascript">alert("'.( WFU_USVAR_exists_downloader('wfu_browser_downloadfile_notexist') ? WFU_USVAR_downloader('wfu_browser_downloadfile_notexist') : 'File does not exist!' ).'");</script>');
+		wfu_update_download_status('failed');
+		die('<script language="javascript">alert("'.$wfu_browser_downloadfile_notexist.'");</script>');
 	}
 
 	$open_session = false;
 	@set_time_limit(0); // disable the time limit for this script
 	$fsize = wfu_filesize_for_downloader($filepath);
 	if ( $fd = wfu_fopen_for_downloader($filepath, "rb") ) {
-		$open_session = ( ( $wfu_user_state_handler == "session" || $wfu_user_state_handler == "" ) && ( function_exists("session_status") ? ( PHP_SESSION_ACTIVE !== session_status() ) : ( empty(session_id()) ) ) );
+		$open_session = ( ( $handler == "session" || $handler == "" ) && ( function_exists("session_status") ? ( PHP_SESSION_ACTIVE !== session_status() ) : ( empty(session_id()) ) ) );
 		if ( $open_session ) session_start();
 		header('Content-Type: application/octet-stream');
 		header("Content-Disposition: attachment; filename=\"".$disposition_name."\"");
@@ -121,14 +136,14 @@ function wfu_download_file() {
 	if ( $delete_file ) wfu_unlink_for_downloader($filepath);
 	
 	if ( !$failed ) {
-		wfu_update_download_status($ticket, 'downloaded');
+		wfu_update_download_status('downloaded');
 		if ( $open_session ) session_write_close();
 		die();
 	}
 	else {
-		wfu_update_download_status($ticket, 'failed');
+		wfu_update_download_status('failed');
 		if ( $open_session ) session_write_close();
-		die('<script type="text/javascript">alert("'.( WFU_USVAR_exists_downloader('wfu_browser_downloadfile_failed') ? WFU_USVAR_downloader('wfu_browser_downloadfile_failed') : 'Could not download file!' ).'");</script>');
+		die('<script type="text/javascript">alert("'.$wfu_browser_downloadfile_failed.'");</script>');
 	}
 }
 
@@ -137,12 +152,45 @@ function wfu_download_file() {
  *
  * Stores in user state the new download status.
  *
- * @param string $ticket The download ticket.
+ * @global array $wfu_downloader_data The downloader data.
+ *
  * @param string $new_status The new download status.
  */
-function wfu_update_download_status($ticket, $new_status) {
-	require_once WFU_USVAR_downloader('wfu_ABSPATH').'wp-load.php';
-	WFU_USVAR_store('wfu_download_status_'.$ticket, $new_status);
+function wfu_update_download_status($new_status) {
+	global $wfu_downloader_data;
+	require_once $wfu_downloader_data['wfu_ABSPATH'].'wp-load.php';
+	WFU_USVAR_store('wfu_download_status_'.$wfu_downloader_data['ticket'], $new_status);
+}
+
+/**
+ * Sanitize a Code.
+ *
+ * This function sanitizes a code. A code must only contain latin letters and
+ * numbers.
+ *
+ * @since 4.24.14
+ *
+ * @param string $code The code to sanitize.
+ *
+ * @return string The sanitized code.
+ */
+function wfu_sanitize_code_downloader($code) {
+	return preg_replace("/[^A-Za-z0-9]/", "", $code);
+}
+
+/**
+ * Sanitize a URL.
+ *
+ * This function sanitizes a URL.
+ *
+ * @since 4.24.14
+ *
+ * @param string $url The URL to sanitize.
+ *
+ * @return string The sanitized URL.
+ */
+function wfu_sanitize_url_downloader($url) {
+	return filter_var(strip_tags($url), FILTER_SANITIZE_URL);
 }
 
 /**

@@ -922,7 +922,7 @@ function wfu_slash( $value ) {
 function wfu_generate_global_short_token($timeout) {
 	$token = wfu_create_random_string(16);
 	$expire = time() + (int)$timeout;
-	update_option('wfu_gst_'.$token, $expire);
+	wfu_update_option('wfu_gst_'.$token, $expire, "integer", true, "wfu_gst");
 	return $token;
 }
 
@@ -1055,6 +1055,23 @@ function wfu_plugin_parse_array($source) {
  */
 function wfu_safe_array($arr) {
 	return array_map("htmlspecialchars", $arr);
+}
+
+/**
+ * Get An Array Item From an Array.
+ *
+ * This function safely gets an array item from an array, checking also
+ * existence. If it does not exist or is not an array it will return an empty
+ * array.
+ *
+ * @since 4.24.14
+ *
+ * @param array $arr The array to get the item from.
+ * @param string $prop The name of the array item to get.
+ * @return array The retrieved array item.
+ */
+function wfu_arr_get_array_item($arr, $prop) {
+	return ( array_key_exists($prop, $arr) && is_array($arr[$prop]) ? $arr[$prop] : array() );
 }
 
 /**
@@ -1829,6 +1846,18 @@ function wfu_compare_versions($current, $latest) {
 	elseif ( intval($cur_data[3]) > intval($lat_data[3]) )
 		return array( 'status' => false, 'custom' => $custom, 'result' => 'current version invalid' );
 	return array( 'status' => true, 'custom' => $custom, 'result' => 'equal' );	
+}
+
+/**
+ * Execute Daily Tasks of the Plugin.
+ *
+ * This function executes actions of the plugin that have been scheduled to run
+ * every day using Wordpress cron jobs.
+ *
+ * @since 4.24.14
+ */
+function wfu_execute_daily_tasks() {
+	wfu_remove_waste_items_from_options();
 }
 
 //********************* File / Directory Functions *****************************
@@ -2732,6 +2761,25 @@ function wfu_get_filepath_from_safe($code) {
 	$safe_storage = WFU_USVAR('wfu_filepath_safe_storage');
 	if ( !isset($safe_storage[$code]) ) return false;
 	return $safe_storage[$code];
+}
+
+/**
+ * Store Downloader Data.
+ *
+ * This function stores the data that need to be passed to the downloader script
+ * in a temporary file.
+ *
+ * @since 4.24.14
+ *
+ * @param array $data The data to be passed to the downloader.
+ * @return string The path to the created temporary file.
+ */
+function wfu_store_downloader_data($data) {
+	$path = @tempnam(sys_get_temp_dir(), 'wfu');
+	if ( $path === false ) return false;
+	$res = @file_put_contents($path, json_encode($data));
+	if ( $res === false ) return false;
+	return $path;
 }
 
 /**
@@ -3903,7 +3951,7 @@ function wfu_get_unread_files_count() {
 	if ( $last_idlog === false ) {
 		$latest_idlog = $wpdb->get_var('SELECT MAX(idlog) FROM '.$table_name1);
 		$last_idlog = array( 'pre' => $latest_idlog, 'post' => $latest_idlog, 'time' => time() );
-		update_option( "wordpress_file_upload_last_idlog", $last_idlog );
+		wfu_update_option( "wordpress_file_upload_last_idlog", $last_idlog );
 	}
 	$limit = (int)WFU_VAR("WFU_UPLOADEDFILES_RESET_TIME");
 	$unread_files_count = 0;
@@ -4890,12 +4938,31 @@ function wfu_option_item_exists($option, $item) {
  * @param string $option The option name to update.
  * @param mixed $value The new value of the option.
  * @param string $type Optional. The value type.
+ * @param boolean $use_default Optional. Use default update_option() function.
+ * @param string $autoload_option Optional. The name of the option for
+ *        retrieving the autoload value.
  */
-function wfu_update_option($option, $value, $type = "array") {
+function wfu_update_option($option, $value, $type = "array", $use_default = true, $autoload_option = null) {
 	global $wpdb;
+	
+	$autoload = wfu_get_option_autoload($option, $autoload_option);
+	$autoload_value = ( $autoload === null ? "auto" : ( $autoload === true ? "yes" : "no" ) );
+	
+	if ( $use_default ) {
+		return update_option($option, $value, $autoload);
+	}
+	
 	$table_name1 = $wpdb->prefix . "options";
 	$value = ( $type == "array" ? wfu_encode_array_to_string($value) : $value );
-	$wpdb->query($wpdb->prepare("INSERT INTO $table_name1 (option_name, option_value) VALUES (%s, %s) ON DUPLICATE KEY UPDATE option_value = VALUES(option_value)", $option, $value));
+	$wpdb->query(
+		$wpdb->prepare(
+			"INSERT INTO $table_name1 (option_name, option_value, autoload) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE option_value = VALUES(option_value), autoload = %s",
+			$option,
+			$value,
+			$autoload_value,
+			$autoload_value
+		)
+	);
 }
 
 /**
@@ -4979,7 +5046,7 @@ function wfu_run_process_in_queue($queue_id, $proc, $params) {
 			return $ret;
 		}
 		$thread_index = intval(wfu_get_option($queue."_count", 0, "string")) + 1;
-		wfu_update_option($queue."_count", $thread_index, "string");
+		wfu_update_option($queue."_count", $thread_index, "string", false, "wfu_queue");
 	}
 	//create an array of references to the function arguments and pass this to
 	//call_user_func_array instead of $args; this is a workaround to avoid PHP
@@ -5012,8 +5079,20 @@ function wfu_join_queue($queue_id, $thread) {
 	global $wpdb;
 	if ( $queue_id == "" ) return;
 	$queue = "wfu_queue_".$queue_id;
+
+	$autoload = wfu_get_option_autoload($queue, "wfu_queue");
+	$autoload_value = ( $autoload === null ? "auto" : ( $autoload === true ? "yes" : "no" ) );
+
 	$table_name1 = $wpdb->prefix . "options";
-	$wpdb->query($wpdb->prepare("INSERT INTO $table_name1 (option_name, option_value) VALUES (%s, %s) ON DUPLICATE KEY UPDATE option_value = CONCAT(option_value, IF (option_value = '', '', '|'), %s)", $queue, $thread, $thread));
+	$wpdb->query(
+		$wpdb->prepare(
+			"INSERT INTO $table_name1 (option_name, option_value, autoload) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE option_value = CONCAT(option_value, IF (option_value = '', '', '|'), %s)",
+			$queue,
+			$thread,
+			$autoload_value,
+			$thread
+		)
+	);
 }
 
 /**
@@ -5081,6 +5160,7 @@ function wfu_remove_queue($queue_id) {
 	if ( $queue_id == "" ) return;
 	$queue = "wfu_queue_".$queue_id;
 	delete_option($queue);
+	delete_option($queue."_count");
 }
 
 /**
@@ -5102,19 +5182,38 @@ function wfu_remove_queue($queue_id) {
  * @param string $option The option name that contains the item.
  * @param string $item The item name whose value to retrieve.
  * @param string $value The new value of the item.
+ * @param string $autoload_option Optional. The name of the option for
+ *        retrieving the autoload value.
  *
  * @return false|int False if there was a DB error, or the number of rows
  *         affected.
  */
-function wfu_update_option_item($option, $item, $value) {
+function wfu_update_option_item($option, $item, $value, $autoload_option = null) {
 	global $wpdb;
 	$table_name1 = $wpdb->prefix . "options";
+
+	$autoload = wfu_get_option_autoload($option, $autoload_option);
+	$autoload_value = ( $autoload === null ? "auto" : ( $autoload === true ? "yes" : "no" ) );
+
 	$timeout = time();
-	$val = false;
+	$val = false;	
 	$suppress_wpdb_errors = $wpdb->suppress_errors;
 	if ( !$suppress_wpdb_errors ) $wpdb->suppress_errors(true);
 	while ( $val === false && time() < $timeout + intval(WFU_VAR("WFU_US_DEADLOCK_TIMEOUT")) ) {
-		$val = $wpdb->query($wpdb->prepare("INSERT INTO $table_name1 (option_name, option_value) SELECT SQL_NO_CACHE %s, IF (COUNT(option_value) = 0, %s, IF (INSTR(option_value, %s) = 0, CONCAT(option_value, %s), CONCAT(SUBSTRING_INDEX(option_value, %s, 1), %s, SUBSTRING_INDEX(option_value, %s, -1)))) FROM $table_name1 WHERE option_name = %s ON DUPLICATE KEY UPDATE option_value = VALUES(option_value)", $option, '['.$item.']'.$value.'{'.$item.'}', '['.$item.']', '['.$item.']'.$value.'{'.$item.'}', '['.$item.']', '['.$item.']'.$value.'{'.$item.'}', '{'.$item.'}', $option));
+		$val = $wpdb->query(
+			$wpdb->prepare(
+				"INSERT INTO $table_name1 (option_name, option_value, autoload) SELECT SQL_NO_CACHE %s, IF (COUNT(option_value) = 0, %s, IF (INSTR(option_value, %s) = 0, CONCAT(option_value, %s), CONCAT(SUBSTRING_INDEX(option_value, %s, 1), %s, SUBSTRING_INDEX(option_value, %s, -1)))), %s FROM $table_name1 WHERE option_name = %s ON DUPLICATE KEY UPDATE option_value = VALUES(option_value)",
+				$option,
+				'['.$item.']'.$value.'{'.$item.'}',
+				'['.$item.']',
+				'['.$item.']'.$value.'{'.$item.'}',
+				'['.$item.']',
+				'['.$item.']'.$value.'{'.$item.'}',
+				'{'.$item.'}',
+				$autoload_value,
+				$option
+			)
+		);
 		if ( $val === false && WFU_VAR("WFU_US_LOG_DBERRORS") == "true" ) error_log("Database error: ".$wpdb->last_error);
 	}
 	if ( !$suppress_wpdb_errors ) $wpdb->suppress_errors(false);
@@ -5138,7 +5237,6 @@ function wfu_update_option_item($option, $item, $value) {
 function wfu_delete_option($option) {
 	global $wpdb;
 	$table_name1 = $wpdb->prefix . "options";
-	$val = $wpdb->get_var($wpdb->prepare("SELECT option_value FROM $table_name1 WHERE option_name = %s", $option));
 	$wpdb->query($wpdb->prepare("DELETE FROM $table_name1 WHERE option_name = %s", $option));
 }
 
@@ -5281,47 +5379,50 @@ function wfu_get_all_plugin_options() {
 	//  1: location of option, "db" or "session"
 	//  2: delete this option when purging all plugin data
 	//  3: store this option when extracting plugin data
+	//  4: autoload this option (only for db options)
 	$options = array(
 		//stored plugin's Settings
-		array( "wordpress_file_upload_options", "db", true, true ),
+		"wordpress_file_upload_options" => array( "wordpress_file_upload_options", "db", true, true, true ),
 		//stored plugin's maintenance options
-		array( "wfu_maintenance_options", "db", true, false ),
+		"wfu_maintenance_options" => array( "wfu_maintenance_options", "db", true, false, false ),
 		//stored flag whether Pro version is active or not
-		array( "wordpress_file_upload_proactive", "db", true, false ),
+		"wordpress_file_upload_proactive" => array( "wordpress_file_upload_proactive", "db", true, false, false ),
 		//wfu_log table version
-		array( "wordpress_file_upload_table_log_version", "db", true, true ),
+		"wordpress_file_upload_table_log_version" => array( "wordpress_file_upload_table_log_version", "db", true, true, false),
 		//wfu_userdata version
-		array( "wordpress_file_upload_table_userdata_version", "db", true, true ),
+		"wordpress_file_upload_table_userdata_version" => array( "wordpress_file_upload_table_userdata_version", "db", true, true, false ),
 		//wfu_dbxqueue version
-		array( "wordpress_file_upload_table_dbxqueue_version", "db", true, true ),
+		"wordpress_file_upload_table_dbxqueue_version" => array( "wordpress_file_upload_table_dbxqueue_version", "db", true, true, false ),
 		//stored extensions
-		array( "wordpress_file_upload_extensions", "db", true, true ),
+		"wordpress_file_upload_extensions" => array( "wordpress_file_upload_extensions", "db", true, true, true ),
 		//stored hooks
-		array( "wordpress_file_upload_hooks", "db", true, true ),
+		"wordpress_file_upload_hooks" => array( "wordpress_file_upload_hooks", "db", true, true, false ),
 		//transfer manager properties
-		array( "wfu_transfermanager_props", "db", true, true ),
+		"wfu_transfermanager_props" => array( "wfu_transfermanager_props", "db", true, true, true ),
 		//last file record that was read
-		array( "wordpress_file_upload_last_idlog", "db", true, false ),
+		"wordpress_file_upload_last_idlog" => array( "wordpress_file_upload_last_idlog", "db", true, false, false ),
 		//indices of stored shortcode parameters
-		array( "wfu_params_index", "db", true, false ),
+		"wfu_params_index" => array( "wfu_params_index", "db", true, false, false ),
 		//stored shortcode parameters
-		array( "wfu_params_*", "db", true, false ),
+		"wfu_params" => array( "wfu_params_*", "db", true, false, false ),
 		//stored advanced environment variables
-		array( "wfu_environment_variables", "db", true, true ),
+		"wfu_environment_variables" => array( "wfu_environment_variables", "db", true, true, true ),
 		//stored global tokens
-		array( "wfu_gst_*", "db", true, false ),
+		"wfu_gst" => array( "wfu_gst_*", "db", true, false, false ),
+		//stored upload queue data
+		"wfu_queue" => array( "wfu_queue_*", "db", true, false, false ),
 		//data of unfinished uploaded files
-		array( "wordpress_file_upload_unfinished_data", "db", true, false ),
+		"wordpress_file_upload_unfinished_data" => array( "wordpress_file_upload_unfinished_data", "db", true, false, false ),
 		//list of stored variables in dboption user state
-		array( "wfu_userstate_list", "db", true, false ),
+		"wfu_userstate_list" => array( "wfu_userstate_list", "db", true, false, false ),
 		//stored variable value in dboption user state
-		array( "wfu_userstate_*", "db", true, false ),
+		"wfu_userstate" => array( "wfu_userstate_*", "db", true, false, false ),
 		//last time dboption user state was checked
-		array( "wfu_userstate_list_last_check", "db", true, false ),
+		"wfu_userstate_list_last_check" => array( "wfu_userstate_list_last_check", "db", true, false, false ),
 		//stored personal data policies
-		array( "wordpress_file_upload_pd_policies", "db", true, true ),
+		"wordpress_file_upload_pd_policies" => array( "wordpress_file_upload_pd_policies", "db", true, true, false ),
 		//last time admin was notified about DOS attack
-		array( "wfu_admin_notification_about_DOS", "db", true, false ),
+		"wfu_admin_notification_about_DOS" => array( "wfu_admin_notification_about_DOS", "db", true, false, false ),
 		//stored token for adding uploader shortcode
 		array( "wfu_add_shortcode_ticket_for_wordpress_file_upload", "session", true, false ),
 		//stored token for adding file viewer shortcode
@@ -5388,6 +5489,25 @@ function wfu_get_all_plugin_options() {
 	
 
 	return $options;
+}
+
+ /**
+  * Get Autoload Value For Option.
+  *
+  * Returns the autoload value for an option, as it is defined in
+  * wfu_get_all_plugin_options() function.
+  *
+  * @since 4.24.14
+  *
+  * @param string $option The option name.
+  * @param string $autoload_option The option name for retrieving the autoload
+  *        value. If it is null then the $option name will be used.
+  * @return boolean|null The autoload value if found or null otherwise.
+  */
+function wfu_get_option_autoload($option, $autoload_option) {
+	$all_plugin_options = wfu_get_all_plugin_options();
+	$name = ( $autoload_option !== null ? $autoload_option : $option );
+	return ( isset($all_plugin_options[$name][4]) ? $all_plugin_options[$name][4] : null );
 }
 
 //********************* Widget Functions ****************************************************************************************
@@ -5513,7 +5633,7 @@ function wfu_generate_current_params_index($shortcode_id, $user_login) {
 	}
 	if ( count($index_match) != 1 ) {
 		$index_str = implode("&&", $index);
-		update_option('wfu_params_index', $index_str);
+		wfu_update_option('wfu_params_index', $index_str);
 	}
 	return $cur_index_rand;
 }
@@ -6857,7 +6977,7 @@ function wfu_get_US_dboption_data($id, $default = false, $type = "array") {
 function wfu_update_US_dboption_time($id) {
 	$list = wfu_get_option("wfu_userstate_list", array());
 	$list[$id] = time();
-	wfu_update_option("wfu_userstate_list", $list);
+	wfu_update_option("wfu_userstate_list", $list, "array", false);
 }
 
 /**
@@ -6994,7 +7114,7 @@ function WFU_USVAR_store_dboption_old($var, $value) {
 	$data = wfu_get_US_dboption_data($id, array());
 	if ( $data === false ) return;
 	$data[$var] = $value;
-	wfu_update_option("wfu_userstate_".$id, $data);
+	wfu_update_option("wfu_userstate_".$id, $data, "array", false, "wfu_userstate");
 	wfu_update_US_dboption_time($id);
 	wfu_update_US_dboption_list();
 }
@@ -7012,7 +7132,7 @@ function WFU_USVAR_store_dboption_old($var, $value) {
 function WFU_USVAR_store_dboption($var, $value) {
 	$id = wfu_get_safe_session_id();
 	if ( $id == "" ) return;
-	wfu_update_option_item("wfu_userstate_".$id, $var, wfu_encode_array_to_string($value));
+	wfu_update_option_item("wfu_userstate_".$id, $var, wfu_encode_array_to_string($value), "wfu_userstate");
 	wfu_update_US_dboption_time($id);
 	wfu_update_US_dboption_list();
 }
@@ -7031,7 +7151,7 @@ function WFU_USVAR_unset_dboption_old($var) {
 	$data = wfu_get_US_dboption_data($id);
 	if ( $data === false ) return;
 	unset($data[$var]);
-	wfu_update_option("wfu_userstate_".$id, $data);
+	wfu_update_option("wfu_userstate_".$id, $data, "array", false, "wfu_userstate");
 	wfu_update_US_dboption_time($id);
 }
 
@@ -7076,8 +7196,8 @@ function wfu_update_US_dboption_list() {
 			wfu_delete_option("wfu_userstate_".$id);
 		}
 	}
-	if ( $changed ) wfu_update_option("wfu_userstate_list", $list);
-	wfu_update_option("wfu_userstate_list_last_check", time());
+	if ( $changed ) wfu_update_option("wfu_userstate_list", $list, "array", false);
+	wfu_update_option("wfu_userstate_list_last_check", time(), "integer", false);
 }
 
 //********************* Javascript Related Functions ****************************************************************************************************
@@ -7340,8 +7460,10 @@ function wfu_theme_is_block_based() {
  * @param string $brief Optional. A brief description of the notification.
  * @param array $action Optional. A proposed action to take for this
  *              notification. It is an array with 2 items, 'title' and 'link'.
+ * @param boolean $mark_read Optional. True if should be marked as read.
+ * @return integer The ID of the notification.
  */
-function wfu_add_admin_notification($description, $category = 'info', $descriptor = '', $brief = '', $action = null) {
+function wfu_add_admin_notification($description, $category = 'info', $descriptor = '', $brief = '', $action = null, $mark_read = false) {
 	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$cat = 'info';
 	switch ($category) {
@@ -7352,7 +7474,7 @@ function wfu_add_admin_notification($description, $category = 'info', $descripto
 		'comment_content'	=> $description,
 		'comment_type'		=> 'wfunotification',
 		'comment_meta'         => array(
-			'status' => 'unread',
+			'status' => ( $mark_read ? 'read' : 'unread' ),
 			'category' => $cat,
 			'descriptor' => $descriptor,
 			'brief' => $brief,
@@ -7361,6 +7483,8 @@ function wfu_add_admin_notification($description, $category = 'info', $descripto
 		)
 	);
 	$comment_id = wp_insert_comment( $data );
+	
+	return $comment_id;
 }
 
 /**

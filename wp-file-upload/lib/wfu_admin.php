@@ -339,7 +339,7 @@ function wordpress_file_upload_install_actions() {
 			DEFAULT CHARACTER SET = utf8
 			DEFAULT COLLATE = utf8_general_ci;";
 		dbDelta($sql);
-		update_option("wordpress_file_upload_table_log_version", $wfu_tb_log_version);
+		wfu_update_option("wordpress_file_upload_table_log_version", $wfu_tb_log_version);
 	}
 
 	$table_name2 = $wpdb->prefix . "wfu_userdata";
@@ -358,7 +358,7 @@ function wordpress_file_upload_install_actions() {
 			DEFAULT CHARACTER SET = utf8
 			DEFAULT COLLATE = utf8_general_ci;";
 		dbDelta($sql);
-		update_option("wordpress_file_upload_table_userdata_version", $wfu_tb_userdata_version);
+		wfu_update_option("wordpress_file_upload_table_userdata_version", $wfu_tb_userdata_version);
 	}
 
 	$table_name3 = $wpdb->prefix . "wfu_dbxqueue";
@@ -375,7 +375,11 @@ function wordpress_file_upload_install_actions() {
 			DEFAULT CHARACTER SET = utf8
 			DEFAULT COLLATE = utf8_general_ci;";
 		dbDelta($sql);
-		update_option("wordpress_file_upload_table_dbxqueue_version", $wfu_tb_dbxqueue_version);
+		wfu_update_option("wordpress_file_upload_table_dbxqueue_version", $wfu_tb_dbxqueue_version);
+	}
+	// initialize daily plugin events
+	if ( !wp_next_scheduled('wfu_daily_scheduled_events') ) {
+		wp_schedule_event(time(), 'daily', 'wfu_daily_scheduled_events');
 	}
 	//adjust user state handler to 'dboption' except if there are active hooks
 	//that use session; adjustment will be done only once
@@ -391,7 +395,7 @@ function wordpress_file_upload_install_actions() {
 		}
 		$GLOBALS["WFU_GLOBALS"]["WFU_US_HANDLER_CHANGED"][3] = "true";
 		$envars["WFU_US_HANDLER_CHANGED"] = "true";
-		update_option("wfu_environment_variables", $envars);				
+		wfu_update_option("wfu_environment_variables", $envars);				
 	}
 }
 
@@ -403,6 +407,7 @@ function wordpress_file_upload_install_actions() {
  * @since 4.4.0
  */
 function wordpress_file_upload_uninstall() {
+	wp_clear_scheduled_hook('wfu_daily_scheduled_events');
 }
 
 /**
@@ -417,9 +422,9 @@ function wordpress_file_upload_update_db_check() {
 	global $wfu_tb_log_version;
 	global $wfu_tb_userdata_version;
 	global $wfu_tb_dbxqueue_version;
-//	update_option("wordpress_file_upload_table_log_version", "0");
-//	update_option("wordpress_file_upload_table_userdata_version", "0");
-//	update_option("wordpress_file_upload_table_dbxqueue_version", "0");
+//	wfu_update_option("wordpress_file_upload_table_log_version", "0");
+//	wfu_update_option("wordpress_file_upload_table_userdata_version", "0");
+//	wfu_update_option("wordpress_file_upload_table_dbxqueue_version", "0");
 	if ( get_option('wordpress_file_upload_table_log_version') != $wfu_tb_log_version || get_option('wordpress_file_upload_table_userdata_version') != $wfu_tb_userdata_version || get_option('wordpress_file_upload_table_dbxqueue_version') != $wfu_tb_dbxqueue_version ) {
 		wordpress_file_upload_install_actions();
 	}

@@ -304,7 +304,7 @@ function wfu_update_settings() {
 			$new_plugin_options['includeotherfiles'] = $includeotherfiles;
 			$new_plugin_options['altserver'] = $altserver;
 			$encoded_options = wfu_encode_plugin_options($new_plugin_options);
-			update_option( "wordpress_file_upload_options", $encoded_options );
+			wfu_update_option( "wordpress_file_upload_options", $encoded_options );
 			if ( $new_plugin_options['hashfiles'] == '1' && $plugin_options['hashfiles'] != '1' )
 				wfu_reassign_hashes();
 		}
@@ -327,6 +327,6 @@ function wfu_update_setting($option, $value) {
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
 	$plugin_options[$option] = $value;
 	$encoded_options = wfu_encode_plugin_options($plugin_options);
-	update_option( "wordpress_file_upload_options", $encoded_options );	
+	wfu_update_option( "wordpress_file_upload_options", $encoded_options );	
 }
 

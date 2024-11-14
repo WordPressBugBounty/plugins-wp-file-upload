@@ -436,6 +436,8 @@ function wfu_clean_log() {
 	return array( "recs_count" => $recs_count, "files_count" => $files_count );
 }
 
+
+
 /**
  * Confirm Purge of Data Operation.
  *
@@ -625,7 +627,7 @@ function wfu_toggle_debug_logging($status, $nonce) {
 	elseif ( $status === false ) $maintenance_options["debug_logging"] = false;
 	else return;
 	
-	update_option( "wfu_maintenance_options", $maintenance_options );
+	wfu_update_option( "wfu_maintenance_options", $maintenance_options );
 }
 
 /**
@@ -646,4 +648,131 @@ function wfu_reset_debuglog_data($nonce) {
 	if ( !file_exists($logfile) ) return;
 	
 	file_put_contents($logfile, "");
+}
+
+/**
+ * Remove Waste Items From Options.
+ *
+ * This function retrieves any waste options and removes them. Waste options are
+ * plugin options stored in Wordpress options table that are no longer used.
+ *
+ * @since 4.24.14
+ *
+ * @redeclarable
+ */
+function wfu_remove_waste_items_from_options() {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	$waste = wfu_update_waste_options();
+	$affected = wfu_process_waste($waste);
+	$message = ( $affected === 1 ? '1 item' : ( $affected === 0 ? 'No' : $affected ).' items' ).' affected.';
+	wfu_add_admin_notification('Completed cleaning database periodic action. '.$message, 'info', 'db_cleaning', 'Plugin maintenance.', null, true);
+}
+
+/**
+ * Update Waste Options.
+ *
+ * This function returns any waste options that need to be processed and it also
+ * collects any new waste options that need to be processed in the future.
+ *
+ * Waste options are not processed immediately but after an amount of time. This
+ * happens in order to ensure that they are no longer used. Such a case is
+ * "wfu_queue_*" options. We do not know which of them are still used by running
+ * upload scripts. For this reason, we collect and store a current list of them.
+ * After a certain period of time, when we are certain that they are no longer
+ * used (e.g. after 4 days, when session has surely expired), we retrieve the
+ * list and we remove them.
+ *
+ * @since 4.24.14
+ *
+ * @redeclarable
+ *
+ * @global object $wpdb The database object.
+ *
+ * @return array An array of waste items that need to be processed.
+ */
+function wfu_update_waste_options() {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	global $wpdb;
+	$table_name1 = $wpdb->prefix . "options";
+	
+	$ret = array();
+	$maintenance_options = get_option( "wfu_maintenance_options", array() );
+	$waste_options = wfu_arr_get_array_item($maintenance_options, "waste_options");
+	$now = time();
+	$changed = false;
+	
+	// process wfu_queue items
+	$wfu_queue_waste = wfu_arr_get_array_item($waste_options, "wfu_queue");
+	// get $process_time to check if there are any waste items that are ready
+	// to be processed provided that process time has passed
+	$process_time = ( isset($wfu_queue_waste["process_time"]) ? intval($wfu_queue_waste["process_time"]) : 0 );
+	if ( $process_time > 0 && $now >= $process_time ) {
+		$items = ( isset($wfu_queue_waste["items"]) ? trim($wfu_queue_waste["items"]) : "" );
+		// if there are waste items then add then to the return list and clear
+		// $waste_options
+		if ( !empty($items) ) {
+			$ret["wfu_queue"] = $items;
+		}
+		$waste_options["wfu_queue"] = array( "process_time" => 0, "items" => "" );
+		$changed = true;
+	}
+	// get again any waste items from the database provided that any previous
+	// waste has been processed
+	if ( $process_time <= 0 || $now >= $process_time ) {
+		$limit = intval(WFU_VAR("WFU_WASTE_BATCHSIZE"));
+		$limit = ( $limit == 0 ? 500 : $limit );
+		$items = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT GROUP_CONCAT(option_id ORDER BY option_id SEPARATOR ',') FROM $table_name1 WHERE option_name LIKE 'wfu_queue_%' LIMIT %d",
+				$limit
+			)
+		);
+		if ( $items !== null && !empty($items) ) {
+			$process_after = intval(WFU_VAR("WFU_UPLOADWASTE_PROCESSAFTER"));
+			$process_after = ( $process_after == 0 ? 4 : $process_after ) * 86400;
+			$waste_options["wfu_queue"] = array( "process_time" => $now + $process_after, "items" => $items );
+			$changed = true;
+		}
+	}
+	
+	// update wfu_maintenance_options if changes have been done
+	if ( $changed ) {
+		$maintenance_options["waste_options"] = $waste_options;
+		wfu_update_option( "wfu_maintenance_options", $maintenance_options );
+	}
+	
+	return $ret;
+}
+
+/**
+ * Process Waste Items.
+ *
+ * This function removes a list of waste items from the database.
+ *
+ * @since 4.24.14
+ *
+ * @redeclarable
+ *
+ * @global object $wpdb The database object.
+ *
+ * @param array $waste The waste items.
+ * @return integer The number of items removed from the database.
+ */
+function wfu_process_waste($waste) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	global $wpdb;
+	$table_name1 = $wpdb->prefix . "options";
+
+	if ( !is_array($waste) || count($waste) == 0 ) return 0;
+	
+	$affected = 0;
+	foreach ( $waste as $items ) {
+		// we perform a validation of $items because we are using it directly
+		// inside the query without $wpdb->prepare()
+		if ( preg_match( "/[^[0-9,]/", $items ) === 0 ) {
+			$affected += $wpdb->query("DELETE FROM $table_name1 WHERE option_id IN ($items)");
+		}
+	}
+	
+	return $affected;
 }

@@ -943,12 +943,15 @@ function wfu_ajax_action_download_file_invoker() {
 	$cookies = array();
 	$use_cookies = ( $wfu_user_state_handler == "dboption" && WFU_VAR("WFU_US_DBOPTION_BASE") == "cookies" );
 	$file_code = sanitize_text_field($file_code);
+	$filepath = "";
+	$filetype = "normal";
 	// if file_code is exportdata, then export of data has been requested and
 	// we need to create a file with export data and recreate file_code
 	// similarly, if file_code is debuglog, then export of debug_log.txt file
 	// has been requested and we need to recreate file_code
 	if ( ( substr($file_code, 0, 10) == "exportdata" || substr($file_code, 0, 8) == "debuglog" ) && current_user_can( 'manage_options' ) ) {
 		if ( substr($file_code, 0, 10) == "exportdata" ) {
+			$filetype = "exportdata";
 			$params = null;
 			$params_str = substr($file_code, 11);
 			if ( trim($params_str) != "" ) $params = json_decode($params_str, true);
@@ -958,23 +961,20 @@ function wfu_ajax_action_download_file_invoker() {
 			$file_code = "exportdata".$file_code_clean;
 		}
 		else {
+			$filetype = "debuglog";
 			$filepath = wfu_debug_log_filepath();
 			if ( !file_exists($filepath) ) die();
 			$file_code_clean = wfu_safe_store_filepath($filepath);
 			$file_code = "debuglog".$file_code_clean;
 		}
-		//store filepath in user state otherwise it can not be retrieved by
-		//downloader script
-		if ( !$use_cookies ) WFU_USVAR_store_session('wfu_storage_'.$file_code_clean, $filepath);
-		else array_push($cookies, '{name: "wfu_storage_'.$file_code_clean.'", value: "'.$filepath.'", expires: 30}');
 	}
 	//else get the file path from the safe
 	else {
 		$filepath = wfu_get_filepath_from_safe($file_code);
 		if ( $filepath === false ) die();
-		$filepath = wfu_path_rel2abs(wfu_flatten_path($filepath));
+		$abs_filepath = wfu_path_rel2abs(wfu_flatten_path($filepath));
 		//reject download of blacklisted file types for security reasons
-		if ( wfu_file_extension_blacklisted($filepath) ) {
+		if ( wfu_file_extension_blacklisted($abs_filepath) ) {
 			/**
 			 * Customise Output of Download Initiation Operation.
 			 *
@@ -991,13 +991,13 @@ function wfu_ajax_action_download_file_invoker() {
 		//allow or restrict the download
 		if ( isset($_POST['browser']) ) {
 			$changable_data["error_message"] = "";
-			$filerec = wfu_get_file_rec($filepath, true);
+			$filerec = wfu_get_file_rec($abs_filepath, true);
 			$userdata = array();
 			foreach ( $filerec->userdata as $data )
 				array_push($userdata, array( "label" => $data->property, "value" => $data->propvalue ));
 			$additional_data = array(
 				"file_action"	=> "download",
-				"filepath"		=> $filepath,
+				"filepath"		=> $abs_filepath,
 				"uploaduser"	=> $filerec->uploaduserid,
 				"userdata"		=> $userdata
 			);
@@ -1034,11 +1034,7 @@ function wfu_ajax_action_download_file_invoker() {
 		}
 		//for back-end browser check if user is allowed to perform this action
 		//on this file
-		if ( !wfu_current_user_owes_file($filepath) ) die();
-		//store filepath in user state otherwise it can not be retrieved by
-		//downloader script
-		if ( !$use_cookies ) WFU_USVAR_store_session('wfu_storage_'.$file_code, wfu_get_filepath_from_safe($file_code));
-		else array_push($cookies, '{name: "wfu_storage_'.$file_code.'", value: "'.wfu_get_filepath_from_safe($file_code).'", expires: 30}');
+		if ( !wfu_current_user_owes_file($abs_filepath) ) die();
 	}
 	
 	//generate download unique id to monitor this download
@@ -1051,46 +1047,47 @@ function wfu_ajax_action_download_file_invoker() {
 	//download; so after the download, the downloader script loads WP
 	//environment, so that it can change download status
 	WFU_USVAR_store('wfu_download_status_'.$download_id, 'starting');
-	//generate download ticket which expires in 30sec and store it in user
-	//state; it will be used as security measure for the downloader script,
-	//which runs outside Wordpress environment; it is noted that the downloader
-	//script needs to read download ticket before the download; however in the
-	//case of dboption the only way to achieve this is to store it in a cookie
-	if ( !$use_cookies ) WFU_USVAR_store_session('wfu_download_ticket_'.$download_id, time() + 30);
-	else array_push($cookies, '{name: "wfu_download_ticket_'.$download_id.'", value: '.(time() + 30).', expires: 30}');
 	//generate download monitor ticket which expires in 30sec and store it in
 	//user state; it will be used as security measure for the monitor script
 	//that will check download status; it is noted that there is no reason to
 	//store download monitor ticket in a cookie in case of dboption, because it
 	//is not needed to be read by the downloader script
 	WFU_USVAR_store('wfu_download_monitor_ticket_'.$download_id, time() + 30);
-
-	//store ABSPATH in user state so that it can be used by download script;
-	//again, in case of dboption, the only way the downloader script can read it
-	//is to store it in a cookie
-	if ( !$use_cookies ) WFU_USVAR_store_session('wfu_ABSPATH', wfu_abspath());
-	else array_push($cookies, '{name: "wfu_ABSPATH", value: "'.urlencode(wfu_abspath()).'", expires: 30}');
-	//store translatable strings to user state so that they can be used by a
-	//script that runs outside Wordpress environment
-	if ( !$use_cookies ) WFU_USVAR_store_session('wfu_browser_downloadfile_notexist', ( isset($_POST['browser']) ? WFU_BROWSER_DOWNLOADFILE_NOTEXIST : 'File does not exist!' ));
-	else array_push($cookies, '{name: "wfu_browser_downloadfile_notexist", value: "'.( isset($_POST['browser']) ? WFU_BROWSER_DOWNLOADFILE_NOTEXIST : 'File does not exist!' ).'", expires: 30}');
-	if ( !$use_cookies ) WFU_USVAR_store_session('wfu_browser_downloadfile_failed', ( isset($_POST['browser']) ? WFU_BROWSER_DOWNLOADFILE_FAILED : 'Could not download file!' ));
-	else array_push($cookies, '{name: "wfu_browser_downloadfile_failed", value: "'.( isset($_POST['browser']) ? WFU_BROWSER_DOWNLOADFILE_FAILED : 'Could not download file!' ).'", expires: 30}');
+	//create array to store all data that need to pass to the downloader; these
+	//data will be saved in a file in tmp folder so that they can safely be read
+	//by the downloader
+	$downloader_data = array(
+		//store the ticket id
+		'ticket' => $download_id,
+		//store the file type and the file path
+		'type' => $filetype,
+		'filepath' => $filepath,
+		//store the user state handler
+		'handler' => $wfu_user_state_handler,
+		//download expires in 30sec
+		'expire' => time() + 30,
+		//store ABSPATH
+		'wfu_ABSPATH' => wfu_abspath(),
+		//store translatable strings
+		'wfu_browser_downloadfile_notexist' => ( isset($_POST['browser']) ? WFU_BROWSER_DOWNLOADFILE_NOTEXIST : 'File does not exist!' ),
+		'wfu_browser_downloadfile_failed' => ( isset($_POST['browser']) ? WFU_BROWSER_DOWNLOADFILE_FAILED : 'Could not download file!' ),
+	);
+	//store downloader data to a temporary file
+	$tmpfile = wfu_store_downloader_data($downloader_data);
 
 	//this routine returns a dynamically created iframe element, that will call
 	//the actual download script; the actual download script runs outside
 	//Wordpress environment in order to ensure that no php warnings or echo from
-	//other plugins is generated, that could scramble the downloaded file; a
-	//ticket, similar to nonces, is passed to the download script to check that
-	//it is not a CSRF attack; moreover,the ticket is destroyed by the time it
-	//is consumed by the download script, so it cannot be used again
-	$urlparams = 'file='.$file_code.'&ticket='.$download_id.'&handler='.$wfu_user_state_handler.'&session_legacy='.( WFU_VAR("WFU_US_SESSION_LEGACY") == "true" ? '1' : '0' ).'&dboption_base='.WFU_VAR("WFU_US_DBOPTION_BASE").'&dboption_useold='.( WFU_VAR("WFU_US_DBOPTION_USEOLD") == "true" ? '1' : '0' ).'&wfu_cookie='.WPFILEUPLOAD_COOKIE;
+	//other plugins is generated, that could scramble the downloaded file; the
+	//name of a temp file that contains data for the downloader is passed to the
+	//iframe as a URL param
+	$urlparams = 'source='.wfu_basename($tmpfile);
 	$response["html"] = '<iframe src="'.WFU_DOWNLOADER_URL.'?'.$urlparams.'" style="display: none;"></iframe>';
 	//if user state handler is set to dboption (cookies), then tickets and other
 	//variables must pass to the download script as cookies; the cookies are
 	//passed in the response of this function, so that the client browser can
 	//add them in cookies by executing wfu_add_cookies() function
-	$response["js"] = ( count($cookies) > 0 ? 'wfu_add_cookies(['.implode(", ", $cookies).']);' : '' );
+	$response["js"] = '';
 	$response = wfu_encode_array_to_string($response);
 
 	/** This filter is documented above. */

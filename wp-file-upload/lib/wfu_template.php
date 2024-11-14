@@ -307,10 +307,10 @@ this.update = function(status) {
                the following lines contain the HTML output 
 ****************************************************************************/ ?>
 	<div id="<?php echo $shortcode_tag; ?>_editor_$ID" class="wfu_overlay_editor">
-		<button class="wfu_overlay_editor_button" title="<?php echo WFU_PAGE_PLUGINEDITOR_BUTTONTITLE; ?>"><img src="<?php echo WFU_IMAGE_OVERLAY_EDITOR; ?>" class="wfu_overlay_editor_img" width="20px" height="20px" /></button>
+		<button class="wfu_overlay_editor_button" title="<?php echo WFU_PAGE_PLUGINEDITOR_BUTTONTITLE; ?>"><img src="<?php echo WFU_IMAGE_OVERLAY_EDITOR; ?>" class="wfu_overlay_editor_img" width="20px" height="20px" alt="overlay editor icon" /></button>
 	</div>
 	<div id="<?php echo $shortcode_tag; ?>_overlay_$ID" class="wfu_overlay_container">
-		<table class="wfu_overlay_table"><tbody><tr><td><img src="<?php echo WFU_IMAGE_OVERLAY_LOADING; ?>" /><label><?php echo WFU_PAGE_PLUGINEDITOR_LOADING; ?></label></td></tr></tbody></table>
+		<table class="wfu_overlay_table"><tbody><tr><td><img src="<?php echo WFU_IMAGE_OVERLAY_LOADING; ?>" alt="overlay loading icon" /><label><?php echo WFU_PAGE_PLUGINEDITOR_LOADING; ?></label></td></tr></tbody></table>
 		<div class="wfu_overlay_container_inner"></div>
 	</div>
 <?php /*************************************************************************
@@ -760,7 +760,7 @@ this.update = function(position) {
 	<div id="progressbar_$ID_outer" class="file_progress_bar" style="<?php echo esc_html($styles2); ?>">
 		<div id="progressbar_$ID_inner" class="file_progress_inner">
 			<span id="progressbar_$ID_animation" class="file_progress_noanimation">&nbsp;</span>
-			<img id="progressbar_$ID_imagesafe" class="file_progress_imagesafe" src="<?php echo WFU_IMAGE_SIMPLE_PROGBAR; ?>" style="display:none;" />
+			<img id="progressbar_$ID_imagesafe" class="file_progress_imagesafe" src="<?php echo WFU_IMAGE_SIMPLE_PROGBAR; ?>" style="display:none;" alt="progress bar image" />
 		</div>
 	</div>
 </div>
@@ -2680,14 +2680,14 @@ this.ended = function() {
 <div id="webcam_$ID" class="wfu_file_webcam" style="<?php echo esc_html($styles); ?>">
 	<div id="webcam_$ID_inner" class="wfu_file_webcam_inner">
 		<label id="webcam_$ID_notsupported" class="wfu_webcam_notsupported_label" style="display:none;"><?php echo WFU_ERROR_WEBCAM_NOTSUPPORTED; ?></label>
-		<img id="webcam_$ID_btns" src="<?php echo WFU_IMAGE_MEDIA_BUTTONS; ?>" style="display:none;" />
+		<img id="webcam_$ID_btns" src="<?php echo WFU_IMAGE_MEDIA_BUTTONS; ?>" style="display:none;" alt="webcam buttons icon" />
 <?php if ( $params["webcamswitch"] == "true" ): ?>
 		<svg viewBox="0 0 8 8" id="webcam_$ID_btn_switchcam" class="wfu_file_webcam_btn wfu_file_webcam_btn_switchcam" onclick="wfu_webcam_switch<?php echo ( WFU_VAR("WFU_WEBCAMSWITCHMODE") == "side" ? "" : "_devices" ) ?>($ID);" style="display:none;"><use xlink:href="#loop-circular"></use><rect width="8" height="8" fill="transparent"><title><?php echo WFU_WEBCAM_SWITCHCAM_BTN; ?></title></rect></svg>
 <?php endif ?>
 		<svg viewBox="0 0 8 8" id="webcam_$ID_btn_onoff" class="wfu_file_webcam_btn wfu_file_webcam_btn_onoff" onclick="wfu_webcam_onoff($ID);" style="display:none;"><use xlink:href="#power-standby"></use><rect width="8" height="8" fill="transparent"><title><?php echo WFU_WEBCAM_TURNONOFF_BTN; ?></title></rect></svg>
 		<div id="webcam_$ID_wrapper" class="wfu_file_webcam_wrapper">
 			<div id="webcam_$ID_image" class="wfu_file_webcam_image" style="display:none;">
-				<img id="webcam_$ID_screenshot" class="wfu_file_webcam_screenshot" onerror="wfu_webcam_screenshot_error($ID);" />
+				<img id="webcam_$ID_screenshot" class="wfu_file_webcam_screenshot" onerror="wfu_webcam_screenshot_error($ID);" alt="take screenshot icon" />
 				<canvas id="webcam_$ID_canvas" style="display:none;"></canvas>
 			</div>
 			<video playsinline autoplay="true" id="webcam_$ID_box" class="wfu_file_webcam_box"><?php echo WFU_ERROR_WEBCAM_NOTSUPPORTED; ?></video>
@@ -2722,7 +2722,7 @@ this.ended = function() {
 		</div>
 		<div id="webcam_$ID_webcamoff" class="wfu_file_webcam_off" style="display:none;">
 			<svg viewBox="-2 -2 12 12"><use xlink:href="#video"></use></svg>
-			<img id="webcam_$ID_webcamoff_img" src="" />
+			<img id="webcam_$ID_webcamoff_img" src="" alt="webcam off icon" />
 		</div>
 	</div>
 </div>

@@ -34,6 +34,7 @@ if ( !defined("WPFILEUPLOAD_COOKIE") ) {
 	if ( defined("COOKIEHASH") ) DEFINE("WPFILEUPLOAD_COOKIE", "wp_wpfileupload_".COOKIEHASH);
 	else DEFINE("WPFILEUPLOAD_COOKIE", "wp_wpfileupload_0");
 }
+
 add_shortcode("wordpress_file_upload", "wordpress_file_upload_handler");
 //additional shortcode that outputs the inline Javascript on block themes
 add_shortcode("wfu_block_inline_js", "wordpress_file_upload_block_inline_js_handler");
@@ -91,6 +92,7 @@ add_action( 'show_user_profile', 'wfu_show_consent_profile_fields' );
 add_action( 'edit_user_profile', 'wfu_show_consent_profile_fields' );
 add_action( 'personal_options_update', 'wfu_update_consent_profile_fields' );
 add_action( 'edit_user_profile_update', 'wfu_update_consent_profile_fields' );
+add_action( 'wfu_daily_scheduled_events', 'wfu_execute_daily_tasks' );
 //Media editor custom properties
 if ( is_admin() ) add_action( 'attachment_submitbox_misc_actions', 'wfu_media_editor_properties', 11 );
 //register admin filter to check consent status before upload
@@ -589,7 +591,7 @@ function wordpress_file_upload_function($incomingfromhandler) {
 //			- d is the user name
 		$params_index = wfu_generate_current_params_index($sid, $user->user_login);
 		$params_str = wfu_encode_array_to_string($params);
-		update_option('wfu_params_'.$params_index, $params_str);
+		wfu_update_option('wfu_params_'.$params_index, $params_str, "string", true, "wfu_params");
 		$init_params["params_index"] = $params_index;
 		$init_params["debugmode"] = ( $params["debugmode"] == "true" );
 		$init_params["is_admin"] = ( $plugin_upload_user_role == "administrator" );

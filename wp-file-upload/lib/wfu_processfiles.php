@@ -32,7 +32,7 @@ function wfu_process_files_queue($params, $method) {
 	$file_id = wfu_sanitize_int($file_id);
 	$file_size = wfu_sanitize_int($file_size);
 	$chunk_id = wfu_sanitize_int($chunk_id);
-	wfu_update_option("wfu_queue_".$unique_id."_count", $queue_count, "string");
+	wfu_update_option("wfu_queue_".$unique_id."_count", $queue_count, "string", false, "wfu_queue");
 	/*if ( $queue_count >= 3 && $queue_count <= 5 ) $ret = "abort";
 	else */$ret = wfu_process_files_net($params, $method);
 	wfu_advance_queue($queue);
@@ -325,7 +325,7 @@ function wfu_process_files($params, $method) {
 					$subject = str_replace("{SITE}", $home, WFU_WARNING_POTENTIAL_DOS_EMAIL_SUBJECT);
 					$message = str_replace(array( "{SITE}", "{FILENUM}", "{INTERVAL}" ), array( $home, WFU_VAR("WFU_DOS_ATTACKS_FILE_LIMIT"), WFU_VAR("WFU_DOS_ATTACKS_TIME_INTERVAL") ), WFU_WARNING_POTENTIAL_DOS_EMAIL_MESSAGE);
 					wfu_notify_admin($subject, $message);
-					wfu_update_option("wfu_admin_notification_about_DOS", time());
+					wfu_update_option("wfu_admin_notification_about_DOS", time(), "integer", false);
 				}
 				//errorabort flag designates that file will be aborted and no resuming will be attempted
 				$file_output['message_type'] = "errorabort";

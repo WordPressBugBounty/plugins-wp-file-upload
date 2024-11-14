@@ -102,7 +102,7 @@ function wfu_uploadedfiles_manager($page = 1, $only_table_rows = false) {
 			$last_idlog["pre"] = $last_idlog["post"];
 			$last_idlog["post"] = $wpdb->get_var('SELECT MAX(idlog) FROM '.$table_name1);
 			$last_idlog["time"] = time();
-			update_option( "wordpress_file_upload_last_idlog", $last_idlog );		
+			wfu_update_option( "wordpress_file_upload_last_idlog", $last_idlog );
 		}
 		
 		$echo_str .= "\n".'<div class="wrap">';
