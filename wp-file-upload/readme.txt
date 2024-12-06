@@ -3,7 +3,7 @@ Contributors: nickboss
 Donate link: http://www.iptanus.com/support/wordpress-file-upload
 Tags: file, upload, ajax, form, page, post, sidebar, responsive, widget, webcam, ftp
 Requires at least: 2.9.2
-Tested up to: 6.7
+Tested up to: 6.7.1
 Stable tag: "trunk"
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -149,6 +149,11 @@ There is an option in plugin's settings in Dashboard to relax the CSS rules, so 
 8. A screenshot of the file browser.
 
 == Changelog ==
+
+= 4.24.15 =
+* loading of plugin text domain moved to init hook to avoid Wordpress warnings
+* added file_path in wfu_after_file_upload filter
+* corrected bug "Call to undefined function wfu_update_option()" in wfu_licensing_functions.php
 
 = 4.24.14 =
 * verified compatibility with Wordpress version 6.7
@@ -1067,6 +1072,9 @@ Added the option to allow anyone to upload files, by setting the attribute uploa
 Initial version.
 
 == Upgrade Notice ==
+
+= 4.24.15 =
+Regular update to fix some bugs.
 
 = 4.24.14 =
 Regular update to fix some security issues and introduce some improvements.

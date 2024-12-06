@@ -115,12 +115,12 @@ function wfu_validate_mime_type($filepath, $filename, &$result) {
 	$ext = strtolower(wfu_fileext($filename));
 	// check if file has an extension
 	if ( empty($ext) ) {
-		$result = "B";
+		$result = "B:".$mime_type;
 		return ( strpos($exceptions, "B") !== false );
 	}
 	// check if file extension has any associated mime types
 	if ( !isset($mime_types[$ext]) ) {
-		$result = "C";
+		$result = "C:".$mime_type;
 		return ( strpos($exceptions, "C") !== false );
 	}
 	// check if file mime type matches its extension's associated mime types
@@ -244,18 +244,18 @@ function wfu_execute_file_security_checks($checks, $filepath, $filename, $params
 		$mime_check_result = "";
 		if ( !wfu_validate_mime_type($filepath, $filename, $mime_check_result) ) {
 			$code = substr($mime_check_result, 0, 1);
-			if ( $code === "A" ) return WFU_ERROR_ADMIN_FILE_NOMIME;
-			elseif ( $code === "B" ) return WFU_ERROR_ADMIN_FILE_NOEXT;
-			elseif ( $code === "C" ) return WFU_ERROR_ADMIN_FILE_NOASSOCMIME;
-			elseif ( $code === "D" ) return WFU_ERROR_ADMIN_FILE_INVALIDMIME.substr($mime_check_result, 2);
-			else return WFU_ERROR_ADMIN_FILE_MIMEUKNOWN;
+			if ( $code === "A" ) return "mime:".WFU_ERROR_ADMIN_FILE_NOMIME;
+			elseif ( $code === "B" ) return "mime:".WFU_ERROR_ADMIN_FILE_NOEXT;
+			elseif ( $code === "C" ) return "mime:".WFU_ERROR_ADMIN_FILE_NOASSOCMIME;
+			elseif ( $code === "D" ) return "mime:".WFU_ERROR_ADMIN_FILE_INVALIDMIME.substr($mime_check_result, 2);
+			else return "mime:".WFU_ERROR_ADMIN_FILE_MIMEUKNOWN;
 		}
 	}
 	if ( in_array( 'content', $checks ) ) {
 		// perform file content scan for scripts and suspicious patterns
 		$content_check = wfu_security_filecontent_checks($filepath, $filename);
 		if ( $content_check !== true ) {
-			return $content_check;
+			return "content:".$content_check;
 		}
 	}
 	
@@ -263,7 +263,7 @@ function wfu_execute_file_security_checks($checks, $filepath, $filename, $params
 }
 
 /**
- * File COntent Security Checks.
+ * File Content Security Checks.
  *
  * This function runs security checks on the contents of a file. It determines
  * which patterns to include in the check and then it performs the scan.

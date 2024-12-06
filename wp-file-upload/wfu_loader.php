@@ -43,6 +43,9 @@ register_activation_hook(WPFILEUPLOAD_PLUGINFILE,'wordpress_file_upload_install'
 register_deactivation_hook(WPFILEUPLOAD_PLUGINFILE,'wordpress_file_upload_uninstall');
 add_action('plugins_loaded', 'wordpress_file_upload_initialize');
 add_action('plugins_loaded', 'wordpress_file_upload_update_db_check');
+// initialize text domain; we use a priority of 0 so that init hook runs before
+// widgets_init hook
+add_action('init', 'wordpress_file_upload_textdomain', 0);
 //widget
 add_action( 'widgets_init', 'register_wfu_widget' );
 //admin hooks
@@ -122,8 +125,6 @@ function wordpress_file_upload_initialize() {
 	 * @since 4.24.0
 	 */
 	do_action("_wfu_load_pre_actions");
-	$loaded = load_plugin_textdomain('wp-file-upload', false, dirname(plugin_basename (WPFILEUPLOAD_PLUGINFILE)).'/languages');
-	wfu_initialize_i18n_strings();
 	// store the User State handler in a global variable for easy access by the
 	// plugin's routines
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
@@ -134,6 +135,22 @@ function wordpress_file_upload_initialize() {
 	$debug_logging = ( isset($maintenance_options["debug_logging"]) ? $maintenance_options["debug_logging"] === true : false );
 	if ( $debug_logging ) wfu_activate_debug_log();
 
+}
+
+/**
+ * Initialize plugin textdomain.
+ *
+ * Runs during init to load the plugin text domain and the translatable strings.
+ *
+ * @since 4.24.15
+ *
+ * @redeclarable
+ */
+function wordpress_file_upload_textdomain() {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	// load text domain and initialize plugin strings
+	$loaded = load_plugin_textdomain('wp-file-upload', false, dirname(plugin_basename (WPFILEUPLOAD_PLUGINFILE)).'/languages');
+	wfu_initialize_i18n_strings();
 }
 
 /**

@@ -196,10 +196,12 @@ function wfu_process_files($params, $method) {
 		$upload_path_forbidden = false;
 		$upload_path_ok = false;
 		$allowed_file_ok = false;
+		$security_check_result = "";
 		$not_allowed_admin_error = "";
 		$size_file_ok = false;
 		$size_file_phpenv_ok = true;
 		$ignore_server_actions = false;
+		$fail_reason = "";
 		$file_output['color'] = $default_colors['color'];
 		$file_output['bgcolor'] = $default_colors['bgcolor'];
 		$file_output['borcolor'] = $default_colors['borcolor'];
@@ -277,8 +279,76 @@ function wfu_process_files($params, $method) {
 				if ( !$nofileupload ) $additional_data['file_size'] = $filesize;
 				$additional_data['user_id'] = $user->ID;
 				$additional_data['page_id'] = $params["pageid"];
-				if ( !$nofileupload ) $ret_data = apply_filters('wfu_before_file_check', $changable_data, $additional_data);
-				else $ret_data = apply_filters('wfu_before_data_submit', $changable_data, $additional_data);
+				if ( !$nofileupload ) {
+					/**
+					 * Custom Actions Before File Checks
+					 * 
+					 * Allow custom operations to be executed when the uploaded
+					 * file is checked. This filter can change several
+					 * properties of the file and also abort the upload.
+					 *
+					 * @since 2.4.1
+					 *
+					 * @param array $changable_data {
+					 *     Parameters to return to the plugin.
+					 *
+					 *     @type array $file_path The target file path.
+					 *     @type array $user_data Not userdata fields.
+					 *     @type string $error_message A custom error message.
+					 *           If it is not empty then the upload will be
+					 *           aborted.
+					 *     @type string $admin_message A custom admin error
+					 *           message.
+					 * }
+					 * @param array $additional_data {
+					 *     Additional parameters of the upload.
+					 *
+					 *     @type string $shortcode_id The shortcode ID of the
+					 *           upload form.
+					 *     @type string $unique_id The unique ID of the upload.
+					 *     @type string $file_unique_id The unique ID of the
+					 *           file.
+					 *     @type string $file_size The file size.
+					 *     @type string $user_id The uploader user ID.
+					 *     @type string $page_id The page ID with the upload
+					 *           form.
+					 * }
+					 */
+					$ret_data = apply_filters('wfu_before_file_check', $changable_data, $additional_data);
+				}
+				else {
+					/**
+					 * Custom Actions Before Data Submission
+					 * 
+					 * Allow custom operations to be executed when the submitted
+					 * data are checked. This filter can change the submitted
+					 * data and also abort the submission.
+					 *
+					 * @since 3.11.0
+					 *
+					 * @param array $changable_data {
+					 *     Parameters to return to the plugin.
+					 *
+					 *     @type array $user_data Not userdata fields.
+					 *     @type string $error_message A custom error message.
+					 *           If it is not empty then the upload will be
+					 *           aborted.
+					 *     @type string $admin_message A custom admin error
+					 *           message.
+					 * }
+					 * @param array $additional_data {
+					 *     Additional parameters of the upload.
+					 *
+					 *     @type string $shortcode_id The shortcode ID of the
+					 *           upload form.
+					 *     @type string $unique_id The unique ID of the upload.
+					 *     @type string $user_id The uploader user ID.
+					 *     @type string $page_id The page ID with the upload
+					 *           form.
+					 * }
+					 */
+					$ret_data = apply_filters('wfu_before_data_submit', $changable_data, $additional_data);
+				}
 				if ( !$nofileupload ) $target_path = $ret_data['file_path'];
 				if ( !$nofileupload ) $only_filename = wfu_basename($target_path);
 				$userdata_fields = $ret_data['user_data'];
@@ -297,8 +367,9 @@ function wfu_process_files($params, $method) {
 					WFU_USVAR_store($file_map, $file_map_arr);
 				}
 			}
-			// if this is a second pass of the file, because a first pass with file checking was done before, then retrieve
-			// file data that may have previously changed because of application of filters
+			// if this is a second pass of the file, because a first pass with
+			// file checking was done before, then retrieve file data that may
+			// have previously changed because of application of filters
 			if ( $filedata_previously_defined ) {
 				$file_map_arr = WFU_USVAR($file_map);
 				$target_path = $file_map_arr['filepath'];
@@ -306,8 +377,10 @@ function wfu_process_files($params, $method) {
 				$userdata_fields = $file_map_arr['userdata'];
 			}
 			if ( $filter_error_message != '' ) {
-				//errorabort flag designates that file will be aborted and no resuming will be attempted
+				// errorabort flag designates that file will be aborted and no
+				// resuming will be attempted
 				$file_output['message_type'] = "errorabort";
+				$fail_reason = "filter:".( !$nofileupload ? "wfu_before_file_check" : "" );
 				$file_output['message'] = wfu_join_strings("<br />", $file_output['message'], $filter_error_message);
 				if ( $filter_admin_message != '' )
 					$file_output['admin_messages'] = wfu_join_strings("<br />", $file_output['admin_messages'], $filter_admin_message);
@@ -327,8 +400,10 @@ function wfu_process_files($params, $method) {
 					wfu_notify_admin($subject, $message);
 					wfu_update_option("wfu_admin_notification_about_DOS", time(), "integer", false);
 				}
-				//errorabort flag designates that file will be aborted and no resuming will be attempted
+				// errorabort flag designates that file will be aborted and no
+				// resuming will be attempted
 				$file_output['message_type'] = "errorabort";
+				$fail_reason = "dos_attack";
 				$file_output['message'] = wfu_join_strings("<br />", $file_output['message'], WFU_ERROR_DOS_ATTACK);
 				$file_output['admin_messages'] = wfu_join_strings("<br />", $file_output['admin_messages'], WFU_ERROR_ADMIN_DOS_ATTACK);
 			}
@@ -343,7 +418,9 @@ function wfu_process_files($params, $method) {
 					//reconstruct target_path
 					$target_path = wfu_basedir($target_path).$only_filename;
 
-					/* if medialink or postlink is activated then the target path becomes the current wordpress upload folder */
+					/* if medialink or postlink is activated then the
+					   target path becomes the current wordpress upload
+					   folder */
 					if ( $params["medialink"] == "true" || $params["postlink"] == "true" ) {
 						$mediapath = wp_upload_dir();
 						$target_path = $mediapath['path'].'/'.$only_filename;
@@ -373,10 +450,12 @@ function wfu_process_files($params, $method) {
 						}
 					}
 
-					/* File name control, reject files with .php, .js (and other) extensions for security reasons.
-					   This is the first pass of extension control, which only checks the filename.
-					   A second pass is performed after the file has completely uploaded, using WP inherent file
-					   extension control, which provides better security. */
+					/* File name control, reject files with .php, .js (and
+					   other) extensions for security reasons. This is the first
+					   pass of extension control, which only checks the
+					   filename. A second pass is performed after the file
+					   has completely uploaded, using WP inherent file extension
+					   control, which provides better security. */
 					if ( !wfu_file_extension_blacklisted(strtolower($only_filename)) )
 						foreach ($allowed_patterns as $allowed_pattern) {
 							if ( wfu_file_extension_matches_pattern($allowed_pattern, strtolower($only_filename)) ) {
@@ -392,9 +471,10 @@ function wfu_process_files($params, $method) {
 					   to 'all'. */
 					if ( $allowed_file_ok && is_uploaded_file($fileprops['tmp_name']) && !$only_check ) {
 						//$allowed_file_ok = !wfu_file_has_php_tags($fileprops['tmp_name'], strtolower(wfu_fileext($only_filename)));
-						$allowed_file_ok = wfu_during_upload_security_checks($fileprops['tmp_name'], $only_filename, $params);
-						if ( $allowed_file_ok !== true ) {
-							$not_allowed_admin_error = $allowed_file_ok;
+						$security_check_result = wfu_during_upload_security_checks($fileprops['tmp_name'], $only_filename, $params);
+						if ( $security_check_result !== true ) {
+							list($security_check_result, $not_allowed_admin_error) = explode(":", $security_check_result, 2);
+							$security_check_result .= "-during";
 							$allowed_file_ok = false;
 						}
 					}
@@ -417,14 +497,19 @@ function wfu_process_files($params, $method) {
 					$file_output['message_type'] = "errorabort";
 					$file_output['message'] = wfu_join_strings("<br />", $file_output['message'], WFU_ERROR_UPLOAD_FAILED);
 
-					if ( !$upload_path_ok ) $file_output['message'] = wfu_join_strings("<br />", $file_output['message'], ( $sftp_not_supported ? WFU_ERROR_ADMIN_SFTP_UNSUPPORTED : ( $upload_path_forbidden ? WFU_ERROR_DIR_ALLOW : WFU_ERROR_DIR_EXIST ) ));
+					if ( !$upload_path_ok ) {
+						$fail_reason = "upload_path";
+						$file_output['message'] = wfu_join_strings("<br />", $file_output['message'], ( $sftp_not_supported ? WFU_ERROR_ADMIN_SFTP_UNSUPPORTED : ( $upload_path_forbidden ? WFU_ERROR_DIR_ALLOW : WFU_ERROR_DIR_EXIST ) ));
+					}
 					if ( !$allowed_file_ok ) {
+						$fail_reason = ( $security_check_result !== "" ? "security:".$security_check_result : "not_allowed" );
 						$file_output['message'] = wfu_join_strings("<br />", $file_output['message'], WFU_ERROR_FILE_ALLOW);
 						if ( !empty($not_allowed_admin_error) ) {
 							$file_output['admin_messages'] = wfu_join_strings("<br />", $file_output['admin_messages'], $not_allowed_admin_error);
 						}
 					}
 					if ( !$size_file_ok ) {
+						$fail_reason = "file_size";
 						if ( $size_file_phpenv_ok ) $file_output['message'] = wfu_join_strings("<br />", $file_output['message'], WFU_ERROR_FILE_PLUGIN_SIZE);
 						else $file_output['message'] = wfu_join_strings("<br />", $file_output['message'], WFU_ERROR_FILE_PLUGIN_2GBSIZE);
 					}
@@ -452,6 +537,7 @@ function wfu_process_files($params, $method) {
 			}
 			//error (and not errorabort) flag designates that a resuming of the file may be attempted
 			$file_output['message_type'] = "error";
+			$fail_reason = "upload_error:".$upload_error;
 			$file_output['message'] = wfu_join_strings("<br />", $file_output['message'], $message_text);
 		}
 		
@@ -472,10 +558,25 @@ function wfu_process_files($params, $method) {
 							//redirect echo in internal buffer to receive and process any unwanted warning messages from wfu_upload_file
 							ob_start();
 							ob_clean();
-							/* Apply wfu_before_file_upload filter right before the upload, in order to allow the user to change the file name.
-							   If additional data are required, such as user_id or userdata values, they can be retrieved by implementing the
-							   previous filter wfu_before_file_check, corresponding them to the unique file id */
 							if ( $file_unique_id != '' ) {
+								/**
+								 * Custom Actions Before File Upload
+								 * 
+								 * Allow custom operations to be executed before
+								 * the file is stored to its final location.
+								 *
+								 * If additional data are required, such as
+								 * user_id or userdata values, they can be
+								 * retrieved by implementing the previous filter
+								 * wfu_before_file_check, corresponding them to
+								 * the unique file id.
+								 *
+								 * @since 2.4.1
+								 *
+								 * @param string $target_path The target path.
+								 * @param string $file_unique_id The unique ID
+								 *        of the file.
+								 */
 								$target_path = apply_filters('wfu_before_file_upload', $target_path, $file_unique_id);
 								if ( WFU_USVAR_exists($file_map) ) {
 									$file_map_arr = WFU_USVAR($file_map);
@@ -495,6 +596,7 @@ function wfu_process_files($params, $method) {
 							if ( $echo_message != "" && !$file_copied ) {
 								//error (and not errorabort) flag designates that file may be resumed
 								$file_output['message_type'] = "error";
+								$fail_reason = "not_copied";
 								if ( stristr($echo_message, "warning") && stristr($echo_message, "permission denied") && stristr($echo_message, "unable to move") ) {
 									$file_output['message'] = wfu_join_strings("<br />", $file_output['message'], WFU_ERROR_DIR_PERMISSION);
 									$file_output['admin_messages'] = wfu_join_strings("<br />", $file_output['admin_messages'], WFU_ERROR_ADMIN_DIR_PERMISSION);
@@ -539,9 +641,7 @@ function wfu_process_files($params, $method) {
 							//redirect echo in internal buffer to receive and process any unwanted warning messages from move_uploaded_file
 							ob_start();
 							ob_clean();
-							/* Apply wfu_before_file_upload filter right before the upload, in order to allow the user to change the file name.
-							   If additional data are required, such as user_id or userdata values, they can be retrieved by implementing the
-							   previous filter wfu_before_file_check, corresponding them to the unique file id */
+							/* This filter is documented above. */
 							if ( $file_unique_id != '' ) {
 								$target_path = apply_filters('wfu_before_file_upload', $target_path, $file_unique_id);
 								$file_map_arr = WFU_USVAR($file_map);
@@ -560,6 +660,7 @@ function wfu_process_files($params, $method) {
 							if ( $echo_message != "" && !$file_copied ) {
 								//error (and not errorabort) flag designates that file may be resumed
 								$file_output['message_type'] = "error";
+								$fail_reason = "not_copied";
 								if ( stristr($echo_message, "warning") && stristr($echo_message, "permission denied") && stristr($echo_message, "unable to move") ) {
 									$file_output['message'] = wfu_join_strings("<br />", $file_output['message'], WFU_ERROR_DIR_PERMISSION);
 									$file_output['admin_messages'] = wfu_join_strings("<br />", $file_output['admin_messages'], WFU_ERROR_ADMIN_DIR_PERMISSION);
@@ -577,6 +678,7 @@ function wfu_process_files($params, $method) {
 						else {
 							//abort the file and do not allow resuming
 							$file_output['message_type'] = "errorabort";
+							$fail_reason = "not_copied";
 							$file_output['message'] = wfu_join_strings("<br />", $file_output['message'], WFU_WARNING_FILE_EXISTS);
 							$message_processed = true;
 							$file_copied = false;
@@ -605,6 +707,7 @@ function wfu_process_files($params, $method) {
 				else if ( !$message_processed ) {
 					//abort the file and do not allow resuming
 					$file_output['message_type'] = "errorabort";
+					$fail_reason = "message_not_processed";
 					$file_output['message'] = wfu_join_strings("<br />", $file_output['message'], WFU_ERROR_UNKNOWN);
 				}
 
@@ -614,6 +717,7 @@ function wfu_process_files($params, $method) {
 			else {
 				//abort the file and do not allow resuming
 				$file_output['message_type'] = "errorabort";
+				$fail_reason = "wrong_conditions";
 				$file_output['message'] = wfu_join_strings("<br />", $file_output['message'], WFU_ERROR_UNKNOWN);
 			}
 		}
@@ -624,6 +728,7 @@ function wfu_process_files($params, $method) {
 			else {
 				//abort the file and do not allow resuming
 				$file_output['message_type'] = "errorabort";
+				$fail_reason = "not_copied";
 				$file_output['message'] = wfu_join_strings("<br />", $file_output['message'], WFU_ERROR_UNKNOWN);
 			}
 		}
@@ -641,6 +746,8 @@ function wfu_process_files($params, $method) {
 		$file_finished_successfully = ( (!$only_check || $nofileupload) && ( $file_output['message_type'] == "success" || $file_output['message_type'] == "warning" ) );
 		/* set non-success status of the file, to be used for medialink and post actions */
 		$file_finished_unsuccessfully = ( substr($file_output['message_type'], 0, 5) == "error" );
+		/* set flag for deleting target file if it is required */
+		$delete_file = false;
 
 
 		/* perform custom actions after file is completely uploaded in order to
@@ -661,8 +768,10 @@ function wfu_process_files($params, $method) {
 				if ( wfu_file_extension_blacklisted(strtolower($proper_filename)) ) {
 					$file_finished_successfully = false;
 					$file_finished_unsuccessfully = true;
-					wfu_unlink($target_path, "wfu_process_files:1");
+					//wfu_unlink($target_path, "wfu_process_files:1");
+					$delete_file = true;
 					$file_output['message_type'] = "errorabort";
+					$fail_reason = "blacklisted";
 					$file_output['message'] = wfu_join_strings("<br />", $file_output['message'], WFU_ERROR_FILE_REJECT);
 					$file_output['admin_messages'] = wfu_join_strings("<br />", $file_output['admin_messages'], WFU_ERROR_ADMIN_FILE_WRONGEXT.$check['proper_filename']);
 				}
@@ -679,10 +788,13 @@ function wfu_process_files($params, $method) {
 				if ( $check !== true ) {
 					$file_finished_successfully = false;
 					$file_finished_unsuccessfully = true;
-					wfu_unlink($target_path, "wfu_process_files:2");
+					//wfu_unlink($target_path, "wfu_process_files:2");
+					$delete_file = true;
 					$file_output['message_type'] = "errorabort";
+					list($reason, $error_message) = explode(":", $check, 2);
+					$fail_reason = "security:".$reason."-post";
 					$file_output['message'] = wfu_join_strings("<br />", $file_output['message'], WFU_ERROR_FILE_REJECT);
-					$file_output['admin_messages'] = wfu_join_strings("<br />", $file_output['admin_messages'], $check);
+					$file_output['admin_messages'] = wfu_join_strings("<br />", $file_output['admin_messages'], $error_message);
 				}
 			}
 			// run any wfu_after_file_loaded filters to make any last file checks and accept or reject it
@@ -694,19 +806,49 @@ function wfu_process_files($params, $method) {
 				$additional_data['file_unique_id'] = $file_unique_id;
 				$additional_data['file_path'] = $target_path;
 				$additional_data['shortcode_id'] = $sid;
+				/**
+				 * Custom Actions After File Has Fully Loaded
+				 * 
+				 * Allow custom actions to run after the file has been fully
+				 * loaded on the web server and its contents can be analysed by
+				 * PHP scripts. This filter can abort the upload.
+				 *
+				 * @since 3.7.0
+				 *
+				 * @param array $changable_data {
+				 *     Parameters to return to the plugin.
+				 *
+				 *     @type string $error_message An error message. If it is
+				 *           not empty then the upload will be aborted.
+				 *     @type string $admin_message An admin error message.
+				 * }
+				 * @param array $additional_data {
+				 *     Additional parameters of the upload.
+				 *
+				 *     @type string $shortcode_id The shortcode ID of the upload
+				 *           form.
+				 *     @type string $file_unique_id The unique ID of the file.
+				 *     @type string $file_path The upload path.
+				 * }
+				 */
 				$ret_data = apply_filters('wfu_after_file_loaded', $changable_data, $additional_data);
 				//this is a call to wfu_after_file_complete filters, which is
 				//the old name of wfu_after_file_loaded filters, for maintaining
 				//backward compatibility
 				$changable_data = $ret_data;
+				/* This filter has the same documentation as
+				   wfu_after_file_loaded above. It is not used anymoe and
+				   remains for maintaining backward compatibility. */
 				$ret_data = apply_filters('wfu_after_file_complete', $changable_data, $additional_data);
 				$filter_error_message = $ret_data['error_message'];
 				$filter_admin_message = $ret_data['admin_message'];
 				if ( $filter_error_message != '' ) {
 					$file_finished_successfully = false;
 					$file_finished_unsuccessfully = true;
-					wfu_unlink($target_path, "wfu_process_files:4");
+					//wfu_unlink($target_path, "wfu_process_files:4");
+					$delete_file = true;
 					$file_output['message_type'] = "errorabort";
+					$fail_reason = "filter:wfu_after_file_loaded";
 					$file_output['message'] = wfu_join_strings("<br />", $file_output['message'], $filter_error_message);
 					if ( $filter_admin_message != '' )
 						$file_output['admin_messages'] = wfu_join_strings("<br />", $file_output['admin_messages'], $filter_admin_message);
@@ -732,7 +874,8 @@ function wfu_process_files($params, $method) {
 			$file_output['bgcolor'] = $color_array[1];
 			$file_output['borcolor'] = $color_array[2];
 			$file_output['header'] = esc_html(preg_replace($search, $replace, $params['successmessage']));
-			/* prepare details of successful file upload, visible only to administrator */
+			/* prepare details of successful file upload, visible only to
+			   administrator */
 			$file_output['admin_messages'] = wfu_join_strings("<br />", preg_replace($search, $replace, WFU_SUCCESSMESSAGE_DETAILS), $file_output['admin_messages']);
 		}
 		/* FileResult: B */
@@ -743,7 +886,8 @@ function wfu_process_files($params, $method) {
 			$file_output['bgcolor'] = $color_array[1];
 			$file_output['borcolor'] = $color_array[2];
 			$file_output['header'] = esc_html(preg_replace($search, $replace, ( $store_nothing ? WFU_WARNINGMESSAGE_NOSAVE : $params['warningmessage'] )));
-			/* prepare and prepend details of successful file upload, visible only to administrator */
+			/* prepare and prepend details of successful file upload, visible
+			   only to administrator */
 			$file_output['admin_messages'] = wfu_join_strings("<br />", preg_replace($search, $replace, WFU_SUCCESSMESSAGE_DETAILS), $file_output['admin_messages']);
 		}
 		/* FileResult: C */
@@ -759,30 +903,155 @@ function wfu_process_files($params, $method) {
 			if ( !$nofileupload ) $file_output['admin_messages'] = wfu_join_strings("<br />", preg_replace($search, $replace, WFU_FAILMESSAGE_DETAILS), $file_output['admin_messages']);
 		}
 
-		/* suppress again any admin messages if user is not administrator or adminmessages is not activated */		
+		/* suppress again any admin messages if user is not administrator or
+		   adminmessages is not activated */		
 		if ( $suppress_admin_messages ) $file_output['admin_messages'] = "";
 
 			$params_output_array[0] = $file_output;
 
 		if ( $file_unique_id != '' && $file_finished_unsuccessfully && !$ignore_server_actions ) {
-			/* Apply wfu_after_file_upload filter after failed upload, in order to allow the user to perform any post-upload actions.
-			   If additional data are required, such as user_id or userdata values or filepath, they can be retrieved by implementing
-			   the previous filters wfu_before_file_check and wfu_before_file_upload, corresponding them to the unique file id.
-			   This actions allows to define custom javascript code to run after each file finishes (either succeeded or failed).
-			   For backward compatibility, the wfu_after_file_upload action that was implemented in previous version of the plugin
-			   still remains. */
 			$changable_data['ret_value'] = null;
 			$changable_data['js_script'] = '';
 			$additional_data['shortcode_id'] = $sid;
 			$additional_data['unique_id'] = $unique_id;
 			if ( !$nofileupload ) $additional_data['file_unique_id'] = $file_unique_id;
+			if ( !$nofileupload ) $additional_data['file_path'] = $target_path;
 			if ( !$nofileupload ) $additional_data['upload_result'] = $file_output['message_type'];
 			else $additional_data['submit_result'] = $file_output['message_type'];
 			$additional_data['error_message'] = $file_output['message'];
 			$additional_data['admin_messages'] = $file_output['admin_messages'];
-			if ( !$nofileupload ) $ret_data = apply_filters('wfu_after_file_upload', $changable_data, $additional_data);
-			else $ret_data = apply_filters('wfu_after_data_submit', $changable_data, $additional_data);
+			if ( !$nofileupload ) {
+				$changable_data_internal = $changable_data + array(
+					"delete_file" => $delete_file
+				);
+				$additional_data_internal = $additional_data + array(
+					"fail_reason" => $fail_reason,
+					"source_path" => $fileprops['tmp_name'],
+					"target_path" => $target_path,
+					"userdata" => $userdata_fields,
+					"params" => $params
+				);
+				/**
+				 * Custom Internal Actions After File Upload
+				 * 
+				 * Allows internal processes to perform actions when a file has
+				 * failed to be uploaded.
+				 *
+				 * @since 4.24.15
+				 *
+				 * @param array $changable_data {
+				 *     Parameters to return to the plugin.
+				 *
+				 *     @type string $ret_value Not used for the moment,
+				 *           it exists for future additions.
+				 *     @type string $js_script Custom Javascript code to execute
+				 *           on user's browser.
+				 *     @type bool $delete_file Whether the uploaded file should
+				 *           be deleted or not.
+				 * }
+				 * @param array $additional_data {
+				 *     Additional parameters of the upload.
+				 *
+				 *     @type string $shortcode_id The shortcode ID of the upload
+				 *           form.
+				 *     @type string $unique_id The unique ID of the upload.
+				 *     @type string $file_unique_id The unique ID of the file.
+				 *     @type string $file_path The upload path.
+				 *     @type string $upload_result The upload result.
+				 *     @type string $error_message Any upload error message.
+				 *     @type string $admin_messages Any upload admin error
+				 *           messages.
+				 *     @type string $fail_reason A code that represents the
+				 *           reason the file failed to be uploaded.
+				 *     @type string $source_path The path to the temp file of 
+				 *           the upload.
+				 *     @type string $target_path The path to the final file of 
+				 *           the upload.
+				 *     @type array $userdata The userdata fields.
+				 *     @type array $params The parameters of the upload.
+				 * }
+				 */
+				$ret_data = apply_filters('_wfu_after_file_upload', $changable_data_internal, $additional_data_internal);
+				$delete_file = $ret_data["delete_file"];
+				unset($ret_data["delete_file"]);
+				$changable_data = $ret_data;
+				/**
+				 * Custom Actions After File Upload
+				 * 
+				 * Apply wfu_after_file_upload filter after failed upload, in
+			     * order to allow the user to perform any post-upload actions.
+			     * If additional data are required, such as user_id or userdata
+				 * values or filepath, they can be retrieved by implementing the
+				 * previous filters wfu_before_file_check and
+				 * wfu_before_file_upload, corresponding them to the unique file
+				 * id. This actions allows to define custom javascript code to
+				 * run after each file finishes (either succeeded or failed).
+				 * For backward compatibility, the wfu_after_file_upload action
+				 * that was implemented in previous version of the plugin still
+				 * remains.
+				 *
+				 * @since 2.4.1
+				 *
+				 * @param array $changable_data {
+				 *     Parameters to return to the plugin.
+				 *
+				 *     @type string $ret_value Not used for the moment,
+				 *           it exists for future additions.
+				 *     @type string $js_script Custom Javascript code to execute
+				 *           on user's browser.
+				 * }
+				 * @param array $additional_data {
+				 *     Additional parameters of the upload.
+				 *
+				 *     @type string $shortcode_id The shortcode ID of the upload
+				 *           form.
+				 *     @type string $unique_id The unique ID of the upload.
+				 *     @type string $file_unique_id The unique ID of the file.
+				 *     @type string $file_path The upload path.
+				 *     @type string $upload_result The upload result.
+				 *     @type string $error_message Any upload error message.
+				 *     @type string $admin_messages Any upload admin error
+				 *           messages.
+				 * }
+				 */
+				$ret_data = apply_filters('wfu_after_file_upload', $changable_data, $additional_data);
+			}
+			else {
+				/**
+				 * Custom Actions After Data Submission
+				 * 
+				 * Apply wfu_after_data_submit filter after failed data
+				 * submission, in order to allow the user to perform any post-
+				 * upload actions.
+				 *
+				 * @since 3.11.0
+				 *
+				 * @param array $changable_data {
+				 *     Parameters to return to the plugin.
+				 *
+				 *     @type string $ret_value Not used for the moment,
+				 *           it exists for future additions.
+				 *     @type string $js_script Custom Javascript code to execute
+				 *           on user's browser.
+				 * }
+				 * @param array $additional_data {
+				 *     Additional parameters of the upload.
+				 *
+				 *     @type string $shortcode_id The shortcode ID of the upload
+				 *           form.
+				 *     @type string $unique_id The unique ID of the upload.
+				 *     @type string $submit_result The submission result.
+				 *     @type string $error_message Any upload error message.
+				 *     @type string $admin_messages Any upload admin error
+				 *           messages.
+				 * }
+				 */
+				$ret_data = apply_filters('wfu_after_data_submit', $changable_data, $additional_data);
+			}
 			$params_output_array["general"]['js_script'] = $ret_data['js_script'];
+			if ( $delete_file ) {
+				wfu_unlink($target_path, "wfu_process_files");
+			}
 //			do_action('wfu_after_file_upload', $file_unique_id, $file_output['message_type'], $file_output['message'], $file_output['admin_messages']);
 		}
 
@@ -797,28 +1066,41 @@ function wfu_process_files($params, $method) {
 			else {
 				if ( !$consent_revoked ) $fileid = wfu_log_action('datasubmit', '', $user->ID, $unique_id, $params['pageid'], $params['blogid'], $sid, $userdata_fields);
 			}
-			/* Apply wfu_after_file_upload filter after failed upload, in order to allow the user to perform any post-upload actions.
-			   If additional data are required, such as user_id or userdata values or filepath, they can be retrieved by implementing
-			   the previous filters wfu_before_file_check and wfu_before_file_upload, corresponding them to the unique file id.
-			   This actions allows to define custom javascript code to run after each file finishes (either suceeded or failed).
-			   For backward compatibility, the wfu_after_file_upload action that was implemented in previous version of the plugin
-			   still remains. */
+			/* Apply wfu_after_file_upload filter after failed upload, in order
+			   to allow the user to perform any post-upload actions. If
+			   additional data are required, such as user_id or userdata values
+			   or filepath, they can be retrieved by implementing the previous
+			   filters wfu_before_file_check and wfu_before_file_upload,
+			   corresponding them to the unique file id. This actions allows to
+			   define custom javascript code to run after each file finishes
+			   (either suceeded or failed). For backward compatibility,
+			   the wfu_after_file_upload action that was implemented in previous
+			   version of the plugin still remains. */
 			$changable_data['ret_value'] = null;
 			$changable_data['js_script'] = '';
 			$additional_data['shortcode_id'] = $sid;
 			$additional_data['unique_id'] = $unique_id;
 			if ( !$nofileupload ) $additional_data['file_unique_id'] = $file_unique_id;
+			if ( !$nofileupload ) $additional_data['file_path'] = $target_path;
 			if ( !$nofileupload ) $additional_data['upload_result'] = $file_output['message_type'];
 			else $additional_data['submit_result'] = $file_output['message_type'];
 			$additional_data['error_message'] = $file_output['message'];
 			$additional_data['admin_messages'] = $file_output['admin_messages'];
-			if ( !$nofileupload ) $ret_data = apply_filters('wfu_after_file_upload', $changable_data, $additional_data);
-			else $ret_data = apply_filters('wfu_after_data_submit', $changable_data, $additional_data);
+			if ( !$nofileupload ) {
+				/* This filter is documented above. */
+				$ret_data = apply_filters('wfu_after_file_upload', $changable_data, $additional_data);
+			}
+			else {
+				/* This filter is documented above. */
+				$ret_data = apply_filters('wfu_after_data_submit', $changable_data, $additional_data);
+			}
 			$params_output_array["general"]['js_script'] = $ret_data['js_script'];
 //			do_action('wfu_after_file_upload', $file_unique_id, $file_output['message_type'], $file_output['message'], $file_output['admin_messages']);
 		}
 
-		/* add file to Media or attach file to current post if any of these options is activated and the file has finished uploading successfully */
+		/* add file to Media or attach file to current post if any of these
+		   options is activated and the file has finished uploading
+		   successfully */
 		if ( ( $params["medialink"] == "true" || $params["postlink"] == "true" ) && $file_finished_successfully && !$ignore_server_actions && !$nofileupload ) {
 			$pageid = ( $params["postlink"] == "true" ? $params['pageid'] : 0 );
 			if ( !$consent_revoked ) wfu_process_media_insert($target_path, $userdata_fields, $pageid);
@@ -848,14 +1130,17 @@ function wfu_process_files($params, $method) {
 	$somefiles_Ok = ( ( $warning_count + $success_count ) > 0 );
 	$allfiles_Ok = ( $somefiles_Ok && ( $error_count == 0 ) );
 
-	/* Prepare WPFileBase Plugin update url, if this option has been selected and only if at least one file has been successfully uploaded.
-	   Execution will happen only if accumulated $params_output_array["general"]['update_wpfilebase'] is not empty */
+	/* Prepare WPFileBase Plugin update url, if this option has been selected
+	   and only if at least one file has been successfully uploaded. Execution
+	   will happen only if accumulated
+	   $params_output_array["general"]['update_wpfilebase'] is not empty */
 	if ( $params["filebaselink"] == "true" && !$nofileupload ) {
 		if ( $somefiles_Ok ) {		
 			$filebaseurl = site_url();
 			if ( substr($filebaseurl, -1, 1) == "/" ) $filebaseurl = substr($filebaseurl, 0, strlen($filebaseurl) - 1);
-			/* if the following variable is not empty, then WPFileBase Plugin update must be executed
-			   and any admin messages must be suppressed */
+			/* if the following variable is not empty, then WPFileBase Plugin
+			   update must be executed and any admin messages must be
+			   suppressed */
 			$params_output_array["general"]['update_wpfilebase'] = $filebaseurl;
 		}
 		else {
@@ -864,10 +1149,13 @@ function wfu_process_files($params, $method) {
 		}
 	} 
 
-	/* Prepare email notification parameters if email notification is enabled and only if at least one file has been successfully uploaded
-	   	if $method = "no-ajax" then send the email to the recipients 
-	   	if $method = "ajax" then return the notification parameters to the handler for further processing
-	   In case of ajax, execution will happen only if notify_by_email is greater than 0 */
+	/* Prepare email notification parameters if email notification is enabled
+	   and only if at least one file has been successfully uploaded.
+	   	If $method = "no-ajax" then send the email to the recipients.
+	   	If $method = "ajax" then return the notification parameters to the
+		handler for further processing.
+		In case of ajax, execution will happen only if notify_by_email is
+		greater than 0 */
 	if ( $params["notify"] == "true" ) {
 		/* verify that there are recipients */
 		$notifyrecipients =  trim(preg_replace('/%useremail%/', $user_email, $params["notifyrecipients"]));
@@ -881,8 +1169,9 @@ function wfu_process_files($params, $method) {
 					}
 				}
 				else {
-					/* if the following variable is not empty, then email notification must be sent
-					   and any admin messages must be suppressed */
+					/* if the following variable is not empty, then email
+					   notification must be sent and any admin messages must be
+					   suppressed */
 					$params_output_array["general"]['notify_by_email'] = ( !$nofileupload && !$force_notifications ? count($notify_target_path_list) : 1 );
 				}
 			}
@@ -897,8 +1186,10 @@ function wfu_process_files($params, $method) {
 		}
 	} 
 
-	/* Prepare redirect link if redirection is enabled and only if all files have been successfully uploaded
-	   Execution will happen only if accumulated redirect_link is not empty and accumulated redirect errors are empty */
+	/* Prepare redirect link if redirection is enabled and only if all files
+	   have been successfully uploaded. Execution will happen only if
+	   accumulated redirect_link is not empty and accumulated redirect errors
+	   are empty. */
 	if ( $params["redirect"] == "true" ) {
 		if ( $params_output_array["general"]['redirect_link'] == "" ) {
 			$params_output_array["general"]['admin_messages']['redirect'] = WFU_WARNING_REDIRECT_NOTEXECUTED_EMPTY;
@@ -910,7 +1201,8 @@ function wfu_process_files($params, $method) {
 		}
 	}
 
-	/* suppress any admin messages if user is not administrator or adminmessages is not activated */		
+	/* suppress any admin messages if user is not administrator or adminmessages
+	   is not activated */		
 	if ( $suppress_admin_messages ) {
 		$params_output_array["general"]['admin_messages']['wpfilebase'] = "";
 		$params_output_array["general"]['admin_messages']['notify'] = "";

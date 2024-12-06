@@ -2961,6 +2961,76 @@ function wfu_file_exists($path, $caller = null) {
 }
 
 /**
+ * File Is FTP.
+ *
+ * Check if this is an FTP file.
+ *
+ * @since 4.24.15
+ *
+ * @param string $path The file path.
+ * @return bool True if it is FTP, false otherwise.
+ */
+function wfu_file_is_ftp($path) {
+	return substr($path, 0, 6) == "ftp://";
+}
+
+/**
+ * File Is sFTP.
+ *
+ * Check if this is an sFTP file.
+ *
+ * @since 4.24.15
+ *
+ * @param string $path The file path.
+ * @return bool True if it is sFTP, false otherwise.
+ */
+function wfu_file_is_sftp($path) {
+	return substr($path, 0, 7) == "sftp://";
+}
+
+/**
+ * File Is Remote.
+ *
+ * Check if this is a remote file.
+ *
+ * @since 4.24.15
+ *
+ * @param string $path The file path.
+ * @return bool True if it is remote, false otherwise.
+ */
+function wfu_file_is_remote($path) {
+	return substr($path, 0, 7) == "remote:";
+}
+
+/**
+ * File Is Local.
+ *
+ * Check if this is a local file.
+ *
+ * @since 4.24.15
+ *
+ * @param string $path The file path.
+ * @return bool True if it is local, false otherwise.
+ */
+function wfu_file_is_local($path) {
+	return ( !wfu_file_is_ftp($path) && !wfu_file_is_sftp($path) && !wfu_file_is_remote($path) );
+}
+
+/**
+ * Get Permissions As String.
+ *
+ * It returns the permissions as an octal string.
+ *
+ * @since 4.24.15
+ *
+ * @param integer $perms Numeric permissions of a file.
+ * @return string The permissions as an octal string.
+ */
+function wfu_perms_str($perms) {
+	return substr(sprintf('%04.o', $perms), -4);
+}
+
+/**
  * Get Info About File.
  *
  * This function gets file info. It is an extension to the original PHP stat()
@@ -3594,13 +3664,13 @@ function wfu_log_action($action, $filepath, $userid, $uploadid, $pageid, $blogid
 		if ( $action == 'upload' || $action == 'include' ) {
 			// calculate and store file hash if this setting is enabled from Settings
 			$filehash = '';
-			if ( $plugin_options['hashfiles'] == '1' ) $filehash = wfu_md5_file($filepath, "wfu_log_action");
+			if ( $plugin_options['hashfiles'] == '1' ) $filehash = @wfu_md5_file($filepath, "wfu_log_action");
 			// calculate file size
-			$filesize = wfu_filesize($filepath, "wfu_log_action");
+			$filesize = @wfu_filesize($filepath, "wfu_log_action");
 			// first make obsolete records having the same file path because the old file has been replaced
 			$oldrecs = $wpdb->get_results('SELECT * FROM '.$table_name1.' WHERE filepath = \''.esc_sql($relativepath).'\' AND date_to = 0');
 			if ( $oldrecs ) {
-				foreach ( $oldrecs as $oldrec ) wfu_make_rec_obsolete($oldrec);
+				foreach ( $oldrecs as $oldrec ) wfu_make_rec_obsolete($oldrec, "log_action");
 			}
 		}
 		// attempt to create new log record
@@ -4505,13 +4575,34 @@ function wfu_reassign_hashes() {
  * @redeclarable
  *
  * @param object $filerec The database record to make obsolete.
+ * @param string $context The calling context. It can be used to determine
+ *        whether the record should really be set as obsolete, in conjuction
+ *        with filter _wfu_make_rec_obsolete.
  *
  * @return bool|int Returns false if errors, or the number of rows affected if
  *         successful.
  */
-function wfu_make_rec_obsolete($filerec) {
+function wfu_make_rec_obsolete($filerec, $context = "") {
 	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	global $wpdb;
+	
+	$make_obsolete = true;
+	/**
+	 * Customize Whether Record Should Become Obsolete.
+	 *
+	 * This filter allows custom actions to determine whether the record should
+	 * become obsolete or not.
+	 *
+	 * @since 4.24.15
+	 *
+	 * @param bool $make_obsolete True if the record should become obsolete,
+	 *        false otherwise.
+	 * @param array $filerec The db record.
+	 * @param string $context The calling context.
+	 */
+	$make_obsolete = apply_filters("_wfu_make_rec_obsolete", $make_obsolete, $filerec, $context);
+	if ( !$make_obsolete ) return 0;
+	
 	$table_name1 = $wpdb->prefix . "wfu_log";
 	$filedata = wfu_get_filedata_from_rec($filerec, true);
 	//update db record accordingly
@@ -4559,7 +4650,7 @@ function wfu_sync_database() {
 			}
 		}
 		if ( $obsolete ) {
-			wfu_make_rec_obsolete($filerec);
+			wfu_make_rec_obsolete($filerec, "sync_database");
 			$obsolete_count ++;
 		}
 	}
@@ -4613,7 +4704,7 @@ function wfu_get_recs_of_user($userid) {
 			}
 		}
 		if ( $obsolete ) {
-			wfu_make_rec_obsolete($filerec);
+			wfu_make_rec_obsolete($filerec, "get_recs_of_user");
 		}
 		else {
 			$filerec->userdata = null;
@@ -4745,7 +4836,7 @@ function wfu_get_filtered_recs($filter) {
 	/**
 	 * Customize Filter Queries.
 	 *
-	 * This filter allows custom actions to midify the queries that will be used
+	 * This filter allows custom actions to modify the queries that will be used
 	 * to filter the selected records of a file viewer.
 	 *
 	 * @since 4.6.2
@@ -4781,7 +4872,7 @@ function wfu_get_filtered_recs($filter) {
 			}
 		}
 		if ( $obsolete ) {
-			wfu_make_rec_obsolete($filerec);
+			wfu_make_rec_obsolete($filerec, "get_filtered_recs");
 		}
 		else {
 			$filerec->userdata = null;
