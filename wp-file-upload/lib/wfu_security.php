@@ -87,15 +87,23 @@ function wfu_file_extension_whitelisted($filename) {
 /**
  * Validate MIME Type of File.
  *
- * This function validates the MIME type of a file.
+ * This function validates the MIME type of a file. It is noted that $filepath
+ * parameter holds the path to the contents of the file, however the name of the
+ * file is provided by $filename parameter.
  *
  * @since 4.24.9
  *
- * @param string $filepath The path to the file.
+ * @param string $filepath The path to the file contents.
+ * @param string $filename The name of the file.
  *
- * @return bool True if validation passes, false otherwise.
+ * @return array {
+ *         The validation result array.
+ *
+ *         @type bool $pass True if validation passes, false otherwise.
+ *         @type string $result A result string holding validation data.
+ * }
  */
-function wfu_validate_mime_type($filepath, $filename, &$result) {
+function wfu_validate_mime_type($filepath, $filename) {
 	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	// Mime type validation exceptions:
 	//  A: pass files having no mime type
@@ -105,31 +113,52 @@ function wfu_validate_mime_type($filepath, $filename, &$result) {
 	// By default no exceptions are allowed.
 	$exceptions = WFU_VAR("WFU_MIMETYPE_VAL_EXCEPTIONS");
 	$mime_type = wfu_mime_type_of_file($filepath);
+	$ret = array( "pass" => true, "result" => "" );
 	// check if mime type of file exists
 	if ( $mime_type === null ) {
-		$result = "A";
-		return ( strpos($exceptions, "A") !== false );
+		$ret["result"] = "A";
+		$ret["pass"] = ( strpos($exceptions, "A") !== false );
 	}
-	$mime_type = strtolower($mime_type);
-	$mime_types = wfu_extensions_mime_types();
-	$ext = strtolower(wfu_fileext($filename));
-	// check if file has an extension
-	if ( empty($ext) ) {
-		$result = "B:".$mime_type;
-		return ( strpos($exceptions, "B") !== false );
+	else {
+		$mime_type = strtolower($mime_type);
+		$mime_types = wfu_extensions_mime_types();
+		$ext = strtolower(wfu_fileext($filename));
+		// check if file has an extension
+		if ( empty($ext) ) {
+			$ret["result"] = "B:".$mime_type;
+			$ret["pass"] = ( strpos($exceptions, "B") !== false );
+		}
+		// check if file extension has any associated mime types
+		elseif ( !isset($mime_types[$ext]) ) {
+			$ret["result"] = "C:".$mime_type;
+			$ret["pass"] = ( strpos($exceptions, "C") !== false );
+		}
+		// check if file mime type matches its extension's associated mime types
+		elseif ( !in_array( $mime_type, $mime_types[$ext] ) ) {
+			$ret["result"] = "D:".$mime_type;
+			$ret["pass"] = ( strpos($exceptions, "D") !== false );
+		}
 	}
-	// check if file extension has any associated mime types
-	if ( !isset($mime_types[$ext]) ) {
-		$result = "C:".$mime_type;
-		return ( strpos($exceptions, "C") !== false );
-	}
-	// check if file mime type matches its extension's associated mime types
-	if ( !in_array( $mime_type, $mime_types[$ext] ) ) {
-		$result = "D:".$mime_type;
-		return ( strpos($exceptions, "D") !== false );
-	}
+	/**
+	 * Custom MIME Type Validation
+	 * 
+	 * Allows internal processes to perform custom validation of MIME type.
+	 *
+	 * @since 4.25.0
+	 *
+	 * @param array $ret {
+	 *        The validation result array.
+	 *
+	 *        @type bool $pass True if validation passes, false otherwise.
+	 *        @type string $result A result string holding validation data.
+	 * }
+	 * @param string $filepath Path to the file contents.
+	 * @param string $filename Name of the file.
+	 * @param string $ext Extension of the file.
+	 */
+	$ret = apply_filters("_wfu_validate_mime_type", $ret, $filepath, $filename, $ext);
 	
-	return true;
+	return $ret;
 }
 
 /**
@@ -143,11 +172,16 @@ function wfu_validate_mime_type($filepath, $filename, &$result) {
  * @param string $filepath The path to the file.
  * @param array $params The uploader instance shortcode params.
  *
- * @return bool|string True if file passes security checks, otherwise an admin
- *         error message.
+ * @return array {
+ *         The check result array.
+ *
+ *         @type bool $pass True if check passes, false otherwise.
+ *         @type string $result A result string holding check data.
+ * }
  */
 function wfu_post_load_security_checks($filepath, $params) {
 	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	$ret = array( "pass" => true, "result" => "" );
 	// By default for simple uploads the security checks are not executed after
 	// file has fully loaded and stored.
 	$execute_file_security_checks = false;
@@ -165,10 +199,10 @@ function wfu_post_load_security_checks($filepath, $params) {
 	 */
 	$execute_file_security_checks = apply_filters( "_wfu_post_load_security_checks", $execute_file_security_checks, $filepath, $params );
 	if ( $execute_file_security_checks ) {
-		return wfu_execute_file_security_checks(array( 'mime', 'content' ), $filepath, wfu_basename($filepath), $params);
+		$ret = wfu_execute_file_security_checks(array( 'mime', 'content' ), $filepath, wfu_basename($filepath), $params);
 	}	
 	
-	return true;
+	return $ret;
 }
 
 /**
@@ -187,11 +221,16 @@ function wfu_post_load_security_checks($filepath, $params) {
  * @param string $filename The filename of the file.
  * @param array $params The uploader instance shortcode params.
  *
- * @return bool|string True if file passes security checks, otherwise an admin
- *         error message.
+ * @return array {
+ *         The check result array.
+ *
+ *         @type bool $pass True if check passes, false otherwise.
+ *         @type string $result A result string holding check data.
+ * }
  */
 function wfu_during_upload_security_checks($filepath, $filename, $params) {
 	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	$ret = array( "pass" => true, "result" => "" );
 	// By default for simple uploads the security checks are executed on the
 	// temporarily uploaded file during the upload.
 	$execute_file_security_checks = true;
@@ -210,10 +249,10 @@ function wfu_during_upload_security_checks($filepath, $filename, $params) {
 	 */
 	$execute_file_security_checks = apply_filters( "_wfu_during_upload_security_checks", $execute_file_security_checks, $filepath, $filename, $params );
 	if ( $execute_file_security_checks ) {
-		return wfu_execute_file_security_checks(array( 'mime', 'content' ), $filepath, $filename, $params);
+		$ret = wfu_execute_file_security_checks(array( 'mime', 'content' ), $filepath, $filename, $params);
 	}	
 	
-	return true;
+	return $ret;
 }
 
 /**
@@ -234,32 +273,44 @@ function wfu_during_upload_security_checks($filepath, $filename, $params) {
  * @param string $filename The filename of the uploaded file.
  * @param array $params The uploader shortcode params.
  *
- * @return bool|string True if file passes security checks, otherwise an admin
- *         error message.
+ * @return array {
+ *         The check result array.
+ *
+ *         @type bool $pass True if check passes, false otherwise.
+ *         @type string $result A result string holding check data.
+ * }
  */
 function wfu_execute_file_security_checks($checks, $filepath, $filename, $params) {
 	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	$ret = array( "pass" => true, "result" => "" );
 	if ( in_array( 'mime', $checks ) ) {
 		// perform MIME type check
-		$mime_check_result = "";
-		if ( !wfu_validate_mime_type($filepath, $filename, $mime_check_result) ) {
-			$code = substr($mime_check_result, 0, 1);
-			if ( $code === "A" ) return "mime:".WFU_ERROR_ADMIN_FILE_NOMIME;
-			elseif ( $code === "B" ) return "mime:".WFU_ERROR_ADMIN_FILE_NOEXT;
-			elseif ( $code === "C" ) return "mime:".WFU_ERROR_ADMIN_FILE_NOASSOCMIME;
-			elseif ( $code === "D" ) return "mime:".WFU_ERROR_ADMIN_FILE_INVALIDMIME.substr($mime_check_result, 2);
-			else return "mime:".WFU_ERROR_ADMIN_FILE_MIMEUKNOWN;
+		$mime = wfu_validate_mime_type($filepath, $filename);
+		if ( !$mime["pass"] ) {
+			$ret["pass"] = false;
+			$code = substr($mime["result"], 0, 1);
+			if ( $code === "A" ) $ret["result"] = "mime:".WFU_ERROR_ADMIN_FILE_NOMIME;
+			elseif ( $code === "B" ) $ret["result"] = "mime:".WFU_ERROR_ADMIN_FILE_NOEXT;
+			elseif ( $code === "C" ) $ret["result"] = "mime:".WFU_ERROR_ADMIN_FILE_NOASSOCMIME;
+			elseif ( $code === "D" ) $ret["result"] = "mime:".WFU_ERROR_ADMIN_FILE_INVALIDMIME.substr($mime["result"], 2);
+			else $ret["result"] = "mime:".WFU_ERROR_ADMIN_FILE_MIMEUKNOWN;
+			return $ret;
+		}
+		else {
+			$ret["result"] = $mime["result"];
 		}
 	}
 	if ( in_array( 'content', $checks ) ) {
 		// perform file content scan for scripts and suspicious patterns
 		$content_check = wfu_security_filecontent_checks($filepath, $filename);
 		if ( $content_check !== true ) {
-			return "content:".$content_check;
+			$ret["pass"] = false;
+			$ret["result"] = "content:".$content_check;
+			return $ret;
 		}
 	}
 	
-	return true;
+	return $ret;
 }
 
 /**

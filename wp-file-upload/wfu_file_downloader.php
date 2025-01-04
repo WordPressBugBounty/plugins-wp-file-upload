@@ -23,6 +23,8 @@ function wfu_read_downloader_data() {
 	// read the temp file name from URL param
 	$source = (isset($_POST['source']) ? $_POST['source'] : (isset($_GET['source']) ? $_GET['source'] : ''));
 	if ( $source === '' ) die();
+	// sanitize source file to avoid directory traversals through it
+	$source = preg_replace("/[^A-Za-z0-9]/", "", $source);
 	$filepath = sys_get_temp_dir();
 	if ( substr($filepath, -1) != '/' ) $filepath .= '/';
 	$filepath .= $source;

@@ -150,6 +150,11 @@ There is an option in plugin's settings in Dashboard to relax the CSS rules, so 
 
 == Changelog ==
 
+= 4.25.0 =
+* modified View Log Remarks column to have a better look
+* fixed security issue that allowed directory traversals in wfu_downloader.php
+* fixed security issue that allowed unauthorized read of directory contents through wfu_ajax_action_read_subfolders() function
+
 = 4.24.15 =
 * loading of plugin text domain moved to init hook to avoid Wordpress warnings
 * added file_path in wfu_after_file_upload filter
@@ -1072,6 +1077,9 @@ Added the option to allow anyone to upload files, by setting the attribute uploa
 Initial version.
 
 == Upgrade Notice ==
+
+= 4.25.0 =
+Regular update to fix some security issues and introduce some new features.
 
 = 4.24.15 =
 Regular update to fix some bugs.

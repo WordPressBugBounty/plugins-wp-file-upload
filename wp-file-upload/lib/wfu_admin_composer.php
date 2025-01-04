@@ -33,6 +33,8 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 	global $wp_roles;
 	$siteurl = site_url();
 	
+	$is_admin = current_user_can( 'manage_options' );
+	
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
 	$components = wfu_component_definitions();
 	if ( $shortcode_tag == 'wordpress_file_upload' ) {
@@ -436,8 +438,8 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 			$echo_str .= $dlp."\t\t\t\t".'<td style="width:60%;"><div style="padding-right:36px;">';
 			$echo_str .= $dlp."\t\t\t\t\t".'<label>Path</label>';
 			$echo_str .= $dlp."\t\t\t\t\t".'<input id="wfu_subfolders_path_'.$attr.'" name="wfu_subfolder_tools_input" type="text" disabled="disabled" />';
-			$echo_str .= $dlp."\t\t\t\t\t".'<button id="wfu_subfolders_browse_'.$attr.'" class="button" title="browse folders" style="right:18px;" disabled="disabled" onclick="wfu_subfolders_browse_clicked(\''.$attr.'\');"><img src="'.WFU_IMAGE_ADMIN_SUBFOLDER_BROWSE.'" ></button>';
-			$echo_str .= $dlp."\t\t\t\t\t".'<button id="wfu_subfolders_ok_'.$attr.'" class="button" title="save changes" style="right:0px;" disabled="disabled" onclick="wfu_subfolders_ok_clicked(\''.$attr.'\');"><img src="'.WFU_IMAGE_ADMIN_SUBFOLDER_OK.'" ></button>';
+			$echo_str .= $dlp."\t\t\t\t\t".'<button id="wfu_subfolders_browse_'.$attr.'" class="button'.( $is_admin ? "" : " wfu-hidden" ).'" title="browse folders" style="right:18px;" disabled="disabled" onclick="wfu_subfolders_browse_clicked(\''.$attr.'\');"><img src="'.WFU_IMAGE_ADMIN_SUBFOLDER_BROWSE.'" ></button>';
+			$echo_str .= $dlp."\t\t\t\t\t".'<button id="wfu_subfolders_ok_'.$attr.'" class="button'.( $is_admin ? "" : " wfu-fullwidth" ).'" title="save changes" style="right:0px;" disabled="disabled" onclick="wfu_subfolders_ok_clicked(\''.$attr.'\');"><img src="'.WFU_IMAGE_ADMIN_SUBFOLDER_OK.'" ></button>';
 			// file browser dialog
 			$echo_str .= $dlp."\t\t\t\t\t".'<div id="wfu_subfolders_browser_'.$attr.'" class="wfu_subfolders_browser_container" style="display:none;">';
 			$echo_str .= $dlp."\t\t\t\t\t\t".'<table><tbody>';

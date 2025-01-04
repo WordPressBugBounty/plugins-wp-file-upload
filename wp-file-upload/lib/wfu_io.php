@@ -163,7 +163,7 @@ function wfu_create_directory($path, $method, $ftpdata) {
  *         @type string $admin_message An admin error message on failure.
  * }
  */
-function wfu_upload_file($source, $target, $method, $ftpdata, $passive, $fileperms) {
+function wfu_upload_file($source, $target, $method, $ftpdata, $passive, $fileperms, $move_uploaded_file = true) {
 	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$ret_array = array();
 	$ret_array["uploaded"] = false;
@@ -173,7 +173,7 @@ function wfu_upload_file($source, $target, $method, $ftpdata, $passive, $fileper
 	//$target_perms = octdec($target_perms);
 	//$target_perms = (int)$target_perms;
 	if ( $method == "" || $method == "normal" ) {
-		$ret_array["uploaded"] = move_uploaded_file($source, $target);
+		$ret_array["uploaded"] = ( $move_uploaded_file ? move_uploaded_file($source, $target) : rename($source, $target) );
 		if ( !$ret_array["uploaded"] && !is_writable(dirname($target)) ) {
 			$ret_message = WFU_ERROR_ADMIN_DIR_PERMISSION;
 		}

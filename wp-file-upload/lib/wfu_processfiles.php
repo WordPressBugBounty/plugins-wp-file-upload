@@ -471,11 +471,14 @@ function wfu_process_files($params, $method) {
 					   to 'all'. */
 					if ( $allowed_file_ok && is_uploaded_file($fileprops['tmp_name']) && !$only_check ) {
 						//$allowed_file_ok = !wfu_file_has_php_tags($fileprops['tmp_name'], strtolower(wfu_fileext($only_filename)));
-						$security_check_result = wfu_during_upload_security_checks($fileprops['tmp_name'], $only_filename, $params);
-						if ( $security_check_result !== true ) {
-							list($security_check_result, $not_allowed_admin_error) = explode(":", $security_check_result, 2);
+						$security_check = wfu_during_upload_security_checks($fileprops['tmp_name'], $only_filename, $params);
+						if ( !$security_check["pass"] ) {
+							list($security_check_result, $not_allowed_admin_error) = explode(":", $security_check["result"], 2);
 							$security_check_result .= "-during";
 							$allowed_file_ok = false;
+						}
+						else {
+							$security_check_result = $security_check["result"];
 						}
 					}
 
@@ -497,22 +500,43 @@ function wfu_process_files($params, $method) {
 					$file_output['message_type'] = "errorabort";
 					$file_output['message'] = wfu_join_strings("<br />", $file_output['message'], WFU_ERROR_UPLOAD_FAILED);
 
+					$additional_file_output = array( "message" => "", "admin_messages" => "" );
 					if ( !$upload_path_ok ) {
 						$fail_reason = "upload_path";
-						$file_output['message'] = wfu_join_strings("<br />", $file_output['message'], ( $sftp_not_supported ? WFU_ERROR_ADMIN_SFTP_UNSUPPORTED : ( $upload_path_forbidden ? WFU_ERROR_DIR_ALLOW : WFU_ERROR_DIR_EXIST ) ));
+						$additional_file_output["message"] = ( $sftp_not_supported ? WFU_ERROR_ADMIN_SFTP_UNSUPPORTED : ( $upload_path_forbidden ? WFU_ERROR_DIR_ALLOW : WFU_ERROR_DIR_EXIST ) );
 					}
 					if ( !$allowed_file_ok ) {
 						$fail_reason = ( $security_check_result !== "" ? "security:".$security_check_result : "not_allowed" );
-						$file_output['message'] = wfu_join_strings("<br />", $file_output['message'], WFU_ERROR_FILE_ALLOW);
-						if ( !empty($not_allowed_admin_error) ) {
-							$file_output['admin_messages'] = wfu_join_strings("<br />", $file_output['admin_messages'], $not_allowed_admin_error);
-						}
+						$additional_file_output["message"] = ( $security_check_result !== "" ? WFU_ERROR_FILE_REJECT : WFU_ERROR_FILE_ALLOW );
+						$additional_file_output["admin_messages"] = $not_allowed_admin_error;
 					}
 					if ( !$size_file_ok ) {
 						$fail_reason = "file_size";
-						if ( $size_file_phpenv_ok ) $file_output['message'] = wfu_join_strings("<br />", $file_output['message'], WFU_ERROR_FILE_PLUGIN_SIZE);
-						else $file_output['message'] = wfu_join_strings("<br />", $file_output['message'], WFU_ERROR_FILE_PLUGIN_2GBSIZE);
+						$additional_file_output["message"] = ( $size_file_phpenv_ok ? WFU_ERROR_FILE_PLUGIN_SIZE : WFU_ERROR_FILE_PLUGIN_2GBSIZE );
 					}
+					
+					/**
+					 * Custom Output Message
+					 * 
+					 * Allow extensions to customize the messages shown to the
+					 * user upon failed upload.
+					 *
+					 * @since 4.25.0
+					 *
+					 * @param array $additional_file_output {
+					 *     List of output messages.
+					 *
+					 *     @type string $message An error message.
+					 *     @type string $admin_messages Admin error messages.
+					 * }
+					 * @param string $fail_reason The fail reason.
+					 */
+					$additional_file_output = apply_filters("_wfu_processfiles_output", $additional_file_output, $fail_reason);
+					
+					if ( !empty($additional_file_output["message"]) )
+						$file_output['message'] = wfu_join_strings("<br />", $file_output['message'], $additional_file_output["message"]);
+					if ( !empty($additional_file_output["admin_messages"]) )
+						$file_output['admin_messages'] = wfu_join_strings("<br />", $file_output['admin_messages'], $additional_file_output["admin_messages"]);
 				}
 			}
 		}
@@ -785,16 +809,24 @@ function wfu_process_files($params, $method) {
 			   These checks refer to MIME type and content scanning. */
 			if ( $file_finished_successfully ) {
 				$check = wfu_post_load_security_checks($target_path, $params);
-				if ( $check !== true ) {
+				if ( !$check["pass"] ) {
 					$file_finished_successfully = false;
 					$file_finished_unsuccessfully = true;
 					//wfu_unlink($target_path, "wfu_process_files:2");
 					$delete_file = true;
 					$file_output['message_type'] = "errorabort";
-					list($reason, $error_message) = explode(":", $check, 2);
+					list($reason, $error_message) = explode(":", $check["result"], 2);
 					$fail_reason = "security:".$reason."-post";
-					$file_output['message'] = wfu_join_strings("<br />", $file_output['message'], WFU_ERROR_FILE_REJECT);
-					$file_output['admin_messages'] = wfu_join_strings("<br />", $file_output['admin_messages'], $error_message);
+					
+					$additional_file_output = array( "message" => WFU_ERROR_FILE_REJECT, "admin_messages" => $error_message );
+					/* This filter is documented above. */
+					$additional_file_output = apply_filters("_wfu_processfiles_output", $additional_file_output, $fail_reason);
+					
+					$file_output['message'] = wfu_join_strings("<br />", $file_output['message'], $additional_file_output['message']);
+					$file_output['admin_messages'] = wfu_join_strings("<br />", $file_output['admin_messages'], $additional_file_output['admin_messages']);
+				}
+				else {
+					$security_check_result = $check["result"];
 				}
 			}
 			// run any wfu_after_file_loaded filters to make any last file checks and accept or reject it
@@ -932,7 +964,7 @@ function wfu_process_files($params, $method) {
 					"params" => $params
 				);
 				/**
-				 * Custom Internal Actions After File Upload
+				 * Custom Internal Actions After File Upload Failed
 				 * 
 				 * Allows internal processes to perform actions when a file has
 				 * failed to be uploaded.
@@ -971,7 +1003,7 @@ function wfu_process_files($params, $method) {
 				 *     @type array $params The parameters of the upload.
 				 * }
 				 */
-				$ret_data = apply_filters('_wfu_after_file_upload', $changable_data_internal, $additional_data_internal);
+				$ret_data = apply_filters('_wfu_after_file_upload_failed', $changable_data_internal, $additional_data_internal);
 				$delete_file = $ret_data["delete_file"];
 				unset($ret_data["delete_file"]);
 				$changable_data = $ret_data;
@@ -1087,6 +1119,49 @@ function wfu_process_files($params, $method) {
 			$additional_data['error_message'] = $file_output['message'];
 			$additional_data['admin_messages'] = $file_output['admin_messages'];
 			if ( !$nofileupload ) {
+				$changable_data_internal = $changable_data;
+				$additional_data_internal = $additional_data + array(
+					"fileid" => $fileid,
+					"security_check_result" => $security_check_result,
+					"userdata" => $userdata_fields,
+					"params" => $params
+				);
+				/**
+				 * Custom Internal Actions After File Upload Succeeded
+				 * 
+				 * Allows internal processes to perform actions when a file has
+				 * been uploaded successfully.
+				 *
+				 * @since 4.25.0
+				 *
+				 * @param array $changable_data {
+				 *     Parameters to return to the plugin.
+				 *
+				 *     @type string $ret_value Not used for the moment,
+				 *           it exists for future additions.
+				 *     @type string $js_script Custom Javascript code to execute
+				 *           on user's browser.
+				 * }
+				 * @param array $additional_data {
+				 *     Additional parameters of the upload.
+				 *
+				 *     @type string $shortcode_id The shortcode ID of the upload
+				 *           form.
+				 *     @type string $unique_id The unique ID of the upload.
+				 *     @type string $file_unique_id The unique ID of the file.
+				 *     @type string $file_path The upload path.
+				 *     @type string $upload_result The upload result.
+				 *     @type string $error_message Any upload error message.
+				 *     @type string $admin_messages Any upload admin error
+				 *           messages.
+				 *     @type int $fileid The db record ID of the uploaded file.
+				 *     @type string $security_check_result Security check data. 
+				 *     @type array $userdata The userdata fields.
+				 *     @type array $params The parameters of the upload.
+				 * }
+				 */
+				$ret_data = apply_filters('_wfu_after_file_upload_succeeded', $changable_data_internal, $additional_data_internal);
+				$changable_data = $ret_data;
 				/* This filter is documented above. */
 				$ret_data = apply_filters('wfu_after_file_upload', $changable_data, $additional_data);
 			}

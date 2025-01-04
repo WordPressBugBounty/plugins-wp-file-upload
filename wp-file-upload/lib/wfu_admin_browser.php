@@ -1474,32 +1474,8 @@ function wfu_file_details($file_code, $errorstatus, $invoker = '') {
 		$echo_str .= "\n\t\t\t\t\t\t\t".'<label></label>';
 		$echo_str .= "\n\t\t\t\t\t\t".'</th>';
 		$echo_str .= "\n\t\t\t\t\t\t".'<td>';
-		//read all linked older records
-		$filerecs = wfu_get_rec_old_history($filerec->idlog);
-		//construct report from db records
-		$rep = '';
-		foreach ( $filerecs as $rec ) {
-			$username = wfu_get_username_by_id($rec->userid);
-			$fileparts = pathinfo($rec->filepath);
-			if ( $rep != '' ) $rep .= "<br />";
-			$rep .= '<strong>['.get_date_from_gmt($rec->date_from).']</strong> ';
-			if ( $rec->action == 'upload' )
-				$rep .= 'File uploaded at <strong>'.$fileparts['dirname'].'</strong> with name <strong>'.$fileparts['basename'].'</strong> by user <strong>'.$username.'</strong>';
-			elseif ( $rec->action == 'include' )
-				$rep .= 'File included in database at <strong>'.$fileparts['dirname'].'</strong> with name <strong>'.$fileparts['basename'].'</strong> by user <strong>'.$username.'</strong>';
-			elseif ( $rec->action == 'download' )
-				$rep .= 'File downloaded by user <strong>'.$username.'</strong>';
-			elseif ( $rec->action == 'rename' )
-				$rep .= 'File renamed to <strong>'.$fileparts['basename'].'</strong> by user <strong>'.$username.'</strong>';
-			elseif ( $rec->action == 'move' )
-				$rep .= 'File moved to <strong>'.$fileparts['dirname'].'</strong> by user <strong>'.$username.'</strong>';
-			elseif ( $rec->action == 'delete' )
-				$rep .= 'File deleted by user <strong>'.$username.'</strong>';
-			elseif ( $rec->action == 'modify' )
-				$rep .= 'File userdata modified by user <strong>'.$username.'</strong>';
-			elseif ( $rec->action == 'changeuser' )
-				$rep .= 'File upload user modified by user <strong>'.$username.'</strong>';
-		}
+		//construct history report
+		$rep = wfu_file_details_history($filerec);
 		$echo_str .= "\n\t\t\t\t\t\t\t".'<div style="border:1px solid #dfdfdf; border-radius:3px; width:50%; overflow:scroll; padding:6px; height:100px; background-color:#eee;">';
 		$echo_str .= "\n\t\t\t\t\t\t\t".'<span style="white-space:nowrap;">'.$rep.'</span>';
 		$echo_str .= "\n\t\t\t\t\t\t\t".'</div>';
@@ -1549,6 +1525,52 @@ function wfu_file_details($file_code, $errorstatus, $invoker = '') {
 	$echo_str .= '</div>';
     
 	return $echo_str;
+}
+
+/**
+ * Get File Details History.
+ *
+ * Generates a report of file's history from all associated db records.
+ *
+ * @since 4.25.0
+ *
+ * @param object $filerec The file db record.
+ * @return string The file details history HTML code.
+ */
+function wfu_file_details_history($filerec) {
+	//read all linked older records
+	$filerecs = wfu_get_rec_old_history($filerec->idlog);
+	//construct report from db records
+	$rep = '';
+	foreach ( $filerecs as $rec ) {
+		$username = wfu_get_username_by_id($rec->userid);
+		$fileparts = pathinfo($rec->filepath);
+		if ( $rep != '' ) $rep .= "<br />";
+		$rep .= '<strong>['.get_date_from_gmt($rec->date_from).']</strong> ';
+		$rep_item = '';
+		
+		if ( $rec->action == 'upload' )
+			$rep_item = 'File uploaded at <strong>'.$fileparts['dirname'].'</strong> with name <strong>'.$fileparts['basename'].'</strong> by user <strong>'.$username.'</strong>';
+		elseif ( $rec->action == 'include' )
+			$rep_item = 'File included in database at <strong>'.$fileparts['dirname'].'</strong> with name <strong>'.$fileparts['basename'].'</strong> by user <strong>'.$username.'</strong>';
+		elseif ( $rec->action == 'download' )
+			$rep_item = 'File downloaded by user <strong>'.$username.'</strong>';
+		elseif ( $rec->action == 'rename' )
+			$rep_item = 'File renamed to <strong>'.$fileparts['basename'].'</strong> by user <strong>'.$username.'</strong>';
+		elseif ( $rec->action == 'move' )
+			$rep_item = 'File moved to <strong>'.$fileparts['dirname'].'</strong> by user <strong>'.$username.'</strong>';
+		elseif ( $rec->action == 'delete' )
+			$rep_item = 'File deleted by user <strong>'.$username.'</strong>';
+		elseif ( $rec->action == 'modify' )
+			$rep_item = 'File userdata modified by user <strong>'.$username.'</strong>';
+		elseif ( $rec->action == 'changeuser' )
+			$rep_item = 'File upload user modified by user <strong>'.$username.'</strong>';
+		
+		$rep_item = apply_filters("_wfu_file_details_history_item", $rep_item, $rec);
+		$rep .= $rep_item;
+	}
+	
+	return $rep;
 }
 
 /**

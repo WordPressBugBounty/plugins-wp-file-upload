@@ -1131,14 +1131,17 @@ function wfu_consent_ask_server_handler($changable_data, $attr) {
  * @param int $sid The shortcode ID
  * @param string $unique_id The unique identifier the upload.
  * @param array $params The shortcode attributes.
+ * @param array $files Optional. An array of uploaded files.
  * @return array An array holding data after the upload filters
  */
-function wfu_execute_after_upload_filters($sid, $unique_id, $params) {
+function wfu_execute_after_upload_filters($sid, $unique_id, $params, $files = null) {
 	//apply internal filters from extensions
 	$ret = array( "echo" => "" );
-	$files = array();
-	$filedata_id = "filedata_".$unique_id;
-	if ( WFU_USVAR_exists($filedata_id) ) $files = WFU_USVAR($filedata_id);
+	if ( $files === null ) {
+		$files = array();
+		$filedata_id = "filedata_".$unique_id;
+		if ( WFU_USVAR_exists($filedata_id) ) $files = WFU_USVAR($filedata_id);
+	}
 	$attr = array( "sid" => $sid, "unique_id" => $unique_id, "files" => $files );
 	/**
 	 * Execute Internal Post Upload Actions.

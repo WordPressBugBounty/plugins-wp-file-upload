@@ -842,12 +842,16 @@ function wfu_ajax_action_gutedit_shortcode() {
  * This function is used to retrieve the subfolder structure of a folder,
  * together with the subfolder structure of one of the subfolders. It is used
  * when defining the subfolders of the subfolders element of the upload form
- * using the shortcoe composer.
+ * using the shortcode composer.
  *
  * @since 2.4.1
  */
 function wfu_ajax_action_read_subfolders() {
-	if ( !isset($_POST['folder1']) || !isset($_POST['folder2']) ) die();
+	if ( !isset($_POST['folder1']) || !isset($_POST['folder2']) || !isset($_POST['nonce']) ) die();
+	
+	check_ajax_referer( 'wfu-admin-composer', 'nonce' );
+	
+	if ( !current_user_can( 'manage_options' ) ) die();
 
 	$_POST = stripslashes_deep($_POST);
 

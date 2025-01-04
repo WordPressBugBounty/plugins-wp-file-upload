@@ -91,51 +91,20 @@ function wfu_view_log($page = 1, $only_table_rows = false, $located_rec = -1) {
 		$echo_str .= "\n\t\t\t".'<tbody>';
 	}
 
-	$userdatarecs = $wpdb->get_results('SELECT * FROM '.$table_name2);
+	$uploadids = wp_list_pluck($filerecs, 'uploadid');
+	$userdatarecs = $wpdb->get_results('SELECT * FROM '.$table_name2.' WHERE uploadid IN (\''.implode('\',\'', $uploadids).'\')');
 	$deletedfiles = array();
 	$filecodes = array();
 	$logpagecode = wfu_safe_store_browser_params('view_log&tag='.$page);
-	$time0 = strtotime("0000-00-00 00:00:00");
 	$i = ($page - 1) * $maxrows;
 	$filerecs_count = count($filerecs);
 	foreach ( $filerecs as $ind => $filerec ) {
-		$remarks = '';
-		if ( $filerec->action == 'delete' ) array_push($deletedfiles, $filerec->linkedto);
-		elseif ( $filerec->action == 'rename' || $filerec->action == 'move' ) {
-			$prevfilepath = '';
-			$prevfilerec = wfu_get_file_rec_from_id($filerec->linkedto);
-			if ( $prevfilerec != null ) $prevfilepath = $prevfilerec->filepath;
-			if ( $prevfilepath != '' )
-				$remarks = "\n\t\t\t\t\t\t".'<label>Previous filepath: '.$prevfilepath.'</label>';
-		}
-		elseif ( $filerec->action == 'upload' || $filerec->action == 'modify' || $filerec->action == 'datasubmit' ) {
-			foreach ( $userdatarecs as $userdata ) {
-				if ( $userdata->uploadid == $filerec->uploadid ) {
-					$userdata_datefrom = strtotime($userdata->date_from);
-					$userdata_dateto = strtotime($userdata->date_to);
-					$filerec_datefrom = strtotime($filerec->date_from);
-					if ( $filerec_datefrom >= $userdata_datefrom && ( $userdata_dateto == $time0 || $filerec_datefrom < $userdata_dateto ) )
-						$remarks .= "\n\t\t\t\t\t\t\t".'<option>'.esc_attr($userdata->property).': '.esc_attr($userdata->propvalue).'</option>';
-				}
-			}
-			if ( $remarks != '' ) {
-				$remarks = "\n\t\t\t\t\t\t".'<select multiple="multiple" style="width:100%; height:40px; background:none; font-size:small; overflow:scroll; resize:vertical;">'.$remarks;
-				$remarks .= "\n\t\t\t\t\t\t".'</select>';
-			}
-		}
-		elseif ( $filerec->action == 'changeuser' ) {
-			$prevuploaduserid = '';
-			$prevfilerec = wfu_get_file_rec_from_id($filerec->linkedto);
-			if ( $prevfilerec != null ) $prevuploaduserid = $prevfilerec->uploaduserid;
-			if ( $prevuploaduserid != '' ) {
-				$prevuploaduser = wfu_get_username_by_id($prevuploaduserid);
-				$remarks = "\n\t\t\t\t\t\t".'<label>Previous upload user: '.$prevuploaduser.'</label>';
-			}
+		$remarks = wfu_generate_log_remarks($filerec, $ind, $userdatarecs);
+		if ( $filerec->action == 'delete' ) {
+			array_push($deletedfiles, $filerec->linkedto);
 		}
 		elseif ( $filerec->action == 'other' ) {
-			$info = $filerec->filepath;
 			$filerec->filepath = '';
-			$remarks = "\n\t\t\t\t\t\t".'<textarea style="width:100%; resize:vertical; background:none;" readonly="readonly">'.$info.'</textarea>';
 		}
 		$displayed_path = wfu_hide_credentials_from_ftpurl($filerec->filepath);
 		$i ++;
@@ -204,4 +173,100 @@ function wfu_view_log($page = 1, $only_table_rows = false, $located_rec = -1) {
 	}
 
 	return $echo_str;
+}
+
+function wfu_generate_log_remarks($filerec, $index, $userdatarecs) {
+	$render_plain_remarks = function($content) {
+		// extract icon from $content, it will be enclosed in HTML comments
+		$icon = preg_replace("/^(<!--\s*(.*?)\s*-->)?.*/", "$2", $content);
+		$icon = ( $icon === "" ? "" : "&#x".$icon );
+		$content = preg_replace("/^<!--.*?-->/", "", $content);
+		$remarks = "\n\t\t\t\t\t\t".'<label class="wfu-historylog-remarks-plain'.( $icon === "" ? '' : ' wfu-icon' ).'" data-icon="'.$icon.'">'.$content.'</label>';
+		return $remarks;
+	};
+	$render_keyvalue_remarks_content = function($content) {
+		$remarks = '';
+		foreach ( $content as $item ) {
+			$remarks .= "\n\t\t\t\t\t\t\t\t".'<div class="wfu-historylog-remarks-row">';
+			$remarks .= "\n\t\t\t\t\t\t\t\t\t".'<span class="wfu-historylog-remarks-label">'.esc_attr($item["key"]).':</span>';
+			$remarks .= "\n\t\t\t\t\t\t\t\t\t".'<span class="wfu-historylog-remarks-value">'.esc_attr($item["value"]).'</span>';
+			$remarks .= "\n\t\t\t\t\t\t\t\t".'</div>';
+		}
+		return $remarks;
+	};
+	$render_remarks_block = function($title, $content, $index, $icon) {
+		$icon = ( $icon === "" ? "" : "&#x".$icon );
+		$remarks = "\n\t\t\t\t\t\t".'<div class="wfu-historylog-remarks">';
+		if ( $title !== "" ) {
+			$remarks .= "\n\t\t\t\t\t\t\t".'<input type="checkbox" class="wfu-historylog-remarks-switch" id="wfu_historylog_remarks_switch_'.$index.'" checked />';
+			$remarks .= "\n\t\t\t\t\t\t\t".'<div class="wfu-historylog-remarks-header">';
+			$remarks .= "\n\t\t\t\t\t\t\t\t".'<label class="wfu-historylog-remarks-title'.( $icon === "" ? '' : ' wfu-icon' ).'" data-icon="'.$icon.'">'.esc_attr($title).'</label>';
+			$remarks .= "\n\t\t\t\t\t\t\t\t".'<label class="wfu-historylog-remarks-toggle" for="wfu_historylog_remarks_switch_'.$index.'"></label>';
+			$remarks .= "\n\t\t\t\t\t\t\t".'</div>';
+		}
+		$remarks .= "\n\t\t\t\t\t\t\t".'<div class="wfu-historylog-remarks-content'.( $title === "" ? ' wfu-visible' : ' wfu-indent' ).'">'.$content;
+		$remarks .= "\n\t\t\t\t\t\t\t".'</div>';
+		$remarks .= "\n\t\t\t\t\t\t".'</div>';
+		return $remarks;
+	};
+	$time0 = strtotime("0000-00-00 00:00:00");
+	$remarks = '';
+	if ( $filerec->action == 'rename' || $filerec->action == 'move' ) {
+		$prevfilepath = '';
+		$prevfilerec = wfu_get_file_rec_from_id($filerec->linkedto);
+		if ( $prevfilerec != null ) $prevfilepath = $prevfilerec->filepath;
+		if ( $prevfilepath != '' )
+			$remarks = $render_plain_remarks("Previous filepath: $prevfilepath");
+	}
+	elseif ( $filerec->action == 'upload' || $filerec->action == 'modify' || $filerec->action == 'datasubmit' ) {
+		$userdata_remarks = array();
+		foreach ( $userdatarecs as $userdata ) {
+			if ( $userdata->uploadid == $filerec->uploadid ) {
+				$userdata_datefrom = strtotime($userdata->date_from);
+				$userdata_dateto = strtotime($userdata->date_to);
+				$filerec_datefrom = strtotime($filerec->date_from);
+				if ( $filerec_datefrom >= $userdata_datefrom && ( $userdata_dateto == $time0 || $filerec_datefrom < $userdata_dateto ) ) {
+					$item = array( "key" => $userdata->property, "value" => $userdata->propvalue );
+					array_push( $userdata_remarks, $item );
+				}
+			}
+		}
+		if ( count($userdata_remarks) > 0 ) {
+			$remarks_content = $render_keyvalue_remarks_content($userdata_remarks);
+			$remarks .= $render_remarks_block("Userdata", $remarks_content, $index, 'f337');
+		}
+	}
+	elseif ( $filerec->action == 'changeuser' ) {
+		$prevuploaduserid = '';
+		$prevfilerec = wfu_get_file_rec_from_id($filerec->linkedto);
+		if ( $prevfilerec != null ) $prevuploaduserid = $prevfilerec->uploaduserid;
+		if ( $prevuploaduserid != '' ) {
+			$prevuploaduser = wfu_get_username_by_id($prevuploaduserid);
+			$remarks = $render_plain_remarks("Previous upload user: $prevuploaduser");
+		}
+	}
+	elseif ( $filerec->action == 'other' ) {
+		$info = $filerec->filepath;
+		$remarks = $render_plain_remarks($info);
+	}
+	
+	$render_functions = compact( "render_plain_remarks", "render_keyvalue_remarks_content", "render_remarks_block" );
+	/**
+	 * Custom Log Remarks
+	 * 
+	 * Allow extensions to customize the generated log remarks.
+	 *
+	 * @since 4.25.0
+	 *
+	 * @param string $remarks The generated remarks.
+	 * @param object $filerec The file db record.
+	 * @param integer $index The row index in the table.
+	 * @param array $userdatarecs The list of userdata records of the visible
+	 *        log entries.
+	 * @param array $render_functions A list of helper functions that generate
+	 *        the HTML of the log remarks.
+	 */
+	$remarks = apply_filters("_wfu_generate_log_remarks", $remarks, $filerec, $index, $userdatarecs, $render_functions);
+	
+	return $remarks;
 }
