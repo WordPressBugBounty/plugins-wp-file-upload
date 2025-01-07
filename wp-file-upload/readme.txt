@@ -150,6 +150,9 @@ There is an option in plugin's settings in Dashboard to relax the CSS rules, so 
 
 == Changelog ==
 
+= 4.25.1 =
+* slight changes in some notifications shown in Remarks column of View Log page
+
 = 4.25.0 =
 * modified View Log Remarks column to have a better look
 * fixed security issue that allowed directory traversals in wfu_downloader.php
@@ -1077,6 +1080,9 @@ Added the option to allow anyone to upload files, by setting the attribute uploa
 Initial version.
 
 == Upgrade Notice ==
+
+= 4.25.1 =
+Minor update to fix some bugs.
 
 = 4.25.0 =
 Regular update to fix some security issues and introduce some new features.

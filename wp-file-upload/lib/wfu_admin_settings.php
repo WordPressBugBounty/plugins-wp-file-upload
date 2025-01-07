@@ -90,25 +90,37 @@ function wfu_encode_plugin_options($plugin_options) {
  *
  * @since 2.1.3
  *
+ * @global array $wordpress_file_upload_options Holds the plugin settings so
+ *         that they do not need to be recalculated whenever
+ *         wfu_decode_plugin_options() is called.
+ *
  * @param string $encoded_options The encoded plugin settings.
  *
  * @return array The decoded plugin settings.
  */
 function wfu_decode_plugin_options($encoded_options) {
-	$settings = wfu_settings_definitions();
-	foreach ( $settings as $setting => $data )
-		$plugin_options[$setting] = $data[1];
+	global $wordpress_file_upload_options;
+	if ( !isset($wordpress_file_upload_options) || !is_array($wordpress_file_upload_options) ) {
+		$plugin_options = array();
+		$settings = wfu_settings_definitions();
+		foreach ( $settings as $setting => $data )
+			$plugin_options[$setting] = $data[1];
 
-	$decoded_array = explode(';', $encoded_options);
-	foreach ($decoded_array as $decoded_item) {
-		if ( trim($decoded_item) != "" ) {
-			list($item_key, $item_value) = explode("=", $decoded_item, 2);
-			if ( isset($settings[$item_key]) ) {
-				if ( $settings[$item_key][0] == "string" ) $plugin_options[$item_key] = wfu_plugin_decode_string($item_value);
-				elseif ( $settings[$item_key][0] == "array" ) $plugin_options[$item_key] = wfu_decode_array_from_string($item_value);
-				else $plugin_options[$item_key] = $item_value;
+		$decoded_array = explode(';', $encoded_options);
+		foreach ($decoded_array as $decoded_item) {
+			if ( trim($decoded_item) != "" ) {
+				list($item_key, $item_value) = explode("=", $decoded_item, 2);
+				if ( isset($settings[$item_key]) ) {
+					if ( $settings[$item_key][0] == "string" ) $plugin_options[$item_key] = wfu_plugin_decode_string($item_value);
+					elseif ( $settings[$item_key][0] == "array" ) $plugin_options[$item_key] = wfu_decode_array_from_string($item_value);
+					else $plugin_options[$item_key] = $item_value;
+				}
 			}
 		}
+		$wordpress_file_upload_options = $plugin_options;
+	}
+	else {
+		$plugin_options = $wordpress_file_upload_options;
 	}
 
 	return $plugin_options;
@@ -274,9 +286,13 @@ function wfu_manage_settings($message = '') {
  *
  * @since 2.1.2
  *
+ * @global array $wordpress_file_upload_options Holds the plugin settings.
+ *
  * @return bool Always true.
  */
 function wfu_update_settings() {
+	global $wordpress_file_upload_options;
+	
 	if ( !current_user_can( 'manage_options' ) ) return;
 	if ( !check_admin_referer('wfu_edit_admin_settings') ) return;
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
@@ -303,6 +319,7 @@ function wfu_update_settings() {
 			$new_plugin_options['mediacustom'] = $mediacustom;
 			$new_plugin_options['includeotherfiles'] = $includeotherfiles;
 			$new_plugin_options['altserver'] = $altserver;
+			$wordpress_file_upload_options = $new_plugin_options;
 			$encoded_options = wfu_encode_plugin_options($new_plugin_options);
 			wfu_update_option( "wordpress_file_upload_options", $encoded_options );
 			if ( $new_plugin_options['hashfiles'] == '1' && $plugin_options['hashfiles'] != '1' )
@@ -320,13 +337,19 @@ function wfu_update_settings() {
  *
  * @since 4.12.0
  *
+ * @global array $wordpress_file_upload_options Holds the plugin settings.
+ *
  * @param string $option The plugin option to change.
  * @param mixed $value The new value of the option.
  */
 function wfu_update_setting($option, $value) {
+	global $wordpress_file_upload_options;
+	
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
 	$plugin_options[$option] = $value;
+	
+	$wordpress_file_upload_options = $plugin_options;
 	$encoded_options = wfu_encode_plugin_options($plugin_options);
-	wfu_update_option( "wordpress_file_upload_options", $encoded_options );	
+	wfu_update_option( "wordpress_file_upload_options", $encoded_options );
 }
 

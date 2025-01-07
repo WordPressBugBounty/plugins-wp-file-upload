@@ -585,9 +585,13 @@ function wfu_ajax_action_save_shortcode() {
  * user has been completed.
  *
  * @since 4.24.8
+ *
+ * @global array $wordpress_file_upload_options Holds the plugin settings.
  */
 function wfu_ajax_action_save_shortcode_after_user_check() {
 	if ( !isset($_POST['shortcode']) || !isset($_POST['shortcode_original']) || !isset($_POST['post_id']) || !isset($_POST['post_hash']) || !isset($_POST['shortcode_position']) || !isset($_POST['shortcode_tag']) || !isset($_POST['widget_id']) || !isset($_POST['nonce']) ) die();
+	
+	global $wordpress_file_upload_options;
 	
 	check_ajax_referer( 'wfu-admin-composer', 'nonce' );
 
