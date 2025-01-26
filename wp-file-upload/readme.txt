@@ -150,6 +150,9 @@ There is an option in plugin's settings in Dashboard to relax the CSS rules, so 
 
 == Changelog ==
 
+= 4.25.2 =
+* corrected bug in file downloader where files having spaces could not be downloaded
+
 = 4.25.1 =
 * slight changes in some notifications shown in Remarks column of View Log page
 
@@ -1080,6 +1083,9 @@ Added the option to allow anyone to upload files, by setting the attribute uploa
 Initial version.
 
 == Upgrade Notice ==
+
+= 4.25.2 =
+Minor update to fix some bugs.
 
 = 4.25.1 =
 Minor update to fix some bugs.

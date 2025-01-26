@@ -183,7 +183,7 @@ function wfu_sanitize_code_downloader($code) {
 /**
  * Sanitize a URL.
  *
- * This function sanitizes a URL.
+ * This function sanitizes a URL. It leaves spaces unchanged.
  *
  * @since 4.24.14
  *
@@ -192,7 +192,11 @@ function wfu_sanitize_code_downloader($code) {
  * @return string The sanitized URL.
  */
 function wfu_sanitize_url_downloader($url) {
-	return filter_var(strip_tags($url), FILTER_SANITIZE_URL);
+	// escape spaces to avoid getting striped by filter_var
+	$url = str_replace(" ", "%9999", $url);
+	$url = filter_var(strip_tags($url), FILTER_SANITIZE_URL);
+	// unescape spaces
+	return str_replace("%9999", " ", $url);
 }
 
 /**
