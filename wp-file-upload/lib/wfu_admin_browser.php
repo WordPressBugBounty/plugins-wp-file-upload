@@ -1376,6 +1376,7 @@ function wfu_file_details($file_code, $errorstatus, $invoker = '') {
 	}
 	$echo_str .= "\n\t\t\t".'<h3 style="margin-bottom: 10px; margin-top: 40px;">Upload Details</h3>';
 	$echo_str .= "\n\t\t\t".'<input type="hidden" name="action" value="edit_filedetails" />';
+	$echo_str .= "\n\t\t\t".'<input type="hidden" name="nonce" value="'.wp_create_nonce('wfu-filedetails-page').'" />';
 	//$echo_str .= "\n\t\t\t".'<input type="hidden" name="dir" value="'.$dir_code.'">';
 	$echo_str .= "\n\t\t\t".'<input type="hidden" name="invoker" value="'.$invoker.'">';
 	$echo_str .= "\n\t\t\t".'<input type="hidden" name="file" value="'.( $allow_obsolete ? 'byID:'.$file_code : $file_code ).'">';
@@ -1589,6 +1590,8 @@ function wfu_edit_filedetails($file_code) {
 	global $wpdb;
 	$table_name2 = $wpdb->prefix . "wfu_userdata";
 	$allow_obsolete = false;
+	
+	if ( !wp_verify_nonce(( isset($_POST['nonce']) ? $_POST["nonce"] : "" ), "wfu-filedetails-page") ) return;
 
 	if ( substr($file_code, 0, 5) == "byID:" ) {
 		$allow_obsolete = true;
