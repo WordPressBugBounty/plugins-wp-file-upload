@@ -9,10 +9,12 @@
  *
  * @link /lib/wfu_admin_composer.php
  *
- * @package WordPress File Upload Plugin
+ * @package Iptanus File Upload Plugin
  * @subpackage Core Components
  * @since 2.4.1
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
  * Display the Shortcode Composer.
@@ -149,49 +151,49 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 	}
 
 	$echo_str = '<div id="wfu_wrapper" class="wrap">';
-	$echo_str .= "\n\t".'<h2>Wordpress File Upload Control Panel</h2>';
+	$echo_str .= wfu_generate_dashboard_menu_title("\n\t", $is_admin);
 	$echo_str .= "\n\t".'<div id="wfu_page_obsolete_message" class="error" style="display:none;">';
-	$echo_str .= "\n\t\t".'<p>'.WFU_DASHBOARD_PAGE_OBSOLETE.'</p>';
+	$echo_str .= "\n\t\t".'<p>'.esc_html(WFU_DASHBOARD_PAGE_OBSOLETE).'</p>';
 	$echo_str .= "\n\t".'</div>';
 	$echo_str .= "\n\t".'<div id="wfu_update_rejected_message" class="error" style="display:none;">';
-	$echo_str .= "\n\t\t".'<p>'.WFU_DASHBOARD_UPDATE_SHORTCODE_REJECTED.'</p>';
+	$echo_str .= "\n\t\t".'<p>'.esc_html(WFU_DASHBOARD_UPDATE_SHORTCODE_REJECTED).'</p>';
 	$echo_str .= "\n\t".'</div>';
 	$echo_str .= "\n\t".'<div id="wfu_update_failed_message" class="error" style="display:none;">';
-	$echo_str .= "\n\t\t".'<p>'.WFU_DASHBOARD_UPDATE_SHORTCODE_FAILED.'</p>';
+	$echo_str .= "\n\t\t".'<p>'.esc_html(WFU_DASHBOARD_UPDATE_SHORTCODE_FAILED).'</p>';
 	$echo_str .= "\n\t".'</div>';
 	$echo_str .= "\n\t".'<div style="margin-top:20px;">';
-	if ( $referer == "dashboard" ) $echo_str .= "\n\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=manage_mainmenu" class="button" title="go back">Go to Main Menu</a>';
+	if ( $referer == "dashboard" ) $echo_str .= "\n\t".'<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=manage_mainmenu&amp;c='.wp_create_nonce('wfu_admin_nonce')).'" class="button" title="'.esc_html__('go back', 'wp-file-upload').'">'.esc_html__('Go to Main Menu', 'wp-file-upload').'</a>';
 	$echo_str .= "\n\t".'</div>';
-	if ( $widgetid == "" ) $echo_str .= "\n\t".'<h2 style="margin-bottom: 10px; margin-top: 20px;">'.( $data == "" ? 'Test' : $posttype.' <strong>'.$postname.'</strong>' ).': Shortcode Composer for '.$plugin_title.' <strong>ID '.$shortcode_id.'</strong></h2>';
-	else $echo_str .= "\n\t".'<h2 style="margin-bottom: 10px; margin-top: 20px;">Sidebar <strong>'.$sidebar.'</strong>: Shortcode Composer for Uploader <strong>ID '.$shortcode_id.'</strong></h2>';
+	if ( $widgetid == "" ) $echo_str .= "\n\t".'<h2 style="margin-bottom: 10px; margin-top: 20px;">'.( $data == "" ? esc_html__('Test', 'wp-file-upload') : esc_html($posttype).' <strong>'.esc_html($postname).'</strong>' ).': '.sprintf(wfu_sanitize_simple_html(__('Shortcode Composer for %s <b>ID %s</b>', 'wp-file-upload'), 'b'), esc_html($plugin_title), esc_html($shortcode_id)).'</h2>';
+	else $echo_str .= "\n\t".'<h2 style="margin-bottom: 10px; margin-top: 20px;">'.sprintf(wfu_sanitize_simple_html(__('Sidebar <b>%s</b>: Shortcode Composer for Uploader <b>ID %s</b>', 'wp-file-upload'), 'b'), esc_html($sidebar), esc_html($shortcode_id)).'</h2>';
 	$echo_str .= "\n\t".'<div style="margin-top:10px; display:inline-block;">';
-	if ( $data != "") $echo_str .= "\n\t\t".'<input id="wfu_update_shortcode" type="button" value="Update" class="button-primary" disabled="disabled" onclick="wfu_save_shortcode()" /><span id="wfu_update_shortcode_wait" class="spinner" style="float:right; display:none;"></span>';
+	if ( $data != "") $echo_str .= "\n\t\t".'<button id="wfu_update_shortcode" value="Update" class="button-primary" disabled="disabled" onclick="wfu_save_shortcode()">'.esc_html__('Update', 'wp-file-upload').'</button><span id="wfu_update_shortcode_wait" class="spinner" style="float:right; display:none;"></span>';
 	$echo_str .= "\n\t\t".'<input id="wfu_shortcode_original_enc" type="hidden" value="'.wfu_plugin_encode_string($shortcode_full).'" />';
-	$echo_str .= "\n\t\t".'<input id="wfu_shortcode_tag" type="hidden" value="'.$shortcode_tag.'" />';
-	$echo_str .= "\n\t\t".'<input id="wfu_shortcode_postid" type="hidden" value="'.$postid.'" />';
-	$echo_str .= "\n\t\t".'<input id="wfu_shortcode_posthash" type="hidden" value="'.$posthash.'" />';
-	$echo_str .= "\n\t\t".'<input id="wfu_shortcode_position" type="hidden" value="'.$shortcode_position.'" />';
-	$echo_str .= "\n\t\t".'<input id="wfu_shortcode_widgetid" type="hidden" value="'.$widgetid.'" />';
+	$echo_str .= "\n\t\t".'<input id="wfu_shortcode_tag" type="hidden" value="'.esc_attr($shortcode_tag).'" />';
+	$echo_str .= "\n\t\t".'<input id="wfu_shortcode_postid" type="hidden" value="'.esc_attr($postid).'" />';
+	$echo_str .= "\n\t\t".'<input id="wfu_shortcode_posthash" type="hidden" value="'.esc_attr($posthash).'" />';
+	$echo_str .= "\n\t\t".'<input id="wfu_shortcode_position" type="hidden" value="'.esc_attr($shortcode_position).'" />';
+	$echo_str .= "\n\t\t".'<input id="wfu_shortcode_widgetid" type="hidden" value="'.esc_attr($widgetid).'" />';
 	$echo_str .= "\n\t".'</div>';
 	$echo_str .= "\n\t".'<div style="margin-top:20px;">';
 	$echo_str .= "\n\t\t".'<div class="wfu_shortcode_container">';
 	$nonce = wp_nonce_field('wfu-admin-composer', 'wfu_wpnonce', false, false);
 	$echo_str .= "\n\t\t\t".$nonce;
-	$echo_str .= "\n\t\t\t".'<span><strong>Generated Shortcode</strong></span>';
-	$echo_str .= "\n\t\t\t".'<span id="wfu_save_label" class="wfu_save_label">saved</span>';
-	$echo_str .= "\n\t\t\t".'<textarea id="wfu_shortcode" class="wfu_shortcode" rows="5">['.$shortcode_tag.']</textarea>';
+	$echo_str .= "\n\t\t\t".'<span><strong>'.esc_html__('Generated Shortcode', 'wp-file-upload').'</strong></span>';
+	$echo_str .= "\n\t\t\t".'<span id="wfu_save_label" class="wfu_save_label">'.esc_html__('saved', 'wp-file-upload').'</span>';
+	$echo_str .= "\n\t\t\t".'<textarea id="wfu_shortcode" class="wfu_shortcode" rows="5">['.esc_textarea($shortcode_tag).']</textarea>';
 	$echo_str .= "\n\t\t\t".'<div id="wfu_attribute_defaults" style="display:none;">';
 	// remove hidden attributes from defs array
 	foreach ( $defs as $key => $def ) if ( $def['type'] == "hidden" ) unset($defs[$key]);
 	foreach ( $defs as $def )
-		$echo_str .= "\n\t\t\t\t".'<input id="wfu_attribute_default_'.$def['attribute'].'" type="hidden" value="'.$def['default'].'" />';
+		$echo_str .= "\n\t\t\t\t".'<input id="wfu_attribute_default_'.esc_attr($def['attribute']).'" type="hidden" value="'.esc_attr($def['default']).'" />';
 	$echo_str .= "\n\t\t\t".'</div>';
 	$echo_str .= "\n\t\t\t".'<div id="wfu_attribute_values" style="display:none;">';
 	foreach ( $defs as $def ) {
-		$echo_str .= "\n\t\t\t\t".'<input id="wfu_attribute_value_'.$def['attribute'].'" type="hidden" value="'.$def['value'].'" />';
+		$echo_str .= "\n\t\t\t\t".'<input id="wfu_attribute_value_'.esc_attr($def['attribute']).'" type="hidden" value="'.esc_attr($def['value']).'" />';
 		//add additional values, if exist
 		foreach( $def['additional_values'] as $key => $val )
-			$echo_str .= "\n\t\t\t\t".'<input id="wfu_attribute_value_'.$def['attribute'].$key.'" type="hidden" value="'.$val.'" />';
+			$echo_str .= "\n\t\t\t\t".'<input id="wfu_attribute_value_'.esc_attr($def['attribute'].$key).'" type="hidden" value="'.esc_attr($val).'" />';
 	}
 	$echo_str .= "\n\t\t\t".'</div>';
 	$echo_str .= "\n\t\t".'</div>';
@@ -199,17 +201,19 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 	$echo_str .= "\n\t".'<h3 id="wfu_tab_container" class="nav-tab-wrapper">';
 	$is_first = true;
 	foreach ( $cats as $key => $cat ) {
-		$echo_str .= "\n\t\t".'<a id="wfu_tab_'.$key.'" class="nav-tab'.( $is_first ? ' nav-tab-active' : '' ).'" href="javascript: wfu_admin_activate_tab(\''.$key.'\');">'.$cat.'</a>';
+		$echo_str .= "\n\t\t".'<a id="wfu_tab_'.esc_attr($key).'" class="nav-tab'.( $is_first ? ' nav-tab-active' : '' ).'" href="javascript: wfu_admin_activate_tab(\''.esc_attr($key).'\');">'.esc_html($cat["title"]).'</a>';
 		$is_first = false;
 	}
 	$echo_str .= "\n\t".'</h3>';
 
 	$prevcat = "";
+	$prevcatsubs = array();
 	$prevsubcat = "";
 	$is_first = true;
 	$block_open = false;
 	$subblock_open = false;
 	foreach ( $defs as $def ) {
+		if ( !isset($cats[$def['category']]) ) continue;
 		$attr = $def['attribute'];
 		//check if this attribute depends on other
 		if ( !array_key_exists($attr, $governors) ) $governors[$attr] = "";
@@ -237,8 +241,9 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 				$echo_str .= "\n\t".'</div>';
 			}
 			$prevcat = $def['category'];
+			$prevcatsubs = $cats[$prevcat]["subcategories"];
 			$prevsubcat = "";
-			$echo_str .= "\n\t".'<div id="wfu_container_'.$prevcat.'" class="wfu_container"'.( $is_first ? '' : ' style="display:none;"' ).'">';
+			$echo_str .= "\n\t".'<div id="wfu_container_'.esc_attr($prevcat).'" class="wfu_container"'.( $is_first ? '' : ' style="display:none;"' ).'">';
 			$echo_str .= "\n\t\t".'<table class="form-table wfu_main_table">';
 			$echo_str .= "\n\t\t\t".'<thead><tr><th></th><td></td><td></td></tr></thead>';
 			$echo_str .= "\n\t\t\t".'<tbody>';
@@ -249,7 +254,7 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 			$prevsubcat = $def['subcategory'];
 			$echo_str .= "\n\t\t\t\t".'<tr class="wfu_subcategory">';
 			$echo_str .= "\n\t\t\t\t\t".'<th scope="row" colspan="3">';
-			$echo_str .= "\n\t\t\t\t\t\t".'<h3 style="margin-bottom: 10px; margin-top: 10px;">'.$prevsubcat.'</h3>';
+			$echo_str .= "\n\t\t\t\t\t\t".'<h3 style="margin-bottom: 10px; margin-top: 10px;">'.esc_html($prevcatsubs[$prevsubcat]).'</h3>';
 			$echo_str .= "\n\t\t\t\t\t".'</th>';
 			$echo_str .= "\n\t\t\t\t".'</tr>';
 		}
@@ -259,7 +264,7 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 		}
 		else {
 			if ( !$subblock_open ) {
-				$echo_str .= "\n\t\t\t\t\t\t".'<div class="wfu_shadow wfu_shadow_'.$def['parent'].$governor['inv'].'" style="display:'.( $governor['active'] ? 'none' : 'block' ).';"></div>';
+				$echo_str .= "\n\t\t\t\t\t\t".'<div class="wfu_shadow wfu_shadow_'.esc_attr($def['parent'].$governor['inv']).'" style="display:'.( $governor['active'] ? 'none' : 'block' ).';"></div>';
 				$echo_str .= "\n\t\t\t\t\t\t".'<table class="form-table wfu_inner_table" style="margin:0;">';
 				$echo_str .= "\n\t\t\t\t\t\t\t".'<tbody>';
 			}
@@ -267,24 +272,24 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 		}
 		$echo_str .= $dlp.'<tr>';
 		$echo_str .= $dlp."\t".'<th scope="row"><div class="wfu_td_div">';
-		if ( $def['parent'] == "" ) $echo_str .= $dlp."\t\t".'<div class="wfu_shadow wfu_shadow_'.$governor['attribute'].$governor['inv'].'" style="display:'.( $governor['active'] ? 'none' : 'block' ).';"></div>';
-		$echo_str .= $dlp."\t\t".'<div class="wfu_restore_container" title="Double-click to restore defaults setting"><img src="'.WFU_IMAGE_ADMIN_RESTOREDEFAULT.'" ondblclick="wfu_apply_value(\''.$attr.'\', \''.$def['type'].'\', \''.$def['default'].'\');" /></div>';
-		$echo_str .= $dlp."\t\t".'<label for="wfu_attribute_'.$attr.'">'.$def['name'].'</label>';
-		$echo_str .= $dlp."\t\t".'<input type="hidden" name="wfu_attribute_governor_'.$governor['attribute'].'" class="wfu_attribute_governor" value="'.$attr.'" />';
-		$echo_str .= $dlp."\t\t".'<div class="wfu_help_container" title="'.$def['help'].'"><img src="'.WFU_IMAGE_ADMIN_HELP.'" /></div>';
+		if ( $def['parent'] == "" ) $echo_str .= $dlp."\t\t".'<div class="wfu_shadow wfu_shadow_'.esc_attr($governor['attribute'].$governor['inv']).'" style="display:'.( $governor['active'] ? 'none' : 'block' ).';"></div>';
+		$echo_str .= $dlp."\t\t".'<div class="wfu_restore_container" title="'.esc_html__('Double-click to restore defaults setting', 'wp-file-upload').'"><img src="'.esc_url(WFU_IMAGE_ADMIN_RESTOREDEFAULT).'" ondblclick="wfu_apply_value(\''.esc_attr($attr).'\', \''.esc_attr($def['type']).'\', \''.esc_attr($def['default']).'\');" /></div>';
+		$echo_str .= $dlp."\t\t".'<label for="wfu_attribute_'.esc_attr($attr).'">'.esc_html($def['name']).'</label>';
+		$echo_str .= $dlp."\t\t".'<input type="hidden" name="wfu_attribute_governor_'.esc_attr($governor['attribute']).'" class="wfu_attribute_governor" value="'.esc_attr($attr).'" />';
+		$echo_str .= $dlp."\t\t".'<div class="wfu_help_container" title="'.wfu_unesc_percent(esc_attr($def['help'])).'"><img src="'.esc_url(WFU_IMAGE_ADMIN_HELP).'" /></div>';
 		$echo_str .= $dlp."\t".'</div></th>';
 		$echo_str .= $dlp."\t".'<td style="vertical-align:top;"><div class="wfu_td_div">';
-		if ( $def['parent'] == "" ) $echo_str .= $dlp."\t\t".'<div class="wfu_shadow wfu_shadow_'.$governor['attribute'].$governor['inv'].'" style="display:'.( $governor['active'] ? 'none' : 'block' ).';"></div>';
+		if ( $def['parent'] == "" ) $echo_str .= $dlp."\t\t".'<div class="wfu_shadow wfu_shadow_'.esc_attr($governor['attribute'].$governor['inv']).'" style="display:'.( $governor['active'] ? 'none' : 'block' ).';"></div>';
 		if ( $def['type'] == "onoff" ) {
-			$echo_str .= $dlp."\t\t".'<div id="wfu_attribute_'.$attr.'" class="wfu_onoff_container_'.( $def['value'] == "true" ? "on" : "off" ).'" onclick="wfu_admin_onoff_clicked(\''.$attr.'\');">';
+			$echo_str .= $dlp."\t\t".'<div id="wfu_attribute_'.$attr.'" class="wfu_onoff_container_'.( $def['value'] == "true" ? "on" : "off" ).'" onclick="wfu_admin_onoff_clicked(\''.esc_attr($attr).'\');">';
 			$echo_str .= $dlp."\t\t\t".'<div class="wfu_onoff_slider"></div>';
-			$echo_str .= $dlp."\t\t\t".'<span class="wfu_onoff_text">ON</span>';
-			$echo_str .= $dlp."\t\t\t".'<span class="wfu_onoff_text">OFF</span>';
+			$echo_str .= $dlp."\t\t\t".'<span class="wfu_onoff_text">'.esc_html__('ON', 'wp-file-upload').'</span>';
+			$echo_str .= $dlp."\t\t\t".'<span class="wfu_onoff_text">'.esc_html__('OFF', 'wp-file-upload').'</span>';
 			$echo_str .= $dlp."\t\t".'</div>';
 		}
 		elseif ( $def['type'] == "text" ) {
 			$val = str_replace(array( "%n%", "%dq%", "%brl%", "%brr%" ), array( "\n", "&quot;", "[", "]" ), $def['value']);
-			$echo_str .= $dlp."\t\t".'<input id="wfu_attribute_'.$attr.'" type="text" name="wfu_text_elements" value="'.$val.'" style="display:block;" />';
+			$echo_str .= $dlp."\t\t".'<input id="wfu_attribute_'.esc_attr($attr).'" type="text" name="wfu_text_elements" value="'.esc_attr($val).'" style="display:block;" />';
 			if ( $def['variables'] != null ) $echo_str .= $dlp.wfu_insert_variables($def['variables'], 'wfu_variable wfu_variable_'.$attr);
 		}
 		elseif ( $def['type'] == "placements" ) {
@@ -306,10 +311,10 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 							$components_used[$item_in_section] ++;
 							if ( $components_indexed[$item_in_section]['multiplacements'] ) {
 								$multi_index = $components_used[$item_in_section];
-								$echo_str .= $dlp."\t\t\t\t".'<div id="wfu_component_box_'.$item_in_section.'_'.$multi_index.'" class="wfu_component_box" draggable="true" title="'.$components_indexed[$item_in_section]['help'].'">'.str_replace(array("XXX", "YYY"), array($components_indexed[$item_in_section]['name'], $multi_index), $centered_content_multi).'</div>';
+								$echo_str .= $dlp."\t\t\t\t".'<div id="wfu_component_box_'.esc_attr($item_in_section.'_'.$multi_index).'" class="wfu_component_box" draggable="true" title="'.esc_attr($components_indexed[$item_in_section]['help']).'">'.str_replace(array("XXX", "YYY"), array(esc_html($components_indexed[$item_in_section]['name']), esc_html($multi_index)), $centered_content_multi).'</div>';
 							}
 							else
-								$echo_str .= $dlp."\t\t\t\t".'<div id="wfu_component_box_'.$item_in_section.'_0" class="wfu_component_box" draggable="true" title="'.$components_indexed[$item_in_section]['help'].'">'.str_replace("XXX", $components_indexed[$item_in_section]['name'], $centered_content).'</div>';
+								$echo_str .= $dlp."\t\t\t\t".'<div id="wfu_component_box_'.esc_attr($item_in_section).'_0" class="wfu_component_box" draggable="true" title="'.esc_attr($components_indexed[$item_in_section]['help']).'">'.str_replace("XXX", esc_html($components_indexed[$item_in_section]['name']), $centered_content).'</div>';
 							$echo_str .= $dlp."\t\t\t\t".'<div class="wfu_component_separator_ver"></div>';
 						}
 					}
@@ -323,14 +328,14 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 			$echo_str .= $dlp."\t\t\t\t".'<div id="wfu_componentlist_dragdrop" class="wfu_componentlist_dragdrop" style="display:none;"></div>';
 			$ii = 1;
 			foreach ( $components as $component ) {
-				$echo_str .= $dlp."\t\t\t\t".'<div id="wfu_component_box_container_'.$component['id'].'" class="wfu_component_box_container">';
-				$echo_str .= $dlp."\t\t\t\t\t".'<div class="wfu_component_box_base">'.str_replace("XXX", $component['name'], $centered_content).'</div>';
+				$echo_str .= $dlp."\t\t\t\t".'<div id="wfu_component_box_container_'.esc_attr($component['id']).'" class="wfu_component_box_container">';
+				$echo_str .= $dlp."\t\t\t\t\t".'<div class="wfu_component_box_base">'.str_replace("XXX", esc_html($component['name']), $centered_content).'</div>';
 				if ( $component['multiplacements'] ) {
 					$multi_index = $components_used[$component['id']] + 1;
-					$echo_str .= $dlp."\t\t\t\t\t".'<div id="wfu_component_box_'.$component['id'].'_'.$multi_index.'" class="wfu_component_box wfu_inbase" draggable="true" title="'.$component['help'].'">'.str_replace(array("XXX", "YYY"), array($component['name'], $multi_index), $centered_content_multi).'</div>';
+					$echo_str .= $dlp."\t\t\t\t\t".'<div id="wfu_component_box_'.esc_attr($component['id'].'_'.$multi_index).'" class="wfu_component_box wfu_inbase" draggable="true" title="'.esc_attr($component['help']).'">'.str_replace(array("XXX", "YYY"), array(esc_html($component['name']), esc_html($multi_index)), $centered_content_multi).'</div>';
 				}
 				elseif ( $components_used[$component['id']] == 0 )
-					$echo_str .= $dlp."\t\t\t\t\t".'<div id="wfu_component_box_'.$component['id'].'_0" class="wfu_component_box wfu_inbase" draggable="true" title="'.$component['help'].'">'.str_replace("XXX", $component['name'], $centered_content).'</div>';
+					$echo_str .= $dlp."\t\t\t\t\t".'<div id="wfu_component_box_'.esc_attr($component['id']).'_0" class="wfu_component_box wfu_inbase" draggable="true" title="'.esc_attr($component['help']).'">'.str_replace("XXX", esc_html($component['name']), $centered_content).'</div>';
 				$echo_str .= $dlp."\t\t\t\t".'</div>'.( ($ii++) % 3 == 0 ? '<br />' : '' );
 			}
 			$echo_str .= $dlp."\t\t\t".'</div>';
@@ -338,29 +343,41 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 		}
 		elseif ( $def['type'] == "ltext" ) {
 			$val = str_replace(array( "%n%", "%dq%", "%brl%", "%brr%" ), array( "\n", "&quot;", "[", "]" ), $def['value']);
-			$echo_str .= $dlp."\t\t".'<input id="wfu_attribute_'.$attr.'" type="text" name="wfu_text_elements" class="wfu_long_text" value="'.$val.'" />';
+			$echo_str .= $dlp."\t\t".'<input id="wfu_attribute_'.esc_attr($attr).'" type="text" name="wfu_text_elements" class="wfu_long_text" value="'.esc_attr($val).'" />';
 			if ( $def['variables'] != null ) $echo_str .= $dlp.wfu_insert_variables($def['variables'], 'wfu_variable wfu_variable_'.$attr);
 		}
 		elseif ( $def['type'] == "integer" ) {
 			$val = str_replace(array( "%n%", "%dq%", "%brl%", "%brr%" ), array( "\n", "&quot;", "[", "]" ), $def['value']);
-			$echo_str .= $dlp."\t\t".'<input id="wfu_attribute_'.$attr.'" type="number" name="wfu_text_elements" class="wfu_short_text" min="1" value="'.$val.'" />';
+			$echo_str .= $dlp."\t\t".'<input id="wfu_attribute_'.esc_attr($attr).'" type="number" name="wfu_text_elements" class="wfu_short_text" min="1" value="'.esc_attr($val).'" />';
 			if ( isset($def['listitems']['unit']) ) $echo_str .= $dlp."\t\t".'<label> '.$def['listitems']['unit'].'</label>';
 		}
 		elseif ( $def['type'] == "float" ) {
 			$val = str_replace(array( "%n%", "%dq%", "%brl%", "%brr%" ), array( "\n", "&quot;", "[", "]" ), $def['value']);
-			$echo_str .= $dlp."\t\t".'<input id="wfu_attribute_'.$attr.'" type="number" name="wfu_text_elements" class="wfu_short_text" step="any" min="0" value="'.$val.'" />';
+			$echo_str .= $dlp."\t\t".'<input id="wfu_attribute_'.esc_attr($attr).'" type="number" name="wfu_text_elements" class="wfu_short_text" step="any" min="0" value="'.esc_attr($val).'" />';
 			if ( isset($def['listitems']['unit']) ) $echo_str .= $dlp."\t\t".'<label> '.$def['listitems']['unit'].'</label>';
 		}
 		elseif ( $def['type'] == "date" ) {
 			$val = $def['value'];
-			$echo_str .= $dlp."\t\t".'<div class="wfu_date_container"><input id="wfu_attribute_'.$attr.'" type="text" value="'.$val.'" readonly style="padding-right:16px; background-color:white; width:auto;" /><img class="wfu_datereset_button" src="'.WFU_IMAGE_ADMIN_SUBFOLDER_CANCEL.'" onclick="var f = document.getElementById(\'wfu_attribute_'.$attr.'\'); f.value = \'\'; wfu_update_date_value({target:f});" /></div><label style="font-size:smaller; margin-left:4px;">format: YYYY-MM-DD</label>';
+			$echo_str .= $dlp."\t\t".'<div class="wfu_date_container"><input id="wfu_attribute_'.esc_attr($attr).'" type="text" value="'.esc_attr($val).'" readonly style="padding-right:16px; background-color:white; width:auto;" /><img class="wfu_datereset_button" src="'.esc_url(WFU_IMAGE_ADMIN_SUBFOLDER_CANCEL).'" onclick="var f = document.getElementById(\'wfu_attribute_'.esc_attr($attr).'\'); f.value = \'\'; wfu_update_date_value({target:f});" /></div><label style="font-size:smaller; margin-left:4px;">format: YYYY-MM-DD</label>';
 			$echo_str .= wfu_inject_js_code('jQuery(function() {jQuery("#wfu_attribute_'.$attr.'").datepicker({dateFormat: "yy-mm-dd", onClose: function(date, picker) {wfu_update_date_value({target:this});}});});');
 		}
 		elseif ( $def['type'] == "radio" ) {
 			$echo_str .= $dlp."\t\t";
 			$ii = 0;
-			foreach ( $def['listitems'] as $item )
-				$echo_str .= '<input name="wfu_radioattribute_'.$attr.'" type="radio" value="'.$item.'" '.( $item == $def['value'] || $item == "*".$def['value'] ? 'checked="checked" ' : '' ).'style="width:auto; margin:0px 2px 0px '.( ($ii++) == 0 ? '0px' : '8px' ).';" onchange="wfu_admin_radio_clicked(\''.$attr.'\');" />'.( $item[0] == "*" ? substr($item, 1) : $item );
+			foreach ( $def['listitems'] as $item ) {
+				$item_key = $item;
+				$item_title = $item;
+				$parts = explode("/", $item);
+				if ( count($parts) == 1 ) {
+					if ( $item[0] == "*" ) $item_title = substr($item, 1);
+				}
+				else {
+					$item_key = $parts[0];
+					$item_title = $parts[1];
+				}
+				$echo_str .= '<label style="display: inline-flex; align-items: center;"><input name="wfu_radioattribute_'.esc_attr($attr).'" type="radio" value="'.esc_attr($item_key).'" '.( $item_key == $def['value'] || $item_key == "*".$def['value'] ? 'checked="checked" ' : '' ).'style="margin:0px 2px 0px '.( $ii == 0 ? '0px' : '8px' ).';" onchange="wfu_admin_radio_clicked(\''.esc_attr($attr).'\');" />'.esc_html($item_title).'</label>';
+				$ii++;
+			}
 //			$echo_str .= '<input type="button" class="button" value="empty" style="width:auto; margin:-2px 0px 0px 8px;" />';
 		}
 		elseif ( $def['type'] == "ptext" ) {
@@ -369,16 +386,16 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 			$singular = $parts[0];
 			if ( count($parts) < 2 ) $plural = $singular;
 			else $plural = $parts[1];
-			$echo_str .= $dlp."\t\t".'<span class="wfu_ptext_span">Singular</span><input id="wfu_attribute_s_'.$attr.'" type="text" name="wfu_ptext_elements" value="'.$singular.'" />';
+			$echo_str .= $dlp."\t\t".'<span class="wfu_ptext_span">'.esc_html__('Singular', 'wp-file-upload').'</span><input id="wfu_attribute_s_'.esc_attr($attr).'" type="text" name="wfu_ptext_elements" value="'.esc_attr($singular).'" />';
 			if ( $def['variables'] != null ) if ( count($def['variables']) > 0 ) $echo_str .= $dlp."\t\t".'<br /><span class="wfu_ptext_span">&nbsp;</span>';
 			if ( $def['variables'] != null ) $echo_str .= $dlp.wfu_insert_variables($def['variables'], 'wfu_variable wfu_variable_s_'.$attr);
-			$echo_str .= $dlp."\t\t".'<br /><span class="wfu_ptext_span">Plural</span><input id="wfu_attribute_p_'.$attr.'" type="text" name="wfu_ptext_elements" value="'.$plural.'" />';
+			$echo_str .= $dlp."\t\t".'<br /><span class="wfu_ptext_span">'.esc_html__('Plural', 'wp-file-upload').'</span><input id="wfu_attribute_p_'.esc_attr($attr).'" type="text" name="wfu_ptext_elements" value="'.esc_attr($plural).'" />';
 			if ( $def['variables'] != null ) if ( count($def['variables']) > 0 ) $echo_str .= $dlp."\t\t".'<br /><span class="wfu_ptext_span">&nbsp;</span>';
 			if ( $def['variables'] != null ) $echo_str .= $dlp.wfu_insert_variables($def['variables'], 'wfu_variable wfu_variable_p_'.$attr, $dlp);
 		}
 		elseif ( $def['type'] == "mtext" ) {
 			$val = str_replace(array( "%n%", "%dq%", "%brl%", "%brr%" ), array( "\n", "&quot;", "[", "]" ), $def['value']);
-			$echo_str .= $dlp."\t\t".'<textarea id="wfu_attribute_'.$attr.'" name="wfu_text_elements" rows="5">'.$val.'</textarea>';
+			$echo_str .= $dlp."\t\t".'<textarea id="wfu_attribute_'.esc_attr($attr).'" name="wfu_text_elements" rows="5">'.esc_textarea($val).'</textarea>';
 			if ( $def['variables'] != null ) $echo_str .= $dlp.wfu_insert_variables($def['variables'], 'wfu_variable wfu_variable_'.$attr);
 		}
 		elseif ( $def['type'] == "ftpinfo" ) {
@@ -386,86 +403,89 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 			$ftpinfo = wfu_decode_ftpinfo($val);
 			$error_class = ( $ftpinfo["error"] ? ' ftpinfo_error' : '' );
 			$echo_str .= $dlp."\t\t".'<div class="ftpinfo_header">';
-			$echo_str .= $dlp."\t\t\t".'<input id="wfu_attribute_'.$attr.'" type="text" name="wfu_ftpinfobase_elements" class="ftpinfo_text'.$error_class.'" value="'.$val.'" />';
-			$echo_str .= $dlp."\t\t\t".'<button class="ftpinfo_btn" onclick="wfu_ftpinfotool_toggle();">Edit</button>';
+			$echo_str .= $dlp."\t\t\t".'<input id="wfu_attribute_'.esc_attr($attr).'" type="text" name="wfu_ftpinfobase_elements" class="ftpinfo_text'.esc_attr($error_class).'" value="'.esc_attr($val).'" />';
+			$echo_str .= $dlp."\t\t\t".'<button class="ftpinfo_btn" onclick="wfu_ftpinfotool_toggle();">'.esc_html__('Edit', 'wp-file-upload').'</button>';
 			$echo_str .= $dlp."\t\t".'</div>';
 			$echo_str .= $dlp."\t\t".'<div class="ftpinfo_tool hidden">';
-			$echo_str .= $dlp."\t\t\t".'<label class="ftpinfo_label">Username</label><input type="text" id="ftpinfo_username" name="wfu_ftpinfotool_elements" class="ftpinfo_value'.$error_class.'" value="'.$ftpinfo["data"]["username"].'" /><br />';
-			$echo_str .= $dlp."\t\t\t".'<label class="ftpinfo_label">Password</label><input type="text" id="ftpinfo_password" name="wfu_ftpinfotool_elements" class="ftpinfo_value'.$error_class.'" value="'.$ftpinfo["data"]["password"].'" /><br />';
-			$echo_str .= $dlp."\t\t\t".'<label class="ftpinfo_label">FTP Domain</label><input type="text" id="ftpinfo_domain" name="wfu_ftpinfotool_elements" class="ftpinfo_value'.$error_class.'" value="'.$ftpinfo["data"]["ftpdomain"].'" /><br />';
-			$echo_str .= $dlp."\t\t\t".'<label class="ftpinfo_label">Port</label><input type="text" id="ftpinfo_port" name="wfu_ftpinfotool_elements" class="ftpinfo_value'.$error_class.'" value="'.$ftpinfo["data"]["port"].'" /><br />';
-			$echo_str .= $dlp."\t\t\t".'<label class="ftpinfo_label">Use SFTP</label><input type="checkbox" id="ftpinfo_sftp" name="wfu_ftpinfotool_elements" class="ftpinfo_checkbox'.$error_class.'"'.( $ftpinfo["data"]["sftp"] ? " checked" : "" ).' />';
-			$echo_str .= $dlp."\t\t".'</div>';
+			$echo_str .= $dlp."\t\t\t".'<label class="ftpinfo_label">'.esc_html__('Username', 'wp-file-upload').'</label><input type="text" id="ftpinfo_username" name="wfu_ftpinfotool_elements" class="ftpinfo_value'.esc_attr($error_class).'" value="'.esc_attr($ftpinfo["data"]["username"]).'" /><br />';
+			$echo_str .= $dlp."\t\t\t".'<label class="ftpinfo_label">'.esc_html__('Password', 'wp-file-upload').'</label><input type="text" id="ftpinfo_password" name="wfu_ftpinfotool_elements" class="ftpinfo_value'.esc_attr($error_class).'" value="'.esc_attr($ftpinfo["data"]["password"]).'" /><br />';
+			$echo_str .= $dlp."\t\t\t".'<label class="ftpinfo_label">'.esc_html__('FTP Domain', 'wp-file-upload').'</label><input type="text" id="ftpinfo_domain" name="wfu_ftpinfotool_elements" class="ftpinfo_value'.esc_attr($error_class).'" value="'.esc_attr($ftpinfo["data"]["ftpdomain"]).'" /><br />';
+			$echo_str .= $dlp."\t\t\t".'<label class="ftpinfo_label">'.esc_html__('Port', 'wp-file-upload').'</label><input type="text" id="ftpinfo_port" name="wfu_ftpinfotool_elements" class="ftpinfo_value'.esc_attr($error_class).'" value="'.esc_attr($ftpinfo["data"]["port"]).'" /><br />';
+			$echo_str .= $dlp."\t\t\t".'<label class="ftpinfo_label">'.esc_html__('FTP Mode', 'wp-file-upload').'</label><div class="ftpinfo_mode">
+			<input type="radio" id="ftpinfo_mode_ftp" name="wfu_ftpinfotool_mode" class="ftpinfo_radio'.esc_attr($error_class).'"'.( !$ftpinfo["data"]["sftp"] && !$ftpinfo["data"]["ftps"] ? " checked" : "" ).' /><label class="ftpinfo_mode_label" for="ftpinfo_mode_ftp">'.esc_html__('FTP', 'wp-file-upload').'</label>
+			<input type="radio" id="ftpinfo_mode_sftp" name="wfu_ftpinfotool_mode" class="ftpinfo_radio'.esc_attr($error_class).'"'.( $ftpinfo["data"]["sftp"] ? " checked" : "" ).' /><label class="ftpinfo_mode_label" for="ftpinfo_mode_sftp">'.esc_html__('SFTP', 'wp-file-upload').'</label>
+			<input type="radio" id="ftpinfo_mode_ftps" name="wfu_ftpinfotool_mode" class="ftpinfo_radio'.esc_attr($error_class).'"'.( $ftpinfo["data"]["ftps"] ? " checked" : "" ).' /><label class="ftpinfo_mode_label" for="ftpinfo_mode_ftps">'.esc_html__('FTPS', 'wp-file-upload').'</label>';
+			$echo_str .= $dlp."\t\t".'</div></div>';
 			if ( $def['variables'] != null ) $echo_str .= $dlp.wfu_insert_variables($def['variables'], 'wfu_variable wfu_variable_'.$attr);
 		}
 		elseif ( $def['type'] == "folderlist" ) {
-			$echo_str .= $dlp."\t\t".'<div id="wfu_subfolders_inner_shadow_'.$attr.'" class="wfu_subfolders_inner_shadow" style="display:none;"></div>';
+			$echo_str .= $dlp."\t\t".'<div id="wfu_subfolders_inner_shadow_'.esc_attr($attr).'" class="wfu_subfolders_inner_shadow" style="display:none;"></div>';
 			$subfolders = wfu_parse_folderlist($def['value']);
-			$poptitle = "Populate list automatically with the first-level subfolders of the path defined in uploadpath";
-			$edittitle = "Allow the user to type the subfolder and filter the list during typing";
-			$echo_str .= $dlp."\t\t".'<input type="checkbox" id="wfu_subfolders_auto_'.$attr.'"'.( substr($def['value'], 0, 4) == "auto" ? ' checked="checked"' : '' ).' onchange="wfu_subfolders_auto_changed(\''.$attr.'\');" title="'.$poptitle.'" /><label for="wfu_subfolders_auto_'.$attr.'" title="'.$poptitle.'"> Auto-populate list</label>';
-			$echo_str .= $dlp."\t\t".'<div style="display:'.( substr($def['value'], 0, 4) == "auto" ? 'inline' : 'none' ).'; padding:0; margin:0 0 0 30px; background:none; border:none;"><input type="checkbox" id="wfu_subfolders_editable_'.$attr.'"'.( substr($def['value'], 0, 5) == "auto+" ? ' checked="checked"' : '' ).' onchange="wfu_subfolders_auto_changed(\''.$attr.'\');" title="'.$edittitle.'" /><label for="wfu_subfolders_editable_'.$attr.'" title="'.$edittitle.'"> List is editable</label></div><br />';
-			$echo_str .= $dlp."\t\t".'<input type="hidden" id="wfu_subfolders_manualtext_'.$attr.'" value="'.( substr($def['value'], 0, 4) == "auto" ? "" : $def['value'] ).'" />';
-			$echo_str .= $dlp."\t\t".'<select id="wfu_attribute_'.$attr.'" class="wfu_select_folders'.( count($subfolders['path']) == 0 ? ' wfu_select_folders_empty' : '' ).'" size="7"'.( substr($def['value'], 0, 4) == "auto" ? ' disabled="disabled"' : '' ).' onchange="wfu_subfolders_changed(\''.$attr.'\');">';
+			$poptitle = __('Populate list automatically with the first-level subfolders of the path defined in uploadpath', 'wp-file-upload');
+			$edittitle = __('Allow the user to type the subfolder and filter the list during typing', 'wp-file-upload');
+			$echo_str .= $dlp."\t\t".'<input type="checkbox" id="wfu_subfolders_auto_'.esc_attr($attr).'"'.( substr($def['value'], 0, 4) == "auto" ? ' checked="checked"' : '' ).' onchange="wfu_subfolders_auto_changed(\''.esc_attr($attr).'\');" title="'.esc_attr($poptitle).'" /><label for="wfu_subfolders_auto_'.esc_attr($attr).'" title="'.esc_attr($poptitle).'"> Auto-populate list</label>';
+			$echo_str .= $dlp."\t\t".'<div style="display:'.( substr($def['value'], 0, 4) == "auto" ? 'inline' : 'none' ).'; padding:0; margin:0 0 0 30px; background:none; border:none;"><input type="checkbox" id="wfu_subfolders_editable_'.esc_attr($attr).'"'.( substr($def['value'], 0, 5) == "auto+" ? ' checked="checked"' : '' ).' onchange="wfu_subfolders_auto_changed(\''.esc_attr($attr).'\');" title="'.esc_attr($edittitle).'" /><label for="wfu_subfolders_editable_'.esc_attr($attr).'" title="'.esc_attr($edittitle).'"> List is editable</label></div><br />';
+			$echo_str .= $dlp."\t\t".'<input type="hidden" id="wfu_subfolders_manualtext_'.esc_attr($attr).'" value="'.( substr($def['value'], 0, 4) == "auto" ? "" : esc_attr($def['value']) ).'" />';
+			$echo_str .= $dlp."\t\t".'<select id="wfu_attribute_'.esc_attr($attr).'" class="wfu_select_folders'.( count($subfolders['path']) == 0 ? ' wfu_select_folders_empty' : '' ).'" size="7"'.( substr($def['value'], 0, 4) == "auto" ? ' disabled="disabled"' : '' ).' onchange="wfu_subfolders_changed(\''.esc_attr($attr).'\');">';
 			foreach ($subfolders['path'] as $ind => $subfolder) {
 				if ( substr($subfolder, -1) == '/' ) $subfolder = substr($subfolder, 0, -1);
 				$subfolder_raw = explode('/', $subfolder);
 				$subfolder = $subfolder_raw[count($subfolder_raw) - 1];
 				$text = str_repeat("&nbsp;&nbsp;&nbsp;", intval($subfolders['level'][$ind])).$subfolders['label'][$ind];
 				$subvalue = str_repeat("*", intval($subfolders['level'][$ind])).( $subfolders['default'][$ind] ? '&' : '' ).( $subfolder == "" ? '{root}' : $subfolder ).'/'.$subfolders['label'][$ind];
-				$echo_str .= $dlp."\t\t\t".'<option class="'.( $subfolders['default'][$ind] ? 'wfu_select_folders_option_default' : '' ).'" value="'.wfu_plugin_encode_string($subvalue).'">'.$text.'</option>';
+				$echo_str .= $dlp."\t\t\t".'<option class="'.( $subfolders['default'][$ind] ? 'wfu_select_folders_option_default' : '' ).'" value="'.wfu_plugin_encode_string($subvalue).'">'.esc_html($text).'</option>';
 			}
-			$echo_str .= $dlp."\t\t\t".'<option value="">'.( substr($def['value'], 0, 4) != "auto" && count($subfolders['path']) == 0 ? 'press here' : '' ).'</option>';
+			$echo_str .= $dlp."\t\t\t".'<option value="">'.( substr($def['value'], 0, 4) != "auto" && count($subfolders['path']) == 0 ? esc_html__('press here', 'wp-file-upload') : '' ).'</option>';
 			$echo_str .= $dlp."\t\t".'</select>';
-			$echo_str .= $dlp."\t\t".'<div id="wfu_subfolder_nav_'.$attr.'" class="wfu_subfolder_nav_container">';
+			$echo_str .= $dlp."\t\t".'<div id="wfu_subfolder_nav_'.esc_attr($attr).'" class="wfu_subfolder_nav_container">';
 			$echo_str .= $dlp."\t\t\t".'<table class="wfu_subfolder_nav"><tbody>';
-			$echo_str .= $dlp."\t\t\t\t".'<tr><td><button id="wfu_subfolders_up_'.$attr.'" name="wfu_subfolder_nav_'.$attr.'" class="button" disabled="disabled" title="move item up" onclick="wfu_subfolders_up_clicked(\''.$attr.'\');">&uarr;</button></tr></td>';
-			$echo_str .= $dlp."\t\t\t\t".'<tr><td><button id="wfu_subfolders_left_'.$attr.'" name="wfu_subfolder_nav_'.$attr.'" class="button" title="make it parent" disabled="disabled" style="height:14px;" onclick="wfu_subfolders_left_clicked(\''.$attr.'\');">&larr;</button>';
-			$echo_str .= $dlp."\t\t\t\t".'<button id="wfu_subfolders_right_'.$attr.'" name="wfu_subfolder_nav_'.$attr.'" class="button" title="make it child" disabled="disabled" style="height:14px;" onclick="wfu_subfolders_right_clicked(\''.$attr.'\');">&rarr;</button></tr></td>';
-			$echo_str .= $dlp."\t\t\t\t".'<tr><td><button id="wfu_subfolders_down_'.$attr.'" name="wfu_subfolder_nav_'.$attr.'" class="button" title="move item down" disabled="disabled" onclick="wfu_subfolders_down_clicked(\''.$attr.'\');">&darr;</button></tr></td>';
+			$echo_str .= $dlp."\t\t\t\t".'<tr><td><button id="wfu_subfolders_up_'.esc_attr($attr).'" name="wfu_subfolder_nav_'.esc_attr($attr).'" class="button" disabled="disabled" title="'.esc_html__('move item up', 'wp-file-upload').'" onclick="wfu_subfolders_up_clicked(\''.esc_attr($attr).'\');">&uarr;</button></tr></td>';
+			$echo_str .= $dlp."\t\t\t\t".'<tr><td><button id="wfu_subfolders_left_'.esc_attr($attr).'" name="wfu_subfolder_nav_'.esc_attr($attr).'" class="button" title="'.esc_html__('make it parent', 'wp-file-upload').'" disabled="disabled" style="height:14px;" onclick="wfu_subfolders_left_clicked(\''.esc_attr($attr).'\');">&larr;</button>';
+			$echo_str .= $dlp."\t\t\t\t".'<button id="wfu_subfolders_right_'.esc_attr($attr).'" name="wfu_subfolder_nav_'.esc_attr($attr).'" class="button" title="'.esc_html__('make it child', 'wp-file-upload').'" disabled="disabled" style="height:14px;" onclick="wfu_subfolders_right_clicked(\''.esc_attr($attr).'\');">&rarr;</button></tr></td>';
+			$echo_str .= $dlp."\t\t\t\t".'<tr><td><button id="wfu_subfolders_down_'.esc_attr($attr).'" name="wfu_subfolder_nav_'.esc_attr($attr).'" class="button" title="'.esc_html__('move item down', 'wp-file-upload').'" disabled="disabled" onclick="wfu_subfolders_down_clicked(\''.esc_attr($attr).'\');">&darr;</button></tr></td>';
 			$echo_str .= $dlp."\t\t\t\t".'<tr><td style="line-height:0;"><button  class="button" style="visibility:hidden; height:10px;"></button></tr></td>';
-			$echo_str .= $dlp."\t\t\t\t".'<tr><td><button id="wfu_subfolders_add_'.$attr.'" name="wfu_subfolder_nav_'.$attr.'" class="button" title="add new item" disabled="disabled" style="height:14px;" onclick="wfu_subfolders_add_clicked(\''.$attr.'\');">+</button></tr></td>';
-			$echo_str .= $dlp."\t\t\t\t".'<tr><td><button id="wfu_subfolders_def_'.$attr.'" name="wfu_subfolder_nav_'.$attr.'" class="button" title="make it default" disabled="disabled" style="height:14px;" onclick="wfu_subfolders_def_clicked(\''.$attr.'\');">&diams;</button></tr></td>';
-			$echo_str .= $dlp."\t\t\t\t".'<tr><td><button id="wfu_subfolders_del_'.$attr.'" name="wfu_subfolder_nav_'.$attr.'" class="button" title="delete item" disabled="disabled" style="height:14px;" onclick="wfu_subfolders_del_clicked(\''.$attr.'\');">-</button></tr></td>';
+			$echo_str .= $dlp."\t\t\t\t".'<tr><td><button id="wfu_subfolders_add_'.esc_attr($attr).'" name="wfu_subfolder_nav_'.esc_attr($attr).'" class="button" title="'.esc_html__('add new item', 'wp-file-upload').'" disabled="disabled" style="height:14px;" onclick="wfu_subfolders_add_clicked(\''.esc_attr($attr).'\');">+</button></tr></td>';
+			$echo_str .= $dlp."\t\t\t\t".'<tr><td><button id="wfu_subfolders_def_'.esc_attr($attr).'" name="wfu_subfolder_nav_'.esc_attr($attr).'" class="button" title="'.esc_html__('make it default', 'wp-file-upload').'" disabled="disabled" style="height:14px;" onclick="wfu_subfolders_def_clicked(\''.esc_attr($attr).'\');">&diams;</button></tr></td>';
+			$echo_str .= $dlp."\t\t\t\t".'<tr><td><button id="wfu_subfolders_del_'.esc_attr($attr).'" name="wfu_subfolder_nav_'.esc_attr($attr).'" class="button" title="d'.esc_html__('elete item', 'wp-file-upload').'" disabled="disabled" style="height:14px;" onclick="wfu_subfolders_del_clicked(\''.esc_attr($attr).'\');">-</button></tr></td>';
 			$echo_str .= $dlp."\t\t\t".'</tbody></table>';
 			$echo_str .= $dlp."\t\t".'</div>';
-			$echo_str .= $dlp."\t\t".'<div id="wfu_subfolder_tools_'.$attr.'" class="wfu_subfolder_tools_container wfu_subfolder_tools_disabled">';
+			$echo_str .= $dlp."\t\t".'<div id="wfu_subfolder_tools_'.esc_attr($attr).'" class="wfu_subfolder_tools_container wfu_subfolder_tools_disabled">';
 			$echo_str .= $dlp."\t\t\t".'<table class="wfu_subfolder_tools"><tbody><tr>';
 			$echo_str .= $dlp."\t\t\t\t".'<td style="width:40%;">';
-			$echo_str .= $dlp."\t\t\t\t\t".'<label>Label</label>';
-			$echo_str .= $dlp."\t\t\t\t\t".'<input id="wfu_subfolders_label_'.$attr.'" name="wfu_subfolder_tools_input" type="text" disabled="disabled" />';
+			$echo_str .= $dlp."\t\t\t\t\t".'<label>'.esc_html__('Label', 'wp-file-upload').'</label>';
+			$echo_str .= $dlp."\t\t\t\t\t".'<input id="wfu_subfolders_label_'.esc_attr($attr).'" name="wfu_subfolder_tools_input" type="text" disabled="disabled" />';
 			$echo_str .= $dlp."\t\t\t\t".'</td>';
 			$echo_str .= $dlp."\t\t\t\t".'<td style="width:60%;"><div style="padding-right:36px;">';
-			$echo_str .= $dlp."\t\t\t\t\t".'<label>Path</label>';
-			$echo_str .= $dlp."\t\t\t\t\t".'<input id="wfu_subfolders_path_'.$attr.'" name="wfu_subfolder_tools_input" type="text" disabled="disabled" />';
-			$echo_str .= $dlp."\t\t\t\t\t".'<button id="wfu_subfolders_browse_'.$attr.'" class="button'.( $is_admin ? "" : " wfu-hidden" ).'" title="browse folders" style="right:18px;" disabled="disabled" onclick="wfu_subfolders_browse_clicked(\''.$attr.'\');"><img src="'.WFU_IMAGE_ADMIN_SUBFOLDER_BROWSE.'" ></button>';
-			$echo_str .= $dlp."\t\t\t\t\t".'<button id="wfu_subfolders_ok_'.$attr.'" class="button'.( $is_admin ? "" : " wfu-fullwidth" ).'" title="save changes" style="right:0px;" disabled="disabled" onclick="wfu_subfolders_ok_clicked(\''.$attr.'\');"><img src="'.WFU_IMAGE_ADMIN_SUBFOLDER_OK.'" ></button>';
+			$echo_str .= $dlp."\t\t\t\t\t".'<label>'.esc_html__('Path', 'wp-file-upload').'</label>';
+			$echo_str .= $dlp."\t\t\t\t\t".'<input id="wfu_subfolders_path_'.esc_attr($attr).'" name="wfu_subfolder_tools_input" type="text" disabled="disabled" />';
+			$echo_str .= $dlp."\t\t\t\t\t".'<button id="wfu_subfolders_browse_'.esc_attr($attr).'" class="button'.( $is_admin ? "" : " wfu-hidden" ).'" title="'.esc_html__('browse folders', 'wp-file-upload').'" style="right:18px;" disabled="disabled" onclick="wfu_subfolders_browse_clicked(\''.esc_attr($attr).'\');"><img src="'.esc_url(WFU_IMAGE_ADMIN_SUBFOLDER_BROWSE).'" ></button>';
+			$echo_str .= $dlp."\t\t\t\t\t".'<button id="wfu_subfolders_ok_'.esc_attr($attr).'" class="button'.( $is_admin ? "" : " wfu-fullwidth" ).'" title="'.esc_html__('save changes', 'wp-file-upload').'" style="right:0px;" disabled="disabled" onclick="wfu_subfolders_ok_clicked(\''.esc_attr($attr).'\');"><img src="'.esc_url(WFU_IMAGE_ADMIN_SUBFOLDER_OK).'" ></button>';
 			// file browser dialog
-			$echo_str .= $dlp."\t\t\t\t\t".'<div id="wfu_subfolders_browser_'.$attr.'" class="wfu_subfolders_browser_container" style="display:none;">';
+			$echo_str .= $dlp."\t\t\t\t\t".'<div id="wfu_subfolders_browser_'.esc_attr($attr).'" class="wfu_subfolders_browser_container" style="display:none;">';
 			$echo_str .= $dlp."\t\t\t\t\t\t".'<table><tbody>';
 			$echo_str .= $dlp."\t\t\t\t\t\t\t".'<tr><td style="height:15px;">';
 			$echo_str .= $dlp."\t\t\t\t\t\t\t\t".'<div>';
-			$echo_str .= $dlp."\t\t\t\t\t\t\t\t\t".'<label>Folder Browser</label>';
-			$echo_str .= $dlp."\t\t\t\t\t\t\t\t\t".'<button class="button wfu_folder_browser_cancel" onclick="wfu_folder_browser_cancel_clicked(\''.$attr.'\');"><img src="'.WFU_IMAGE_ADMIN_SUBFOLDER_CANCEL.'" ></button>';
+			$echo_str .= $dlp."\t\t\t\t\t\t\t\t\t".'<label>'.esc_html__('Folder Browser', 'wp-file-upload').'</label>';
+			$echo_str .= $dlp."\t\t\t\t\t\t\t\t\t".'<button class="button wfu_folder_browser_cancel" onclick="wfu_folder_browser_cancel_clicked(\''.esc_attr($attr).'\');"><img src="'.esc_url(WFU_IMAGE_ADMIN_SUBFOLDER_CANCEL).'" ></button>';
 			$echo_str .= $dlp."\t\t\t\t\t\t\t\t".'</div>';
 			$echo_str .= $dlp."\t\t\t\t\t\t\t".'</td></tr>';
 			$echo_str .= $dlp."\t\t\t\t\t\t\t".'<tr><td style="height:106px;">';
 			$echo_str .= $dlp."\t\t\t\t\t\t\t\t".'<div>';
-			$echo_str .= $dlp."\t\t\t\t\t\t\t\t\t".'<select id="wfu_subfolders_browser_list_'.$attr.'" size="2" onchange="wfu_subfolders_browser_list_changed(\''.$attr.'\');">';
+			$echo_str .= $dlp."\t\t\t\t\t\t\t\t\t".'<select id="wfu_subfolders_browser_list_'.esc_attr($attr).'" size="2" onchange="wfu_subfolders_browser_list_changed(\''.esc_attr($attr).'\');">';
 			$echo_str .= $dlp."\t\t\t\t\t\t\t\t\t\t".'<option>Value</option>';
 			$echo_str .= $dlp."\t\t\t\t\t\t\t\t\t\t".'<option>Value2</option>';
 			$echo_str .= $dlp."\t\t\t\t\t\t\t\t\t\t".'<option>Value3</option>';
 			$echo_str .= $dlp."\t\t\t\t\t\t\t\t\t".'</select>';
-			$echo_str .= $dlp."\t\t\t\t\t\t\t\t\t".'<div id="wfu_subfolders_browser_msgcont_'.$attr.'" class="wfu_folder_browser_loading_container" style="padding-top:40px;">';
-			$echo_str .= $dlp."\t\t\t\t\t\t\t\t\t\t".'<label id="wfu_subfolders_browser_msg_'.$attr.'" style="margin-bottom:4px;">loading folder contents...</label>';
-			$echo_str .= $dlp."\t\t\t\t\t\t\t\t\t\t".'<img id="wfu_subfolders_browser_img_'.$attr.'" src="'.WFU_IMAGE_ADMIN_SUBFOLDER_LOADING.'" ></button>';
+			$echo_str .= $dlp."\t\t\t\t\t\t\t\t\t".'<div id="wfu_subfolders_browser_msgcont_'.esc_attr($attr).'" class="wfu_folder_browser_loading_container" style="padding-top:40px;">';
+			$echo_str .= $dlp."\t\t\t\t\t\t\t\t\t\t".'<label id="wfu_subfolders_browser_msg_'.esc_attr($attr).'" style="margin-bottom:4px;">'.esc_html__('loading folder contents...', 'wp-file-upload').'</label>';
+			$echo_str .= $dlp."\t\t\t\t\t\t\t\t\t\t".'<img id="wfu_subfolders_browser_img_'.esc_attr($attr).'" src="'.esc_url(WFU_IMAGE_ADMIN_SUBFOLDER_LOADING).'" ></button>';
 			$echo_str .= $dlp."\t\t\t\t\t\t\t\t\t".'</div>';
 			$echo_str .= $dlp."\t\t\t\t\t\t\t\t".'</div>';
 			$echo_str .= $dlp."\t\t\t\t\t\t\t".'</td></tr>';
 			$echo_str .= $dlp."\t\t\t\t\t\t\t".'<tr><td align="right" style="height:15px;">';
 			$echo_str .= $dlp."\t\t\t\t\t\t\t\t".'<div>';
-			$echo_str .= $dlp."\t\t\t\t\t\t\t\t\t".'<button class="button" onclick="wfu_folder_browser_cancel_clicked(\''.$attr.'\');">Cancel</button>';
-			$echo_str .= $dlp."\t\t\t\t\t\t\t\t\t".'<button id="wfu_subfolders_browser_ok_'.$attr.'" class="button">Ok</button>';
+			$echo_str .= $dlp."\t\t\t\t\t\t\t\t\t".'<button class="button" onclick="wfu_folder_browser_cancel_clicked(\''.esc_attr($attr).'\');">'.esc_html__('Cancel', 'wp-file-upload').'</button>';
+			$echo_str .= $dlp."\t\t\t\t\t\t\t\t\t".'<button id="wfu_subfolders_browser_ok_'.esc_attr($attr).'" class="button">Ok</button>';
 			$echo_str .= $dlp."\t\t\t\t\t\t\t\t".'</div>';
 			$echo_str .= $dlp."\t\t\t\t\t\t\t".'</td></tr>';
 			$echo_str .= $dlp."\t\t\t\t\t\t".'</tbody></table>';
@@ -473,10 +493,10 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 
 			$echo_str .= $dlp."\t\t\t\t".'</div></td>';
 			$echo_str .= $dlp."\t\t\t".'</tr></tbody></table>';
-			$echo_str .= $dlp."\t\t\t".'<input id="wfu_subfolders_isnewitem_'.$attr.'" type="hidden" value="" />';
-			$echo_str .= $dlp."\t\t\t".'<input id="wfu_subfolders_newitemindex_'.$attr.'" type="hidden" value="" />';
-			$echo_str .= $dlp."\t\t\t".'<input id="wfu_subfolders_newitemlevel_'.$attr.'" type="hidden" value="" />';
-			$echo_str .= $dlp."\t\t\t".'<input id="wfu_subfolders_newitemlevel2_'.$attr.'" type="hidden" value="" />';
+			$echo_str .= $dlp."\t\t\t".'<input id="wfu_subfolders_isnewitem_'.esc_attr($attr).'" type="hidden" value="" />';
+			$echo_str .= $dlp."\t\t\t".'<input id="wfu_subfolders_newitemindex_'.esc_attr($attr).'" type="hidden" value="" />';
+			$echo_str .= $dlp."\t\t\t".'<input id="wfu_subfolders_newitemlevel_'.esc_attr($attr).'" type="hidden" value="" />';
+			$echo_str .= $dlp."\t\t\t".'<input id="wfu_subfolders_newitemlevel2_'.esc_attr($attr).'" type="hidden" value="" />';
 			$echo_str .= $dlp."\t\t".'</div>';
 		}
 		elseif ( $def['type'] == "mchecklist" ) {
@@ -497,18 +517,18 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 			if ( $def['value'] == "all" ) $selected = array();
 			else $selected = explode(",", $def['value']);
 			foreach ( $selected as $key => $item ) $selected[$key] = trim($item);
-			$echo_str .= $dlp."\t\t".'<div id="wfu_attribute_'.$attr.'" class="wfu_mchecklist_container">';
+			$echo_str .= $dlp."\t\t".'<div id="wfu_attribute_'.esc_attr($attr).'" class="wfu_mchecklist_container">';
 			$is_first = true;
 			foreach ( $items as $key => $item ) {
 				if ( !$is_first ) $echo_str .= "<br />";
 				$is_first = false;
-				$echo_str .= $dlp."\t\t\t".'<div class="wfu_mchecklist_item"><input id="wfu_attribute_'.$attr.'_'.$key.'" type="checkbox"'.( $def['value'] == "all" || in_array($item['id'], $selected) ? ' checked="checked"' : '' ).( $def['value'] == "all" ? ' disabled="disabled"' : '' ).' onchange="wfu_update_mchecklist_value(\''.$attr.'\');" /><label for="wfu_attribute_'.$attr.'_'.$key.'">'.$item['id'].'</label>';
-				if ( $item['help'] != '' ) $echo_str .= '<div class="wfu_help_container" title="'.$item['help'].'"><img src="'.WFU_IMAGE_ADMIN_HELP.'" /></div>';
+				$echo_str .= $dlp."\t\t\t".'<div class="wfu_mchecklist_item"><input id="wfu_attribute_'.esc_attr($attr.'_'.$key).'" type="checkbox"'.( $def['value'] == "all" || in_array($item['id'], $selected) ? ' checked="checked"' : '' ).( $def['value'] == "all" ? ' disabled="disabled"' : '' ).' onchange="wfu_update_mchecklist_value(\''.esc_attr($attr).'\');" /><label for="wfu_attribute_'.esc_attr($attr.'_'.$key).'">'.esc_html($item['id']).'</label>';
+				if ( $item['help'] != '' ) $echo_str .= '<div class="wfu_help_container" title="'.wfu_unesc_percent(esc_attr($item['help'])).'"><img src="'.esc_url(WFU_IMAGE_ADMIN_HELP).'" /></div>';
 				$echo_str .= '</div>';
 			}
 			$echo_str .= $dlp."\t\t".'</div>';
-			$echo_str .= $dlp."\t\t".'<div id="wfu_attribute_'.$attr.'_optionhelp" class="wfu_help_container" title="" style="display:none; position:absolute;"><img src="'.WFU_IMAGE_ADMIN_HELP.'" style="visibility:visible;" /></div>';
-			$echo_str .= $dlp."\t\t".'<div class="wfu_mchecklist_checkall"><input id="wfu_attribute_'.$attr.'_all" type="checkbox" onchange="wfu_update_mchecklist_value(\''.$attr.'\');"'.( $def['value'] == "all" ? ' checked="checked"' : '' ).' /> Select all</div>';
+			$echo_str .= $dlp."\t\t".'<div id="wfu_attribute_'.esc_attr($attr).'_optionhelp" class="wfu_help_container" title="" style="display:none; position:absolute;"><img src="'.esc_url(WFU_IMAGE_ADMIN_HELP).'" style="visibility:visible;" /></div>';
+			$echo_str .= $dlp."\t\t".'<div class="wfu_mchecklist_checkall"><input id="wfu_attribute_'.esc_attr($attr).'_all" type="checkbox" onchange="wfu_update_mchecklist_value(\''.esc_attr($attr).'\');"'.( $def['value'] == "all" ? ' checked="checked"' : '' ).' /> '.esc_html__('Select all', 'wp-file-upload').'</div>';
 		}
 		elseif ( $def['type'] == "rolelist" ) {
 			$roles = $wp_roles->get_names();
@@ -518,13 +538,13 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 			else $rolesselected = $selected;
 			foreach ( $selected as $key => $item ) $selected[$key] = trim($item);
 			$echo_str .= $dlp."\t\t".'<table class="wfu_rolelist_container"><tbody><tr><td>';
-			$echo_str .= $dlp."\t\t".'<select id="wfu_attribute_'.$attr.'" multiple="multiple" size="'.count($roles).'" onchange="wfu_update_rolelist_value(\''.$attr.'\');"'.( in_array('all', $selected) ? ' disabled="disabled"' : '' ).'>';
+			$echo_str .= $dlp."\t\t".'<select id="wfu_attribute_'.esc_attr($attr).'" multiple="multiple" size="'.count($roles).'" onchange="wfu_update_rolelist_value(\''.esc_attr($attr).'\');"'.( in_array('all', $selected) ? ' disabled="disabled"' : '' ).'>';
 			foreach ( $roles as $roleid => $rolename )
-				$echo_str .= $dlp."\t\t\t".'<option value="'.$roleid.'"'.( in_array($roleid, $rolesselected) ? ' selected="selected"' : '' ).'>'.$rolename.'</option>';
+				$echo_str .= $dlp."\t\t\t".'<option value="'.esc_attr($roleid).'"'.( in_array($roleid, $rolesselected) ? ' selected="selected"' : '' ).'>'.esc_html($rolename).'</option>';
 			$echo_str .= $dlp."\t\t".'</select>';
 			$echo_str .= $dlp."\t\t".'</td><td>';
-			$echo_str .= $dlp."\t\t".'<div class="wfu_rolelist_checkbtn"><input class="'.( $default_administrator ? 'wfu_default_administrator' : '' ).'" id="wfu_attribute_'.$attr.'_all" type="checkbox" onchange="wfu_update_rolelist_value(\''.$attr.'\');"'.( in_array('all', $selected) ? ' checked="checked"' : '' ).' /><label for="wfu_attribute_'.$attr.'_all"> Select all</label></div><br />';
-			$echo_str .= $dlp."\t\t".'<div class="wfu_rolelist_checkbtn"><input id="wfu_attribute_'.$attr.'_guests" type="checkbox" onchange="wfu_update_rolelist_value(\''.$attr.'\');"'.( in_array("guests", $selected) ? ' checked="checked"' : '' ).' /><label for="wfu_attribute_'.$attr.'_guests"> Include guests</label></div>';
+			$echo_str .= $dlp."\t\t".'<div class="wfu_rolelist_checkbtn"><input class="'.( $default_administrator ? 'wfu_default_administrator' : '' ).'" id="wfu_attribute_'.esc_attr($attr).'_all" type="checkbox" onchange="wfu_update_rolelist_value(\''.esc_attr($attr).'\');"'.( in_array('all', $selected) ? ' checked="checked"' : '' ).' /><label for="wfu_attribute_'.esc_attr($attr).'_all"> '.esc_html__('Select all', 'wp-file-upload').'</label></div><br />';
+			$echo_str .= $dlp."\t\t".'<div class="wfu_rolelist_checkbtn"><input id="wfu_attribute_'.esc_attr($attr).'_guests" type="checkbox" onchange="wfu_update_rolelist_value(\''.esc_attr($attr).'\');"'.( in_array("guests", $selected) ? ' checked="checked"' : '' ).' /><label for="wfu_attribute_'.esc_attr($attr).'_guests"> '.esc_html__('Include guests', 'wp-file-upload').'</label></div>';
 			$echo_str .= $dlp."\t\t".'</td></tr></tbody></table>';
 		}
 		elseif ( $def['type'] == "userlist" ) {
@@ -541,16 +561,16 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 			if ( is_array($def['listitems']) && in_array('include_current', $def['listitems']) ) {
 				$only_current = ( $def['value'] == 'current' );
 				if ( $only_current ) $usersselected = ( $default_0 ? array($users[0]->user_login) : array( ) );
-				$echo_str .= $dlp."\t\t".'<td colspan="2"><div class="wfu_userlist_checkbtn"><input id="wfu_attribute_'.$attr.'_current" type="checkbox" onchange="wfu_update_userlist_value(\''.$attr.'\');"'.( $only_current ? ' checked="checked"' : '' ).' /><label for="wfu_attribute_'.$attr.'_current"> Only From Current User</label></div>';
+				$echo_str .= $dlp."\t\t".'<td colspan="2"><div class="wfu_userlist_checkbtn"><input id="wfu_attribute_'.esc_attr($attr).'_current" type="checkbox" onchange="wfu_update_userlist_value(\''.esc_attr($attr).'\');"'.( $only_current ? ' checked="checked"' : '' ).' /><label for="wfu_attribute_'.esc_attr($attr).'_current"> '.esc_html__('Only From Current User', 'wp-file-upload').'</label></div>';
 				$echo_str .= $dlp."\t\t".'</td></tr><tr>';
 			}
-			$echo_str .= $dlp."\t\t".'<td><select id="wfu_attribute_'.$attr.'" multiple="multiple" size="'.min(count($users), 10).'" onchange="wfu_update_userlist_value(\''.$attr.'\');"'.( $only_current || in_array('all', $selected) ? ' disabled="disabled"' : '' ).'>';
+			$echo_str .= $dlp."\t\t".'<td><select id="wfu_attribute_'.esc_attr($attr).'" multiple="multiple" size="'.min(count($users), 10).'" onchange="wfu_update_userlist_value(\''.esc_attr($attr).'\');"'.( $only_current || in_array('all', $selected) ? ' disabled="disabled"' : '' ).'>';
 			foreach ( $users as $userid => $user )
-				$echo_str .= $dlp."\t\t\t".'<option value="'.$user->user_login.'"'.( in_array($user->user_login, $usersselected) ? ' selected="selected"' : '' ).'>'.$user->display_name.' ('.$user->user_login.')</option>';
+				$echo_str .= $dlp."\t\t\t".'<option value="'.esc_attr($user->user_login).'"'.( in_array($user->user_login, $usersselected) ? ' selected="selected"' : '' ).'>'.esc_html($user->display_name.' ('.$user->user_login.')').'</option>';
 			$echo_str .= $dlp."\t\t".'</select>';
 			$echo_str .= $dlp."\t\t".'</td><td>';
-			$echo_str .= $dlp."\t\t".'<div class="wfu_userlist_checkbtn"><input class="'.( $default_0 ? 'wfu_default_0' : '' ).'" id="wfu_attribute_'.$attr.'_all" type="checkbox" onchange="wfu_update_userlist_value(\''.$attr.'\');"'.( in_array('all', $selected) ? ' checked="checked"' : '' ).( $only_current ? ' disabled="disabled"' : '' ).' /><label for="wfu_attribute_'.$attr.'_all"> Select all</label></div><br />';
-			$echo_str .= $dlp."\t\t".'<div class="wfu_userlist_checkbtn"><input id="wfu_attribute_'.$attr.'_guests" type="checkbox" onchange="wfu_update_userlist_value(\''.$attr.'\');"'.( in_array("guests", $selected) ? ' checked="checked"' : '' ).( $only_current ? ' disabled="disabled"' : '' ).' /><label for="wfu_attribute_'.$attr.'_guests"> Include guests</label></div>';
+			$echo_str .= $dlp."\t\t".'<div class="wfu_userlist_checkbtn"><input class="'.( $default_0 ? 'wfu_default_0' : '' ).'" id="wfu_attribute_'.esc_attr($attr).'_all" type="checkbox" onchange="wfu_update_userlist_value(\''.esc_attr($attr).'\');"'.( in_array('all', $selected) ? ' checked="checked"' : '' ).( $only_current ? ' disabled="disabled"' : '' ).' /><label for="wfu_attribute_'.$attr.'_all"> '.esc_html__('Select all', 'wp-file-upload').'</label></div><br />';
+			$echo_str .= $dlp."\t\t".'<div class="wfu_userlist_checkbtn"><input id="wfu_attribute_'.esc_attr($attr).'_guests" type="checkbox" onchange="wfu_update_userlist_value(\''.esc_attr($attr).'\');"'.( in_array("guests", $selected) ? ' checked="checked"' : '' ).( $only_current ? ' disabled="disabled"' : '' ).' /><label for="wfu_attribute_'.esc_attr($attr).'_guests"> '.esc_html__('Include guests', 'wp-file-upload').'</label></div>';
 			$echo_str .= $dlp."\t\t".'</td></tr></tbody></table>';
 		}
 		elseif ( $def['type'] == "postlist" ) {
@@ -568,12 +588,12 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 				if ( count($def['listitems']) > 0 ) {
 					$selected = explode(",", $def['value']);
 					$only_current = false;
-					$echo_str .= $dlp."\t\t".'<input id="wfu_attribute_'.$attr.'_postlist" type="hidden" value="'.implode(",", $def['listitems']).'" />';
+					$echo_str .= $dlp."\t\t".'<input id="wfu_attribute_'.esc_attr($attr).'_postlist" type="hidden" value="'.esc_attr(implode(",", $def['listitems'])).'" />';
 					$echo_str .= $dlp."\t\t".'<table class="wfu_postlist_container"><tbody><tr>';
 					if ( $has_current ) {
 						$only_current = ( $def['value'] == 'current' );
 						if ( $only_current ) $sselected = array();
-						$echo_str .= $dlp."\t\t".'<td colspan="'.count($def['listitems']).'"><div class="wfu_postlist_checkbtn"><input id="wfu_attribute_'.$attr.'_current" type="checkbox" onchange="wfu_update_postlist_value(\''.$attr.'\');"'.( $only_current ? ' checked="checked"' : '' ).' /><label for="wfu_attribute_'.$attr.'_current"> Only From Current Post/Page</label></div>';
+						$echo_str .= $dlp."\t\t".'<td colspan="'.count($def['listitems']).'"><div class="wfu_postlist_checkbtn"><input id="wfu_attribute_'.esc_attr($attr).'_current" type="checkbox" onchange="wfu_update_postlist_value(\''.esc_attr($attr).'\');"'.( $only_current ? ' checked="checked"' : '' ).' /><label for="wfu_attribute_'.esc_attr($attr).'_current"> '.esc_html__('Only From Current Post/Page', 'wp-file-upload').'</label></div>';
 						$echo_str .= $dlp."\t\t".'</td></tr><tr>';
 					}
 					$postargs = array( 'post_type' => $def['listitems'], 'post_status' => "publish,private,draft", 'posts_per_page' => -1 );
@@ -585,10 +605,10 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 					foreach ( $def['listitems'] as $post_type ) {
 						$flatlist = wfu_flatten_post_list($list[$post_type]);
 						$postobj = get_post_type_object( $post_type );
-						$echo_str .= $dlp."\t\t".'<td style="width:'.$td_width.'%;"><div class="wfu_postlist_header"><label>'.$postobj->label.'</label><div class="wfu_postlist_selectall"><input id="wfu_attribute_'.$attr.'_all_'.$post_type.'" type="checkbox" onchange="wfu_update_postlist_value(\''.$attr.'\');"'.( in_array('all', $selected) || in_array('all'.$post_type, $selected) ? ' checked="checked"' : '' ).( $only_current ? ' disabled="disabled"' : '' ).' /><label for="wfu_attribute_'.$attr.'_all_'.$post_type.'"> Select all</label></div></div>';
-						$echo_str .= $dlp."\t\t".'<select id="wfu_attribute_'.$attr.'_'.$post_type.'" multiple="multiple" size="'.min(count($flatlist), 10).'" onchange="wfu_update_postlist_value(\''.$attr.'\');"'.( $only_current || in_array('all', $selected) || in_array('all'.$post_type, $selected) ? ' disabled="disabled"' : '' ).' style="width:100%; overflow:auto;">';
+						$echo_str .= $dlp."\t\t".'<td style="width:'.esc_attr($td_width).'%;"><div class="wfu_postlist_header"><label>'.esc_html($postobj->label).'</label><div class="wfu_postlist_selectall"><input id="wfu_attribute_'.esc_attr($attr.'_all_'.$post_type).'" type="checkbox" onchange="wfu_update_postlist_value(\''.esc_attr($attr).'\');"'.( in_array('all', $selected) || in_array('all'.$post_type, $selected) ? ' checked="checked"' : '' ).( $only_current ? ' disabled="disabled"' : '' ).' /><label for="wfu_attribute_'.esc_attr($attr.'_all_'.$post_type).'"> '.esc_html__('Select all', 'wp-file-upload').'</label></div></div>';
+						$echo_str .= $dlp."\t\t".'<select id="wfu_attribute_'.esc_attr($attr.'_'.$post_type).'" multiple="multiple" size="'.min(count($flatlist), 10).'" onchange="wfu_update_postlist_value(\''.esc_attr($attr).'\');"'.( $only_current || in_array('all', $selected) || in_array('all'.$post_type, $selected) ? ' disabled="disabled"' : '' ).' style="width:100%; overflow:auto;">';
 						foreach ( $flatlist as $item )
-							$echo_str .= $dlp."\t\t\t".'<option value="'.$item['id'].'"'.( in_array($item['id'], $selected) ? ' selected="selected"' : '' ).'>'.str_repeat('&nbsp;', 4 * $item['level']).( $item['status'] == 1 ? '[Private]' : ( $item['status'] == 2 ? '[Draft]' : '' ) ).$item['title'].'</option>';
+							$echo_str .= $dlp."\t\t\t".'<option value="'.esc_attr($item['id']).'"'.( in_array($item['id'], $selected) ? ' selected="selected"' : '' ).'>'.esc_html(str_repeat('&nbsp;', 4 * $item['level']).( $item['status'] == 1 ? '[Private]' : ( $item['status'] == 2 ? '[Draft]' : '' ) ).$item['title']).'</option>';
 						$echo_str .= $dlp."\t\t".'</select></td>';
 					}
 					$echo_str .= $dlp."\t\t".'</tr></tbody></table>';
@@ -597,12 +617,12 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 			}
 			if ( !$processed ) {
 				$val = str_replace(array( "%n%", "%dq%", "%brl%", "%brr%" ), array( "\n", "&quot;", "[", "]" ), $def['value']);
-				$echo_str .= $dlp."\t\t".'<input id="wfu_attribute_'.$attr.'" type="text" name="wfu_text_elements" value="'.$val.'" />';				
+				$echo_str .= $dlp."\t\t".'<input id="wfu_attribute_'.esc_attr($attr).'" type="text" name="wfu_text_elements" value="'.esc_attr($val).'" />';				
 			}
 		}
 		elseif ( $def['type'] == "bloglist" ) {
-			if ( function_exists('wp_get_sites') ) {
-				$blogs = wp_get_sites( );
+			if ( function_exists('get_sites') ) {
+				$blogs = get_sites( );
 				$selected = explode(",", $def['value']);
 				if ( in_array('all', $selected) ) $blogsselected = array( );
 				else $blogsselected = $selected;
@@ -611,20 +631,20 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 				if ( is_array($def['listitems']) && in_array('include_current', $def['listitems']) ) {
 					$only_current = ( $def['value'] == 'current' );
 					if ( $only_current ) $blogsselected = array( );
-					$echo_str .= $dlp."\t\t".'<td colspan="2"><div class="wfu_bloglist_checkbtn"><input id="wfu_attribute_'.$attr.'_current" type="checkbox" onchange="wfu_update_bloglist_value(\''.$attr.'\');"'.( $only_current ? ' checked="checked"' : '' ).' /><label for="wfu_attribute_'.$attr.'_current"> Only From Current Site</label></div>';
+					$echo_str .= $dlp."\t\t".'<td colspan="2"><div class="wfu_bloglist_checkbtn"><input id="wfu_attribute_'.esc_attr($attr).'_current" type="checkbox" onchange="wfu_update_bloglist_value(\''.esc_attr($attr).'\');"'.( $only_current ? ' checked="checked"' : '' ).' /><label for="wfu_attribute_'.esc_attr($attr).'_current"> '.esc_html__('Only From Current Site', 'wp-file-upload').'</label></div>';
 					$echo_str .= $dlp."\t\t".'</td></tr><tr>';
 				}
-				$echo_str .= $dlp."\t\t".'<td><select id="wfu_attribute_'.$attr.'" multiple="multiple" size="'.min(count($blogs), 10).'" onchange="wfu_update_bloglist_value(\''.$attr.'\');"'.( $only_current || in_array('all', $selected) ? ' disabled="disabled"' : '' ).'>';
+				$echo_str .= $dlp."\t\t".'<td><select id="wfu_attribute_'.esc_attr($attr).'" multiple="multiple" size="'.min(count($blogs), 10).'" onchange="wfu_update_bloglist_value(\''.esc_attr($attr).'\');"'.( $only_current || in_array('all', $selected) ? ' disabled="disabled"' : '' ).'>';
 				foreach ( $blogs as $blog )
-					$echo_str .= $dlp."\t\t\t".'<option value="'.$blog->blog_id.'"'.( in_array($blog->blog_id, $blogsselected) ? ' selected="selected"' : '' ).'>'.$blog->path.'</option>';
+					$echo_str .= $dlp."\t\t\t".'<option value="'.esc_attr($blog->blog_id).'"'.( in_array($blog->blog_id, $blogsselected) ? ' selected="selected"' : '' ).'>'.esc_html($blog->path).'</option>';
 				$echo_str .= $dlp."\t\t".'</select>';
 				$echo_str .= $dlp."\t\t".'</td><td>';
-				$echo_str .= $dlp."\t\t".'<div class="wfu_bloglist_checkbtn"><input id="wfu_attribute_'.$attr.'_all" type="checkbox" onchange="wfu_update_bloglist_value(\''.$attr.'\');"'.( in_array('all', $selected) ? ' checked="checked"' : '' ).( $only_current ? ' disabled="disabled"' : '' ).' /><label for="wfu_attribute_'.$attr.'_all"> Select all</label></div>';
+				$echo_str .= $dlp."\t\t".'<div class="wfu_bloglist_checkbtn"><input id="wfu_attribute_'.esc_attr($attr).'_all" type="checkbox" onchange="wfu_update_bloglist_value(\''.esc_attr($attr).'\');"'.( in_array('all', $selected) ? ' checked="checked"' : '' ).( $only_current ? ' disabled="disabled"' : '' ).' /><label for="wfu_attribute_'.esc_attr($attr).'_all"> '.esc_html__('Select all', 'wp-file-upload').'</label></div>';
 				$echo_str .= $dlp."\t\t".'</td></tr></tbody></table>';
 			}
 			else {
 				$val = str_replace(array( "%n%", "%dq%", "%brl%", "%brr%" ), array( "\n", "&quot;", "[", "]" ), $def['value']);
-				$echo_str .= $dlp."\t\t".'<input id="wfu_attribute_'.$attr.'" type="text" name="wfu_text_elements" value="'.$val.'" />';				
+				$echo_str .= $dlp."\t\t".'<input id="wfu_attribute_'.esc_attr($attr).'" type="text" name="wfu_text_elements" value="'.esc_attr($val).'" />';				
 			}
 		}
 		elseif ( $def['type'] == "stringmatch" ) {
@@ -639,18 +659,18 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 			}
 //			$echo_str .= $dlp."\t\t".'<div style="white-space:nowrap;">';
 			$echo_str .= $dlp."\t\t".'<table class="wfu_stringmatch_container"><tbody><tr>';
-			$echo_str .= $dlp."\t\t".'<td style="width:40%; white-space:nowrap;"><label>Field </label><input id="wfu_attribute_'.$attr.'_matchfield" type="text" name="wfu_stringmatch_elements" value="'.$matchfield.'" style="width:auto;" /></td>';
-			$echo_str .= $dlp."\t\t".'<td style="width:30%;"><select id="wfu_attribute_'.$attr.'_matchcriterion" value="'.$matchcriterion.'" onchange="wfu_update_stringmatch_value(\''.$attr.'\');">';
-			$echo_str .= $dlp."\t\t\t".'<option value="equal to"'.( $matchcriterion == "equal to" ? 'selected="selected"' : '' ).'>equal to</option>';
-			$echo_str .= $dlp."\t\t\t".'<option value="starts with"'.( $matchcriterion == "starts with" ? 'selected="selected"' : '' ).'>starts with</option>';
-			$echo_str .= $dlp."\t\t\t".'<option value="ends with"'.( $matchcriterion == "ends with" ? 'selected="selected"' : '' ).'>ends with</option>';
-			$echo_str .= $dlp."\t\t\t".'<option value="contains"'.( $matchcriterion == "contains" ? 'selected="selected"' : '' ).'>contains</option>';
-			$echo_str .= $dlp."\t\t\t".'<option value="not equal to"'.( $matchcriterion == "not equal to" ? 'selected="selected"' : '' ).'>not equal to</option>';
-			$echo_str .= $dlp."\t\t\t".'<option value="does not start with"'.( $matchcriterion == "does not start with" ? 'selected="selected"' : '' ).'>does not start with</option>';
-			$echo_str .= $dlp."\t\t\t".'<option value="does not end with"'.( $matchcriterion == "does not end with" ? 'selected="selected"' : '' ).'>does not end with</option>';
-			$echo_str .= $dlp."\t\t\t".'<option value="does not contain"'.( $matchcriterion == "does not contain" ? 'selected="selected"' : '' ).'>does not contain</option>';
+			$echo_str .= $dlp."\t\t".'<td style="width:40%; white-space:nowrap;"><label>'.esc_html__('Field', 'wp-file-upload').' </label><input id="wfu_attribute_'.esc_attr($attr).'_matchfield" type="text" name="wfu_stringmatch_elements" value="'.esc_attr($matchfield).'" style="width:auto;" /></td>';
+			$echo_str .= $dlp."\t\t".'<td style="width:30%;"><select id="wfu_attribute_'.esc_attr($attr).'_matchcriterion" value="'.esc_attr($matchcriterion).'" onchange="wfu_update_stringmatch_value(\''.esc_attr($attr).'\');">';
+			$echo_str .= $dlp."\t\t\t".'<option value="equal to"'.( $matchcriterion == "equal to" ? 'selected="selected"' : '' ).'>'.esc_html__('equal to', 'wp-file-upload').'</option>';
+			$echo_str .= $dlp."\t\t\t".'<option value="starts with"'.( $matchcriterion == "starts with" ? 'selected="selected"' : '' ).'>'.esc_html__('starts with', 'wp-file-upload').'</option>';
+			$echo_str .= $dlp."\t\t\t".'<option value="ends with"'.( $matchcriterion == "ends with" ? 'selected="selected"' : '' ).'>'.esc_html__('ends with', 'wp-file-upload').'</option>';
+			$echo_str .= $dlp."\t\t\t".'<option value="contains"'.( $matchcriterion == "contains" ? 'selected="selected"' : '' ).'>'.esc_html__('contains', 'wp-file-upload').'</option>';
+			$echo_str .= $dlp."\t\t\t".'<option value="not equal to"'.( $matchcriterion == "not equal to" ? 'selected="selected"' : '' ).'>'.esc_html__('not equal to', 'wp-file-upload').'</option>';
+			$echo_str .= $dlp."\t\t\t".'<option value="does not start with"'.( $matchcriterion == "does not start with" ? 'selected="selected"' : '' ).'>'.esc_html__('does not start with', 'wp-file-upload').'</option>';
+			$echo_str .= $dlp."\t\t\t".'<option value="does not end with"'.( $matchcriterion == "does not end with" ? 'selected="selected"' : '' ).'>'.esc_html__('does not end with', 'wp-file-upload').'</option>';
+			$echo_str .= $dlp."\t\t\t".'<option value="does not contain"'.( $matchcriterion == "does not contain" ? 'selected="selected"' : '' ).'>'.esc_html__('does not contain', 'wp-file-upload').'</option>';
 			$echo_str .= $dlp."\t\t".'</select></td>';
-			$echo_str .= $dlp."\t\t".'<td style="width:30%;"><input id="wfu_attribute_'.$attr.'_matchvalue" type="text" name="wfu_stringmatch_elements" value="'.$matchvalue.'" style="width:auto;" /></td>';
+			$echo_str .= $dlp."\t\t".'<td style="width:30%;"><input id="wfu_attribute_'.esc_attr($attr).'_matchvalue" type="text" name="wfu_stringmatch_elements" value="'.esc_attr($matchvalue).'" style="width:auto;" /></td>';
 			$echo_str .= $dlp."\t\t".'</tr></tbody></table>';
 //			$echo_str .= $dlp."\t\t".'</div>';
 		}
@@ -660,11 +680,11 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 			$selected_flat = array();
 			foreach ( $selected as $ind => $item ) $selected_flat[$ind] = preg_replace("/(:|\/).*$/", "", $item);
 			$echo_str .= $dlp."\t".'<table class="wfu_columns_container"><tbody><tr>';
-			$echo_str .= $dlp."\t\t\t".'<td style="width:45%;"><label class="wfu_columns_listtitle">Available Columns</label></td>';
-			$echo_str .= $dlp."\t\t\t".'<td style="width:55%"><label class="wfu_columns_listtitle">Displayed Columns</label></td></tr><tr>';
+			$echo_str .= $dlp."\t\t\t".'<td style="width:45%;"><label class="wfu_columns_listtitle">'.esc_html__('Available Columns', 'wp-file-upload').'</label></td>';
+			$echo_str .= $dlp."\t\t\t".'<td style="width:55%"><label class="wfu_columns_listtitle">'.esc_html__('Displayed Columns', 'wp-file-upload').'</label></td></tr><tr>';
 			$echo_str .= $dlp."\t\t".'<td style="width:45%;">';
 			$echo_str .= $dlp."\t\t\t".'<table class="wfu_columns_container" style="table-layout:fixed; width:100%;"><tbody><tr>';
-			$echo_str .= $dlp."\t\t\t\t".'<td><select id="wfu_attribute_'.$attr.'_sourcelist" multiple="multiple" size="'.min(count($def['listitems']), 10).'" style="width:100%; overflow:auto;">';
+			$echo_str .= $dlp."\t\t\t\t".'<td><select id="wfu_attribute_'.esc_attr($attr).'_sourcelist" multiple="multiple" size="'.min(count($def['listitems']), 10).'" style="width:100%; overflow:auto;">';
 			$itemprops = array();
 			foreach ( $def['listitems'] as $item ) {
 				$item_required = ( substr($item, 0, 1) == "*" );
@@ -683,7 +703,7 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 				if ( $item_title == "" ) $item_title = $item_label;
 				$itemprops[$item_name] = array( 'label' => $item_label, 'title' => $item_title, 'required' => $item_required, 'sortable' => ( $item_name == "custom" || $item_sort != "" ), 'sorttype' => $item_sort );
 				$val = $item_name.":".$item_sort."/".$item_title;
-				$echo_str .= $dlp."\t\t\t\t\t".'<option value="'.$val.'"'.( $item_required ? ' class="wfu_columns_item_required"' : '' ).' onclick="wfu_columns_itemclicked(this, \''.$attr.'\');">'.$item_label.'</option>';
+				$echo_str .= $dlp."\t\t\t\t\t".'<option value="'.esc_attr($val).'"'.( $item_required ? ' class="wfu_columns_item_required"' : '' ).' onclick="wfu_columns_itemclicked(this, \''.esc_attr($attr).'\');">'.esc_html($item_label).'</option>';
 			}
 			foreach ( $itemprops as $item_name => $prop )
 				if ( $prop['required'] && !in_array($item_name, $selected_flat) )
@@ -707,34 +727,34 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 				}
 			}
 			$echo_str .= $dlp."\t\t\t\t".'</select></td>';
-			$echo_str .= $dlp."\t\t\t\t".'<td style="width:30px; padding:0 6px;"><button class="wfu_columns_addbutton" title="add column" onclick="wfu_columns_buttonaction(\''.$attr.'\', \'add\');" style="width:100%;">&gt;&gt;</button></td>';
+			$echo_str .= $dlp."\t\t\t\t".'<td style="width:30px; padding:0 6px;"><button class="wfu_columns_addbutton" title="'.esc_html__('add column', 'wp-file-upload').'" onclick="wfu_columns_buttonaction(\''.esc_attr($attr).'\', \'add\');" style="width:100%;">&gt;&gt;</button></td>';
 			$echo_str .= $dlp."\t\t\t".'</tr></tbody></table>';
 			$echo_str .= $dlp."\t\t".'</td>';
 			$echo_str .= $dlp."\t\t".'<td style="width:55%">';
 			$echo_str .= $dlp."\t\t\t".'<table class="wfu_columns_container" style="table-layout:fixed; width:100%;"><tbody><tr>';
-			$echo_str .= $dlp."\t\t\t\t".'<td><select id="wfu_attribute_'.$attr.'" multiple="multiple" size="'.min(count($def['listitems']), 10).'" onchange="wfu_update_columns(\''.$attr.'\');" style="width:100%; overflow:auto;">';
+			$echo_str .= $dlp."\t\t\t\t".'<td><select id="wfu_attribute_'.esc_attr($attr).'" multiple="multiple" size="'.min(count($def['listitems']), 10).'" onchange="wfu_update_columns(\''.esc_attr($attr).'\');" style="width:100%; overflow:auto;">';
 			foreach ( $selprops as $prop ) {
 				$val = $prop['name'].":".$prop['sorttype']."/".$prop['label']."/".$prop['title'];
-				$echo_str .= $dlp."\t\t\t\t\t".'<option value="'.$val.'"'.( $prop['required'] ? ' class="wfu_columns_item_required"' : '' ).' onclick="wfu_columns_itemclicked(this, \''.$attr.'\');">'.$prop['label'].( $prop['title'] != "" && $prop['title'] != $prop['label'] ? " (".$prop['title'].")" : "" ).'</option>';
+				$echo_str .= $dlp."\t\t\t\t\t".'<option value="'.esc_attr($val).'"'.( $prop['required'] ? ' class="wfu_columns_item_required"' : '' ).' onclick="wfu_columns_itemclicked(this, \''.esc_attr($attr).'\');">'.esc_html($prop['label'].( $prop['title'] != "" && $prop['title'] != $prop['label'] ? " (".$prop['title'].")" : "" )).'</option>';
 			}
 			$echo_str .= $dlp."\t\t\t\t".'</select></td>';
 			$echo_str .= $dlp."\t\t\t\t".'<td style="width:30px; padding:0 6px;">';
-			$echo_str .= $dlp."\t\t\t\t\t".'<button class="wfu_columns_addbutton" title="move up" onclick="wfu_columns_buttonaction(\''.$attr.'\', \'up\');" style="width:100%;">&#8593;</button>';
-			$echo_str .= $dlp."\t\t\t\t\t".'<button class="wfu_columns_addbutton" title="remove" onclick="wfu_columns_buttonaction(\''.$attr.'\', \'del\');" style="width:100%;">-</button>';
-			$echo_str .= $dlp."\t\t\t\t\t".'<button class="wfu_columns_addbutton" title="move down" onclick="wfu_columns_buttonaction(\''.$attr.'\', \'down\');" style="width:100%;">&#8595;</button>';
+			$echo_str .= $dlp."\t\t\t\t\t".'<button class="wfu_columns_addbutton" title="'.esc_html__('move up', 'wp-file-upload').'" onclick="wfu_columns_buttonaction(\''.esc_attr($attr).'\', \'up\');" style="width:100%;">&#8593;</button>';
+			$echo_str .= $dlp."\t\t\t\t\t".'<button class="wfu_columns_addbutton" title="'.esc_html__('remove', 'wp-file-upload').'" onclick="wfu_columns_buttonaction(\''.esc_attr($attr).'\', \'del\');" style="width:100%;">-</button>';
+			$echo_str .= $dlp."\t\t\t\t\t".'<button class="wfu_columns_addbutton" title="'.esc_html__('move down', 'wp-file-upload').'" onclick="wfu_columns_buttonaction(\''.esc_attr($attr).'\', \'down\');" style="width:100%;">&#8595;</button>';
 			$echo_str .= $dlp."\t\t\t\t".'</td>';
 			$echo_str .= $dlp."\t\t\t".'</tr></tbody></table>';
-			$echo_str .= $dlp."\t\t\t".'<label class="wfu_columns_listtitle" style="margin-top:6px; display:block;">Column Properties</label>';
-			$echo_str .= $dlp."\t\t\t".'<table id="wfu_attribute_'.$attr.'_columnprops_container" class="wfu_columnprops_container wfu_columnprops_container_disabled"><tbody>';
-			$echo_str .= $dlp."\t\t\t\t".'<tr><td style="width:1%; padding-right:10px;"><label id="wfu_attribute_'.$attr.'_columnprops_title_label">Title</label></td>';
-			$echo_str .= $dlp."\t\t\t\t".'<td><input type="text" id="wfu_attribute_'.$attr.'_columnprops_title" name="wfu_columnprops_elements" value="" style="width:100%;" disabled="disabled" /></td></tr>';
-			$echo_str .= $dlp."\t\t\t\t".'<tr><td style="width:1%; padding-right:10px; white-space:nowrap;"><label id="wfu_attribute_'.$attr.'_columnprops_id_label">Field ID</label></td>';
-			$echo_str .= $dlp."\t\t\t\t".'<td><input type="number" id="wfu_attribute_'.$attr.'_columnprops_id" name="wfu_columnprops_elements" min="1" value="" style="width:100%;" disabled="disabled" /></td></tr>';
-			$echo_str .= $dlp."\t\t\t\t".'<tr><td colspan="2"><input type="checkbox" id="wfu_attribute_'.$attr.'_columnprops_sort" value="" onchange="wfu_columnprops_element_changed({target:this});" disabled="disabled" /><label id="wfu_attribute_'.$attr.'_columnprops_sort_label" for="wfu_attribute_'.$attr.'_columnprops_sort">Sortable</label></td></tr>';
-			$echo_str .= $dlp."\t\t\t\t".'<tr><td style="width:1%; padding-right:10px;"><label id="wfu_attribute_'.$attr.'_columnprops_sorttype_label" style="white-space:nowrap;">Sort As</label></td>';
-			$echo_str .= $dlp."\t\t\t\t".'<td><select id="wfu_attribute_'.$attr.'_columnprops_sorttype" value="" onchange="wfu_columnprops_element_changed({target:this});" disabled="disabled"><option value=""></option><option value="s">String</option><option value="n">Integer</option></select></td></tr>';
-			$echo_str .= $dlp."\t\t\t\t".'<tr><td style="width:1%; padding-right:10px;"><label id="wfu_attribute_'.$attr.'_columnprops_defaultsort_label" style="white-space:nowrap;">Default Sort</label></td>';
-			$echo_str .= $dlp."\t\t\t\t".'<td><select id="wfu_attribute_'.$attr.'_columnprops_defaultsort" value="" onchange="wfu_columnprops_element_changed({target:this});" disabled="disabled"><option value=" "></option><option value="+">Ascending</option><option value="-">Descending</option></select></td></tr>';
+			$echo_str .= $dlp."\t\t\t".'<label class="wfu_columns_listtitle" style="margin-top:6px; display:block;">'.esc_html__('Column Properties', 'wp-file-upload').'</label>';
+			$echo_str .= $dlp."\t\t\t".'<table id="wfu_attribute_'.esc_attr($attr).'_columnprops_container" class="wfu_columnprops_container wfu_columnprops_container_disabled"><tbody>';
+			$echo_str .= $dlp."\t\t\t\t".'<tr><td style="width:1%; padding-right:10px;"><label id="wfu_attribute_'.esc_attr($attr).'_columnprops_title_label">'.esc_html__('Title', 'wp-file-upload').'</label></td>';
+			$echo_str .= $dlp."\t\t\t\t".'<td><input type="text" id="wfu_attribute_'.esc_attr($attr).'_columnprops_title" name="wfu_columnprops_elements" value="" style="width:100%;" disabled="disabled" /></td></tr>';
+			$echo_str .= $dlp."\t\t\t\t".'<tr><td style="width:1%; padding-right:10px; white-space:nowrap;"><label id="wfu_attribute_'.esc_attr($attr).'_columnprops_id_label">'.esc_html__('Field ID', 'wp-file-upload').'</label></td>';
+			$echo_str .= $dlp."\t\t\t\t".'<td><input type="number" id="wfu_attribute_'.esc_attr($attr).'_columnprops_id" name="wfu_columnprops_elements" min="1" value="" style="width:100%;" disabled="disabled" /></td></tr>';
+			$echo_str .= $dlp."\t\t\t\t".'<tr><td colspan="2"><input type="checkbox" id="wfu_attribute_'.esc_attr($attr).'_columnprops_sort" value="" onchange="wfu_columnprops_element_changed({target:this});" disabled="disabled" /><label id="wfu_attribute_'.esc_attr($attr).'_columnprops_sort_label" for="wfu_attribute_'.esc_attr($attr).'_columnprops_sort">'.esc_html__('Sortable', 'wp-file-upload').'</label></td></tr>';
+			$echo_str .= $dlp."\t\t\t\t".'<tr><td style="width:1%; padding-right:10px;"><label id="wfu_attribute_'.esc_attr($attr).'_columnprops_sorttype_label" style="white-space:nowrap;">'.esc_html__('Sort As', 'wp-file-upload').'</label></td>';
+			$echo_str .= $dlp."\t\t\t\t".'<td><select id="wfu_attribute_'.esc_attr($attr).'_columnprops_sorttype" value="" onchange="wfu_columnprops_element_changed({target:this});" disabled="disabled"><option value=""></option><option value="s">'.esc_html__('String', 'wp-file-upload').'</option><option value="n">'.esc_html__('Integer', 'wp-file-upload').'</option></select></td></tr>';
+			$echo_str .= $dlp."\t\t\t\t".'<tr><td style="width:1%; padding-right:10px;"><label id="wfu_attribute_'.esc_attr($attr).'_columnprops_defaultsort_label" style="white-space:nowrap;">'.esc_html__('Default Sort', 'wp-file-upload').'</label></td>';
+			$echo_str .= $dlp."\t\t\t\t".'<td><select id="wfu_attribute_'.esc_attr($attr).'_columnprops_defaultsort" value="" onchange="wfu_columnprops_element_changed({target:this});" disabled="disabled"><option value=" "></option><option value="+">'.esc_html__('Ascending', 'wp-file-upload').'</option><option value="-">'.esc_html__('Descending', 'wp-file-upload').'</option></select></td></tr>';
 			$echo_str .= $dlp."\t\t\t".'</tbody></table>';
 			$echo_str .= $dlp."\t\t".'</td>';
 			$echo_str .= $dlp."\t".'</tr></tbody></table>';
@@ -759,7 +779,7 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 			}
 			foreach ( $dims as $dim_id => $dim_name ) {
 				if ( !array_key_exists($dim_id, $vals) ) $vals[$dim_id] = "";
-				$echo_str .= $dlp."\t\t".'<span style="display:inline-block; width:130px;">'.$dim_name.'</span><input id="wfu_attribute_'.$attr.'_'.$dim_id.'" type="text" name="wfu_dimension_elements_'.$attr.'" class="wfu_short_text" value="'.$vals[$dim_id].'" /><br />';
+				$echo_str .= $dlp."\t\t".'<span style="display:inline-block; width:130px;">'.esc_html($dim_name).'</span><input id="wfu_attribute_'.esc_attr($attr.'_'.$dim_id).'" type="text" name="wfu_dimension_elements_'.esc_attr($attr).'" class="wfu_short_text" value="'.esc_attr($vals[$dim_id]).'" /><br />';
 			}
 		}
 		elseif ( $def['type'] == "userfields" ) {
@@ -771,14 +791,14 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 				if ( $field_raw != "" ) array_push($fields, array( "name" => $field_raw, "required" => $is_req ));
 			}
 			if ( count($fields) == 0 ) array_push($fields, array( "name" => "", "required" => false ));
-			$echo_str .= $dlp."\t\t".'<div id="wfu_attribute_'.$attr.'" class="wfu_userdata_container">';
+			$echo_str .= $dlp."\t\t".'<div id="wfu_attribute_'.esc_attr($attr).'" class="wfu_userdata_container">';
 			foreach ( $fields as $field ) {
 				$echo_str .= $dlp."\t\t\t".'<div class="wfu_userdata_line">';
-				$echo_str .= $dlp."\t\t\t\t".'<input type="text" name="wfu_userfield_elements" value="'.$field['name'].'" />';
-				$echo_str .= $dlp."\t\t\t\t".'<div class="wfu_userdata_action" onclick="wfu_userdata_add_field(this);"><img src="'.WFU_IMAGE_ADMIN_USERDATA_ADD.'" ></div>';
-				$echo_str .= $dlp."\t\t\t\t".'<div class="wfu_userdata_action wfu_userdata_action_disabled" onclick="wfu_userdata_remove_field(this);"><img src="'.WFU_IMAGE_ADMIN_USERDATA_REMOVE.'" ></div>';
+				$echo_str .= $dlp."\t\t\t\t".'<input type="text" name="wfu_userfield_elements" value="'.esc_attr($field['name']).'" />';
+				$echo_str .= $dlp."\t\t\t\t".'<div class="wfu_userdata_action" onclick="wfu_userdata_add_field(this);"><img src="'.esc_url(WFU_IMAGE_ADMIN_USERDATA_ADD).'" ></div>';
+				$echo_str .= $dlp."\t\t\t\t".'<div class="wfu_userdata_action wfu_userdata_action_disabled" onclick="wfu_userdata_remove_field(this);"><img src="'.esc_url(WFU_IMAGE_ADMIN_USERDATA_REMOVE).'" ></div>';
 				$echo_str .= $dlp."\t\t\t\t".'<input type="checkbox"'.( $field['required'] ? 'checked="checked"' : '' ).' onchange="wfu_update_userfield_value({target:this});" />';
-				$echo_str .= $dlp."\t\t\t\t".'<span>Required</span>';
+				$echo_str .= $dlp."\t\t\t\t".'<span>'.esc_html__('Required', 'wp-file-upload').'</span>';
 				$echo_str .= $dlp."\t\t\t".'</div>';
 			}
 			$echo_str .= $dlp."\t\t".'</div>';
@@ -809,52 +829,52 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 			if ( count($fields) == 0 ) array_push($fields, $fieldprops_default);
 			//set html template variable
 			$template = $dlp."\t\t\t\t".'<table class="wfu_formdata_props_table"><tbody>';
-			$template .= $dlp."\t\t\t\t".'<tr><td colspan="2"><label class="wfu_formdata_label">Type</label><select id="wfu_formfield_[[key]]_type" value="[[t]]" onchange="wfu_formdata_type_changed(\'[[key]]\');">';
-			foreach( $fielddefs as $item ) $template .= $dlp."\t\t\t\t\t".'<option value="'.$item['type'].'"[[type_'.$item['type'].'_selected]]>'.$item['type_description'].'</option>';
+			$template .= $dlp."\t\t\t\t".'<tr><td colspan="2"><label class="wfu_formdata_label">'.esc_html__('Type', 'wp-file-upload').'</label><select id="wfu_formfield_[[key]]_type" value="[[t]]" onchange="wfu_formdata_type_changed(\'[[key]]\');">';
+			foreach( $fielddefs as $item ) $template .= $dlp."\t\t\t\t\t".'<option value="'.esc_attr($item['type']).'"[[type_'.esc_attr($item['type']).'_selected]]>'.esc_html($item['type_description']).'</option>';
 			$template .= $dlp."\t\t\t\t".'</select></td><td>';
-			$template .= $dlp."\t\t\t\t".'<div class="wfu_formdata_action wfu_formdata_action_add" onclick="wfu_formdata_add_field(\'[[key]]\');"><img src="'.WFU_IMAGE_ADMIN_USERDATA_ADD.'" ></div>';
-			$template .= $dlp."\t\t\t\t".'<div class="wfu_formdata_action wfu_formdata_action_remove[[remove_disabled]]" onclick="wfu_formdata_remove_field(\'[[key]]\');"><img src="'.WFU_IMAGE_ADMIN_USERDATA_REMOVE.'" ></div>';
-			$template .= $dlp."\t\t\t\t".'<div class="wfu_formdata_action wfu_formdata_action_up[[up_disabled]]" onclick="wfu_formdata_move_field(\'[[key]]\', \'up\');"><img src="'.WFU_IMAGE_ADMIN_USERDATA_UP.'" ></div>';
-			$template .= $dlp."\t\t\t\t".'<div class="wfu_formdata_action wfu_formdata_action_down[[down_disabled]]" onclick="wfu_formdata_move_field(\'[[key]]\', \'down\');"><img src="'.WFU_IMAGE_ADMIN_USERDATA_DOWN.'" ></div></td></tr>';
+			$template .= $dlp."\t\t\t\t".'<div class="wfu_formdata_action wfu_formdata_action_add" onclick="wfu_formdata_add_field(\'[[key]]\');"><img src="'.esc_url(WFU_IMAGE_ADMIN_USERDATA_ADD).'" ></div>';
+			$template .= $dlp."\t\t\t\t".'<div class="wfu_formdata_action wfu_formdata_action_remove[[remove_disabled]]" onclick="wfu_formdata_remove_field(\'[[key]]\');"><img src="'.esc_url(WFU_IMAGE_ADMIN_USERDATA_REMOVE).'" ></div>';
+			$template .= $dlp."\t\t\t\t".'<div class="wfu_formdata_action wfu_formdata_action_up[[up_disabled]]" onclick="wfu_formdata_move_field(\'[[key]]\', \'up\');"><img src="'.esc_url(WFU_IMAGE_ADMIN_USERDATA_UP).'" ></div>';
+			$template .= $dlp."\t\t\t\t".'<div class="wfu_formdata_action wfu_formdata_action_down[[down_disabled]]" onclick="wfu_formdata_move_field(\'[[key]]\', \'down\');"><img src="'.esc_url(WFU_IMAGE_ADMIN_USERDATA_DOWN).'" ></div></td></tr>';
 			$template .= $dlp."\t\t\t\t".'<tr><td class="wfu_formdata_props"><label class="wfu_formdata_label" title="[[label_hint]]">[[label_label]]</label></td><td><input type="text" id="wfu_formfield_[[key]]_label" name="wfu_formfield_elements" value="[[label]]" /></td><td></td></tr>';
 			$labelpos_options = "";
 			foreach ( $labelpositions as $pos ) $labelpos_options .= '<option value="'.$pos.'"[[labelposition_'.$pos.'_selected]]>'.$pos.'</option>';
 			$template .= '[[S->]]'.$dlp."\t\t\t\t".'<tr><td class="wfu_formdata_props"><label class="wfu_formdata_labelposition" title="[[labelposition_hint]]">Label Position</label></td><td><select id="wfu_formfield_[[key]]_labelposition" value="[[s]]" title="[[labelposition_hint]]" onchange="wfu_update_formfield_value({target:this});">'.$labelpos_options.'</select></td><td></td></tr>[[<-S]]';
-			$template .= '[[R->]]'.$dlp."\t\t\t\t".'<tr><td colspan="2" class="wfu_formdata_props"><input id="wfu_formfield_[[key]]_required" type="checkbox"[[r->]] checked="checked"[[<-r]] title="[[required_hint]]" onchange="wfu_update_formfield_value({target:this});" /><label for="wfu_formfield_[[key]]_required" title="[[required_hint]]"> Required</label></td><td></td></tr>[[<-R]]';
-			$template .= '[[A->]]'.$dlp."\t\t\t\t".'<tr><td colspan="2" class="wfu_formdata_props"><input id="wfu_formfield_[[key]]_donotautocomplete" type="checkbox"[[a->]] checked="checked"[[<-a]] title="[[donotautocomplete_hint]]" onchange="wfu_update_formfield_value({target:this});" /><label for="wfu_formfield_[[key]]_donotautocomplete" title="[[donotautocomplete_hint]]"> Do not autocomplete</label></td><td></td></tr>[[<-A]]';
-			$template .= '[[V->]]'.$dlp."\t\t\t\t".'<tr><td colspan="2" class="wfu_formdata_props"><input id="wfu_formfield_[[key]]_validate" type="checkbox"[[v->]] checked="checked"[[<-v]] title="[[validate_hint]]" onchange="wfu_update_formfield_value({target:this});" /><label for="wfu_formfield_[[key]]_validate" title="[[validate_hint]]"> Validate</label></td><td></td></tr>[[<-V]]';
+			$template .= '[[R->]]'.$dlp."\t\t\t\t".'<tr><td colspan="2" class="wfu_formdata_props"><input id="wfu_formfield_[[key]]_required" type="checkbox"[[r->]] checked="checked"[[<-r]] title="[[required_hint]]" onchange="wfu_update_formfield_value({target:this});" /><label for="wfu_formfield_[[key]]_required" title="[[required_hint]]"> '.esc_html__('Required', 'wp-file-upload').'</label></td><td></td></tr>[[<-R]]';
+			$template .= '[[A->]]'.$dlp."\t\t\t\t".'<tr><td colspan="2" class="wfu_formdata_props"><input id="wfu_formfield_[[key]]_donotautocomplete" type="checkbox"[[a->]] checked="checked"[[<-a]] title="[[donotautocomplete_hint]]" onchange="wfu_update_formfield_value({target:this});" /><label for="wfu_formfield_[[key]]_donotautocomplete" title="[[donotautocomplete_hint]]"> '.esc_html__('Do not autocomplete', 'wp-file-upload').'</label></td><td></td></tr>[[<-A]]';
+			$template .= '[[V->]]'.$dlp."\t\t\t\t".'<tr><td colspan="2" class="wfu_formdata_props"><input id="wfu_formfield_[[key]]_validate" type="checkbox"[[v->]] checked="checked"[[<-v]] title="[[validate_hint]]" onchange="wfu_update_formfield_value({target:this});" /><label for="wfu_formfield_[[key]]_validate" title="[[validate_hint]]"> '.esc_html__('Validate', 'wp-file-upload').'</label></td><td></td></tr>[[<-V]]';
 			$hint_options = "";
-			foreach ( $hintpositions as $pos ) $hint_options .= '<option value="'.$pos.'"[[hintposition_'.$pos.'_selected]]>'.$pos.'</option>';
-			$template .= '[[P->]]'.$dlp."\t\t\t\t".'<tr><td class="wfu_formdata_props"><label class="wfu_formdata_label" title="[[hintposition_hint]]">Hint Position</label></td><td><select id="wfu_formfield_[[key]]_hintposition" value="[[p]]" title="[[hintposition_hint]]" onchange="wfu_update_formfield_value({target:this});">'.$hint_options.'</select></td><td></td></tr>[[<-P]]';
-			$template .= '[[H->]]'.$dlp."\t\t\t\t".'<tr><td colspan="2" class="wfu_formdata_props"><input id="wfu_formfield_[[key]]_typehook" type="checkbox"[[h->]] checked="checked"[[<-h]] title="[[typehook_hint]]" onchange="wfu_update_formfield_value({target:this});" /><label for="wfu_formfield_[[key]]_typehook" title="[[typehook_hint]]"> Type hook</label></td><td></td></tr>[[<-H]]';
-			$template .= '[[D->]]'.$dlp."\t\t\t\t".'<tr><td class="wfu_formdata_props"><label class="wfu_formdata_label" title="[[default_hint]]">Default</label></td><td><input id="wfu_formfield_[[key]]_default" type="text" name="wfu_formfield_elements" value="[[d]]" title="[[default_hint]]" /></td><td></td></tr>[[<-D]]';
+			foreach ( $hintpositions as $pos ) $hint_options .= '<option value="'.esc_attr($pos).'"[[hintposition_'.esc_attr($pos).'_selected]]>'.esc_html($pos).'</option>';
+			$template .= '[[P->]]'.$dlp."\t\t\t\t".'<tr><td class="wfu_formdata_props"><label class="wfu_formdata_label" title="[[hintposition_hint]]">'.esc_html__('Hint Position', 'wp-file-upload').'</label></td><td><select id="wfu_formfield_[[key]]_hintposition" value="[[p]]" title="[[hintposition_hint]]" onchange="wfu_update_formfield_value({target:this});">'.$hint_options.'</select></td><td></td></tr>[[<-P]]';
+			$template .= '[[H->]]'.$dlp."\t\t\t\t".'<tr><td colspan="2" class="wfu_formdata_props"><input id="wfu_formfield_[[key]]_typehook" type="checkbox"[[h->]] checked="checked"[[<-h]] title="[[typehook_hint]]" onchange="wfu_update_formfield_value({target:this});" /><label for="wfu_formfield_[[key]]_typehook" title="[[typehook_hint]]"> '.esc_html__('Type hook', 'wp-file-upload').'</label></td><td></td></tr>[[<-H]]';
+			$template .= '[[D->]]'.$dlp."\t\t\t\t".'<tr><td class="wfu_formdata_props"><label class="wfu_formdata_label" title="[[default_hint]]">'.esc_html__('Default', 'wp-file-upload').'</label></td><td><input id="wfu_formfield_[[key]]_default" type="text" name="wfu_formfield_elements" value="[[d]]" title="[[default_hint]]" /></td><td></td></tr>[[<-D]]';
 			$template .= '[[L->]]'.$dlp."\t\t\t\t".'<tr><td class="wfu_formdata_props"><label class="wfu_formdata_label" title="[[data_hint]]">[[data_label]]</label></td><td><input id="wfu_formfield_[[key]]_data" type="text" name="wfu_formfield_elements" value="[[l]]" title="[[data_hint]]" /></td><td></td></tr>[[<-L]]';
-			$template .= '[[G->]]'.$dlp."\t\t\t\t".'<tr><td class="wfu_formdata_props"><label class="wfu_formdata_label" title="[[group_hint]]">Group ID</label></td><td><input id="wfu_formfield_[[key]]_group" type="text" name="wfu_formfield_elements" value="[[g]]" title="[[group_hint]]" /></td><td></td></tr>[[<-G]]';
-			$template .= '[[F->]]'.$dlp."\t\t\t\t".'<tr><td class="wfu_formdata_props"><label class="wfu_formdata_label" title="[[format_hint]]">Format</label></td><td><input id="wfu_formfield_[[key]]_format" type="text" name="wfu_formfield_elements" value="[[f]]" title="[[format_hint]]" /></td><td></td></tr>[[<-F]]';
+			$template .= '[[G->]]'.$dlp."\t\t\t\t".'<tr><td class="wfu_formdata_props"><label class="wfu_formdata_label" title="[[group_hint]]">'.esc_html__('Group ID', 'wp-file-upload').'</label></td><td><input id="wfu_formfield_[[key]]_group" type="text" name="wfu_formfield_elements" value="[[g]]" title="[[group_hint]]" /></td><td></td></tr>[[<-G]]';
+			$template .= '[[F->]]'.$dlp."\t\t\t\t".'<tr><td class="wfu_formdata_props"><label class="wfu_formdata_label" title="[[format_hint]]">'.esc_html__('Format', 'wp-file-upload').'</label></td><td><input id="wfu_formfield_[[key]]_format" type="text" name="wfu_formfield_elements" value="[[f]]" title="[[format_hint]]" /></td><td></td></tr>[[<-F]]';
 			$template .= $dlp."\t\t\t\t".'</tbody></table>';
 			//draw html elements
-			$echo_str .= $dlp."\t\t".'<div id="wfu_attribute_'.$attr.'" class="wfu_formdata_container">';
-			$echo_str .= $dlp."\t\t\t".'<input type="hidden" class="wfu_formdata_all_attributes" value="'.implode(",", $all_attributes).'" />';
-			$echo_str .= $dlp."\t\t\t".'<div id="wfu_attribute_'.$attr.'_codeadd" style="display:none;">';
+			$echo_str .= $dlp."\t\t".'<div id="wfu_attribute_'.esc_attr($attr).'" class="wfu_formdata_container">';
+			$echo_str .= $dlp."\t\t\t".'<input type="hidden" class="wfu_formdata_all_attributes" value="'.esc_attr(implode(",", $all_attributes)).'" />';
+			$echo_str .= $dlp."\t\t\t".'<div id="wfu_attribute_'.esc_attr($attr).'_codeadd" style="display:none;">';
 			//pass template and type props to client javascript variable and then erase the code
 			$echo_str .= $dlp."\t\t\t\t".'<script type="text/javascript">';
-			$echo_str .= $dlp."\t\t\t\t\t".'var wfu_attribute_'.$attr.'_formtemplate = "'.wfu_plugin_encode_string($template).'";';
-			$echo_str .= $dlp."\t\t\t\t\t".'var wfu_attribute_'.$attr.'_typeprops = {};';
+			$echo_str .= $dlp."\t\t\t\t\t".'var wfu_attribute_'.esc_attr($attr).'_formtemplate = "'.wfu_plugin_encode_string($template).'";';
+			$echo_str .= $dlp."\t\t\t\t\t".'var wfu_attribute_'.esc_attr($attr).'_typeprops = {};';
 			$fielddef_array = array();
 			foreach( $fielddefs as $item ) array_push($fielddef_array, $item['type']);
 			//prepare storage of field definitions to browser context
-			$echo_str .= $dlp."\t\t\t\t\t".'wfu_attribute_'.$attr.'_typeprops[0] = \''.implode(",", $fielddef_array).'\'';
+			$echo_str .= $dlp."\t\t\t\t\t".'wfu_attribute_'.esc_attr($attr).'_typeprops[0] = \''.esc_attr(implode(",", $fielddef_array)).'\'';
 			foreach( $fielddefs as $item ) {
 				$typeprops = array();
 				foreach ( $fieldprops_basic as $prop ) {
-					array_push($typeprops, $prop.': \''.$item[$prop].'\'');
-					array_push($typeprops, $prop.'_hint: \''.$item[$prop.'_hint'].'\'');
+					array_push($typeprops, esc_attr($prop).': \''.esc_attr($item[$prop]).'\'');
+					array_push($typeprops, esc_attr($prop).'_hint: \''.esc_attr($item[$prop.'_hint']).'\'');
 				}
-				array_push($typeprops, 'label_label: \''.$item['label_label'].'\'');
-				array_push($typeprops, 'data_label: \''.$item['data_label'].'\'');
-				$echo_str .= $dlp."\t\t\t\t\t".'wfu_attribute_'.$attr.'_typeprops["'.$item['type'].'"] = {'.implode(", ", $typeprops).'};';
+				array_push($typeprops, 'label_label: \''.esc_attr($item['label_label']).'\'');
+				array_push($typeprops, 'data_label: \''.esc_attr($item['data_label']).'\'');
+				$echo_str .= $dlp."\t\t\t\t\t".'wfu_attribute_'.esc_attr($attr).'_typeprops["'.esc_attr($item['type']).'"] = {'.implode(", ", $typeprops).'};';
 			}
-			$echo_str .= $dlp."\t\t\t\t\t".'var self = document.getElementById("wfu_attribute_'.$attr.'_codeadd"); self.parentNode.removeChild(self);';
+			$echo_str .= $dlp."\t\t\t\t\t".'var self = document.getElementById("wfu_attribute_'.esc_attr($attr).'_codeadd"); self.parentNode.removeChild(self);';
 			$echo_str .= $dlp."\t\t\t\t".'</script>';
 			$echo_str .= $dlp."\t\t\t".'</div>';
 			$i = 1;
@@ -862,10 +882,10 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 				$ind = wfu_create_random_string(4);
 				$key = $attr."_".$ind;
 				$fielddef = $fielddefs[$field["type"]];
-				$echo_str .= $dlp."\t\t\t".'<div id="wfu_formfield_'.$key.'_container" class="wfu_formdata_line_container">';
+				$echo_str .= $dlp."\t\t\t".'<div id="wfu_formfield_'.esc_attr($key).'_container" class="wfu_formdata_line_container">';
 				//generate html elements from template, replacing variables where applicable
-				$from_template = str_replace(array('[[key]]', '[[t]]', '[[label]]', '[[s]]', '[[d]]', '[[l]]', '[[label_label]]', '[[data_label]]', '[[g]]', '[[f]]', '[[p]]'), array($key, $field['type'], $field['label'], $field['labelposition'], $field['default'], $field['data'], $fielddef['label_label'], $fielddef['data_label'], $field['group'], $field['format'], $field['hintposition']), $template);
-				foreach ( $fieldprops_basic as $prop ) $from_template = str_replace('[['.$prop.'_hint]]', str_replace('\r\n', "\r\n", $fielddef[$prop.'_hint']), $from_template);
+				$from_template = str_replace(array('[[key]]', '[[t]]', '[[label]]', '[[s]]', '[[d]]', '[[l]]', '[[label_label]]', '[[data_label]]', '[[g]]', '[[f]]', '[[p]]'), array(esc_attr($key), esc_attr($field['type']), esc_attr($field['label']), esc_attr($field['labelposition']), esc_attr($field['default']), esc_attr($field['data']), esc_attr($fielddef['label_label']), esc_attr($fielddef['data_label']), esc_attr($field['group']), esc_attr($field['format']), esc_attr($field['hintposition'])), $template);
+				foreach ( $fieldprops_basic as $prop ) $from_template = str_replace('[['.$prop.'_hint]]', esc_attr(str_replace('\r\n', "\r\n", $fielddef[$prop.'_hint'])), $from_template);
 				foreach( $fielddefs as $item ) $from_template = str_replace('[[type_'.$item['type'].'_selected]]', ( $item['type'] == $field['type'] ? ' selected = "selected"' : '' ), $from_template);
 				foreach( $labelpositions as $pos ) $from_template = str_replace('[[labelposition_'.$pos.'_selected]]', ( $pos == $field['labelposition'] ? ' selected = "selected"' : '' ), $from_template);
 				foreach( $hintpositions as $pos ) $from_template = str_replace('[[hintposition_'.$pos.'_selected]]', ( $pos == $field['hintposition'] ? ' selected = "selected"' : '' ), $from_template);
@@ -896,12 +916,12 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 		}
 		elseif ( $def['type'] == "color" ) {
 			$val = str_replace(array( "%n%", "%dq%", "%brl%", "%brr%" ), array( "\n", "&quot;", "[", "]" ), $def['value']);
-			$echo_str .= $dlp."\t\t".'<input id="wfu_attribute_'.$attr.'" type="text" name="wfu_text_elements" class="wfu_color_field" value="'.$val.'" />';
+			$echo_str .= $dlp."\t\t".'<input id="wfu_attribute_'.esc_attr($attr).'" type="text" name="wfu_text_elements" class="wfu_color_field" value="'.esc_attr($val).'" />';
 		}
 		elseif ( $def['type'] == "coloralpha" ) {
 			$val = str_replace(array( "%n%", "%dq%", "%brl%", "%brr%" ), array( "\n", "&quot;", "[", "]" ), $def['value']);
-			$echo_str .= $dlp."\t\t".'<input id="wfu_attribute_'.$attr.'" type="text" name="wfu_text_elements" class="wfu_color_field" value="'.$val.'" data-alpha-enabled="true" />';
-			$echo_str .= $dlp."\t\t".'<input id="wfu_attribute_'.$attr.'_default" type="hidden" value="'.$def['default'].'" />';
+			$echo_str .= $dlp."\t\t".'<input id="wfu_attribute_'.esc_attr($attr).'" type="text" name="wfu_text_elements" class="wfu_color_field" value="'.esc_attr($val).'" data-alpha-enabled="true" />';
+			$echo_str .= $dlp."\t\t".'<input id="wfu_attribute_'.esc_attr($attr).'_default" type="hidden" value="'.esc_attr($def['default']).'" />';
 		}
 		elseif ( $def['type'] == "color-triplet" ) {
 			$triplet = explode(",", $def['value']);
@@ -909,21 +929,21 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 			if ( count($triplet) == 2 ) $triplet = array( $triplet[0], $triplet[1], "#000000");
 			elseif ( count($triplet) == 1 ) $triplet = array( $triplet[0], "#FFFFFF", "#000000");
 			elseif ( count($triplet) < 3 ) $triplet = array( "#000000", "#FFFFFF", "#000000");
-			$echo_str .= $dlp."\t\t".'<div class="wfu_color_container"><label style="display:inline-block; width:120px; margin-top:-16px;">Text Color</label><input id="wfu_attribute_'.$attr.'_color" type="text" class="wfu_color_field" name="wfu_triplecolor_elements" value="'.$triplet[0].'" /></div>';
-			$echo_str .= $dlp."\t\t".'<div class="wfu_color_container"><label style="display:inline-block; width:120px; margin-top:-16px;">Background Color</label><input id="wfu_attribute_'.$attr.'_bgcolor" type="text" class="wfu_color_field" name="wfu_triplecolor_elements" value="'.$triplet[1].'" /></div>';
-			$echo_str .= $dlp."\t\t".'<div class="wfu_color_container"><label style="display:inline-block; width:120px; margin-top:-16px;">Border Color</label><input id="wfu_attribute_'.$attr.'_borcolor" type="text" class="wfu_color_field" name="wfu_triplecolor_elements" value="'.$triplet[2].'" /></div>';
+			$echo_str .= $dlp."\t\t".'<div class="wfu_color_container"><label style="display:inline-block; width:120px; margin-top:-16px;">'.esc_html__('Text Color', 'wp-file-upload').'</label><input id="wfu_attribute_'.esc_attr($attr).'_color" type="text" class="wfu_color_field" name="wfu_triplecolor_elements" value="'.esc_attr($triplet[0]).'" /></div>';
+			$echo_str .= $dlp."\t\t".'<div class="wfu_color_container"><label style="display:inline-block; width:120px; margin-top:-16px;">'.esc_html__('Background Color', 'wp-file-upload').'</label><input id="wfu_attribute_'.esc_attr($attr).'_bgcolor" type="text" class="wfu_color_field" name="wfu_triplecolor_elements" value="'.esc_attr($triplet[1]).'" /></div>';
+			$echo_str .= $dlp."\t\t".'<div class="wfu_color_container"><label style="display:inline-block; width:120px; margin-top:-16px;">'.esc_html__('Border Color', 'wp-file-upload').'</label><input id="wfu_attribute_'.esc_attr($attr).'_borcolor" type="text" class="wfu_color_field" name="wfu_triplecolor_elements" value="'.esc_attr($triplet[2]).'" /></div>';
 		}
 		elseif ( $def['type'] == "customactionbutton" ) {
 			$echo_str .= $dlp."\t\t".'<div class="wfu_customactionbutton_wrapper">';
 			$ii = 1;
 			foreach ( $def['listitems'] as $item ) {
-				$echo_str .= '<input id="wfu_attribute_'.$attr.'" type="button" class="wfu_customactionbutton" value="'.$item.'" onclick="wfu_runcustomaction(\''.$def['attribute'].'_'.$ii.'\')" />';
+				$echo_str .= '<input id="wfu_attribute_'.esc_attr($attr).'" type="button" class="wfu_customactionbutton" value="'.esc_attr($item).'" onclick="wfu_runcustomaction(\''.esc_attr($def['attribute'].'_'.$ii).'\')" />';
 				$ii++;
 			}
 			$echo_str .= $dlp."\t\t".'</div>';
 		}
 		else {
-			$echo_str .= $dlp."\t\t".'<input id="wfu_attribute_'.$attr.'" type="text" name="wfu_text_elements" value="'.$def['value'].'" />';
+			$echo_str .= $dlp."\t\t".'<input id="wfu_attribute_'.esc_attr($attr).'" type="text" name="wfu_text_elements" value="'.esc_attr($def['value']).'" />';
 			if ( $def['variables'] != null ) $echo_str .= $dlp.wfu_insert_variables($def['variables'], 'wfu_variable wfu_variable_'.$attr);
 		}
 		$echo_str .= $dlp."\t".'</div></td>';
@@ -976,7 +996,7 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 function wfu_insert_variables($variables, $class) {
 	$ret = "";
 	foreach ( $variables as $variable )
-		if ( $variable == "%userdataXXX%" ) $ret .= "\t\t".'<select class="'.$class.'" name="wfu_formfield_select" title="'.constant("WFU_VARIABLE_TITLE_".strtoupper(str_replace("%", "", $variable))).'" onchange="wfu_insert_userfield_variable(this);"><option style="display:none;">%userdataXXX%</option></select>';
-		elseif ( $variable != "%n%" && $variable != "%dq%" && $variable != "%brl%" && $variable != "%brr%" ) $ret .= "\t\t".'<span class="'.$class.'" title="'.constant("WFU_VARIABLE_TITLE_".strtoupper(str_replace("%", "", $variable))).'" ondblclick="wfu_insert_variable(this);">'.$variable.'</span>';
+		if ( $variable == "%userdataXXX%" ) $ret .= "\t\t".'<select class="'.esc_attr($class).'" name="wfu_formfield_select" title="'.esc_attr(wfu_unesc_percent(constant("WFU_VARIABLE_TITLE_".strtoupper(str_replace("%", "", $variable))))).'" onchange="wfu_insert_userfield_variable(this);"><option style="display:none;">%userdataXXX%</option></select>';
+		elseif ( $variable != "%n%" && $variable != "%dq%" && $variable != "%brl%" && $variable != "%brr%" ) $ret .= "\t\t".'<span class="'.esc_attr($class).'" title="'.esc_attr(wfu_unesc_percent(constant("WFU_VARIABLE_TITLE_".strtoupper(str_replace("%", "", $variable))))).'" ondblclick="wfu_insert_variable(this);">'.esc_html($variable).'</span>';
 	return $ret;
 }

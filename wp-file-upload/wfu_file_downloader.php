@@ -3,6 +3,7 @@ $downloader_data = wfu_read_downloader_data();
 $GLOBALS["wfu_downloader_data"] = $downloader_data;
 if ( !defined("ABSWPFILEUPLOAD_DIR") ) DEFINE("ABSWPFILEUPLOAD_DIR", dirname(__FILE__).'/');
 if ( !defined("WFU_AUTOLOADER_PHP50600") ) DEFINE("WFU_AUTOLOADER_PHP50600", 'vendor/modules/php5.6/autoload.php');
+
 include_once( ABSWPFILEUPLOAD_DIR.'lib/wfu_functions.php' );
 include_once( ABSWPFILEUPLOAD_DIR.'lib/wfu_security.php' );
 wfu_download_file();
@@ -21,10 +22,8 @@ wfu_download_file();
  */
 function wfu_read_downloader_data() {
 	// read the temp file name from URL param
-	$source = (isset($_POST['source']) ? $_POST['source'] : (isset($_GET['source']) ? $_GET['source'] : ''));
+	$source = (isset($_POST['source']) ? wfu_sanitize_code_downloader($_POST['source']) : (isset($_GET['source']) ? wfu_sanitize_code_downloader($_GET['source']) : ''));
 	if ( $source === '' ) die();
-	// sanitize source file to avoid directory traversals through it
-	$source = preg_replace("/[^A-Za-z0-9]/", "", $source);
 	$filepath = sys_get_temp_dir();
 	if ( substr($filepath, -1) != '/' ) $filepath .= '/';
 	$filepath .= $source;
@@ -58,6 +57,19 @@ function wfu_read_downloader_data() {
 	$notexist = ( array_key_exists('wfu_browser_downloadfile_notexist', $data) ? strip_tags($data['wfu_browser_downloadfile_notexist']) : '' );
 	$failed = ( array_key_exists('wfu_browser_downloadfile_failed', $data) ? strip_tags($data['wfu_browser_downloadfile_failed']) : '' );
 	if ( empty($notexist) || empty($failed) || $notexist !== $data['wfu_browser_downloadfile_notexist'] || $failed !== $data['wfu_browser_downloadfile_failed'] ) die();
+	// validate sftp properties
+	$sftp_settings = ( array_key_exists('sftp_settings', $data) ? wfu_sanitize_setting_downloader($data['sftp_settings']) : '' );
+	$sftp_settings = wfu_decode_settings_downloader($sftp_settings);
+	if ( $sftp_settings === null ) die();
+	// validate ftps properties
+	$ftps_settings = ( array_key_exists('ftps_settings', $data) ? wfu_sanitize_setting_downloader($data['ftps_settings']) : '' );
+	$ftps_settings = wfu_decode_settings_downloader($ftps_settings);
+	if ( $ftps_settings === null ) die();
+	if ( !isset($ftps_settings['use_pasv']) || !in_array( $ftps_settings['use_pasv'], array( '0', '1' ) ) ) die();
+	if ( !isset($ftps_settings['use_pasvaddr']) || !in_array( $ftps_settings['use_pasvaddr'], array( '0', '1' ) ) ) die();
+	
+	// checks have passed, we can safely set ABSPATH
+	if ( !defined('ABSPATH') ) DEFINE('ABSPATH', $wfu_ABSPATH);
 	
 	return $data;
 }
@@ -181,9 +193,26 @@ function wfu_sanitize_code_downloader($code) {
 }
 
 /**
+ * Sanitize a Setting.
+ *
+ * This function sanitizes a setting. A setting must only contain latin letters,
+ * numbers and the special characters (_-|=).
+ *
+ * @since 5.1.5
+ *
+ * @param string $setting The setting to sanitize.
+ *
+ * @return string The sanitized setting.
+ */
+function wfu_sanitize_setting_downloader($setting) {
+	return preg_replace("/[^A-Za-z0-9_-|=]/", "", $setting);
+}
+
+/**
  * Sanitize a URL.
  *
- * This function sanitizes a URL. It leaves spaces unchanged.
+ * This function sanitizes a URL. It leaves spaces and non-latin characters
+ * unchanged.
  *
  * @since 4.24.14
  *
@@ -192,11 +221,39 @@ function wfu_sanitize_code_downloader($code) {
  * @return string The sanitized URL.
  */
 function wfu_sanitize_url_downloader($url) {
-	// escape spaces to avoid getting striped by filter_var
-	$url = str_replace(" ", "%9999", $url);
-	$url = filter_var(strip_tags($url), FILTER_SANITIZE_URL);
-	// unescape spaces
-	return str_replace("%9999", " ", $url);
+	$sanitized = '';
+	if ( mb_check_encoding($url, 'UTF-8') ) {
+		$sanitized = filter_var($url, FILTER_UNSAFE_RAW);
+		$sanitized = htmlspecialchars($sanitized, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+	}
+	return $sanitized;
+}
+
+/**
+ * Decode a Settings String.
+ *
+ * It decodes a settings string and converts it into an associative array.
+ *
+ * @since 5.1.0
+ *
+ * @param string $settings The settings string.
+ * @return array|null The array of setting options or null on error.
+ */
+function wfu_decode_settings_downloader($settings) {
+	$ret = array();
+	$options = explode('|', $settings);
+	foreach ( $options as $option ) {
+		$option = trim($option);
+		if ( $option === '' ) continue;
+		$parts = explode('=', $option, 2);
+		$key = trim($parts[0]);
+		if ( count($parts) !== 2 || $key === '' ) {
+			$ret = null;
+			break;
+		}
+		$ret[$key] = trim($parts[1]);
+	}
+	return $ret;
 }
 
 /**
@@ -254,17 +311,33 @@ function WFU_USVAR_unset_downloader($var) {
  * @return bool True if the file exists, false otherwise.
  */
 function wfu_file_exists_for_downloader($filepath) {
-	if ( substr($filepath, 0, 7) != "sftp://" ) return file_exists($filepath);
+	global $wfu_downloader_data;
+	if ( substr($filepath, 0, 7) !== "sftp://" && substr($filepath, 0, 7) !== "ftps://" ) return file_exists($filepath);
 	$ret = false;
 	$ftpinfo = wfu_decode_ftpurl($filepath);
 	if ( $ftpinfo["error"] ) return $ret;
 	$data = $ftpinfo["data"];
-	{
-		$conn = @ssh2_connect($data["ftpdomain"], $data["port"]);
-		if ( $conn && @ssh2_auth_password($conn, $data["username"], $data["password"]) ) {
-			$sftp = @ssh2_sftp($conn);
-			$ret = ( $sftp && @file_exists("ssh2.sftp://".intval($sftp).$data["filepath"]) );
+	if ( substr($filepath, 0, 7) === "sftp://" ) {
+		$sftp_settings = wfu_decode_settings_downloader($wfu_downloader_data['sftp_settings']);
+		{
+			$conn = @ssh2_connect($data["ftpdomain"], $data["port"]);
+			if ( $conn && @ssh2_auth_password($conn, $data["username"], $data["password"]) ) {
+				$sftp = @ssh2_sftp($conn);
+				$ret = ( $sftp && @file_exists("ssh2.sftp://".intval($sftp).$data["filepath"]) );
+			}
 		}
+	}
+	else {
+		$conn = @ftp_ssl_connect($data["ftpdomain"], $data["port"]);
+		if ( $conn && ftp_login($conn, $data["username"], $data["password"]) ) {
+			wfu_check_set_ftps_passive_downloader($conn);
+			$filepath = $data["filepath"];
+			$dirpath = wfu_basedir($filepath);
+			$filename = wfu_basename($filepath);
+			$filelist = @ftp_nlist($conn, $dirpath);
+			$ret = ( $filelist !== false && in_array( $filepath, $filelist ) );
+		}
+		if ( $conn ) ftp_close($conn);
 	}
 	
 	return $ret;
@@ -279,17 +352,29 @@ function wfu_file_exists_for_downloader($filepath) {
  * @return int|bool The size of the file on success, false on failure.
  */
 function wfu_filesize_for_downloader($filepath) {
-	if ( substr($filepath, 0, 7) != "sftp://" ) return filesize($filepath);
+	global $wfu_downloader_data;
+	if ( substr($filepath, 0, 7) !== "sftp://" && substr($filepath, 0, 7) !== "ftps://" ) return filesize($filepath);
 	$ret = false;
 	$ftpinfo = wfu_decode_ftpurl($filepath);
 	if ( $ftpinfo["error"] ) return $ret;
 	$data = $ftpinfo["data"];
-	{
-		$conn = @ssh2_connect($data["ftpdomain"], $data["port"]);
-		if ( $conn && @ssh2_auth_password($conn, $data["username"], $data["password"]) ) {
-			$sftp = @ssh2_sftp($conn);
-			if ( $sftp ) $ret = @filesize("ssh2.sftp://".intval($sftp).$data["filepath"]);
+	if ( substr($filepath, 0, 7) === "sftp://" ) {
+		$sftp_settings = wfu_decode_settings_downloader($wfu_downloader_data['sftp_settings']);
+		{
+			$conn = @ssh2_connect($data["ftpdomain"], $data["port"]);
+			if ( $conn && @ssh2_auth_password($conn, $data["username"], $data["password"]) ) {
+				$sftp = @ssh2_sftp($conn);
+				if ( $sftp ) $ret = @filesize("ssh2.sftp://".intval($sftp).$data["filepath"]);
+			}
 		}
+	}
+	else {
+		$conn = @ftp_ssl_connect($data["ftpdomain"], $data["port"]);
+		if ( $conn && ftp_login($conn, $data["username"], $data["password"]) ) {
+			wfu_check_set_ftps_passive_downloader($conn);
+			$ret = ftp_size($conn, $data['filepath']);
+		}
+		if ( $conn ) ftp_close($conn);
 	}
 	
 	return $ret;
@@ -307,24 +392,39 @@ function wfu_filesize_for_downloader($filepath) {
  * @return resource|bool The file handler on success, false on failure.
  */
 function wfu_fopen_for_downloader($filepath, $mode) {
-	if ( substr($filepath, 0, 7) != "sftp://" ) return @fopen($filepath, $mode);
+	global $wfu_downloader_data;
+	if ( substr($filepath, 0, 7) !== "sftp://" && substr($filepath, 0, 7) !== "ftps://" ) return @fopen($filepath, $mode);
 	$ret = false;
 	$ftpinfo = wfu_decode_ftpurl($filepath);
 	if ( $ftpinfo["error"] ) return $ret;
 	$data = $ftpinfo["data"];
-	{
-		$conn = @ssh2_connect($data["ftpdomain"], $data["port"]);
-		if ( $conn && @ssh2_auth_password($conn, $data["username"], $data["password"]) ) {
-			$sftp = @ssh2_sftp($conn);
-			if ( $sftp ) {
-				//$ret = @fopen("ssh2.sftp://".intval($sftp).$data["filepath"], $mode);
-				$contents = @file_get_contents("ssh2.sftp://".intval($sftp).$data["filepath"]);
-				$stream = fopen('php://memory', 'r+');
-				fwrite($stream, $contents);
-				rewind($stream);
-				$ret = $stream;
+	if ( substr($filepath, 0, 7) === "sftp://" ) {
+		$sftp_settings = wfu_decode_settings_downloader($wfu_downloader_data['sftp_settings']);
+		{
+			$conn = @ssh2_connect($data["ftpdomain"], $data["port"]);
+			if ( $conn && @ssh2_auth_password($conn, $data["username"], $data["password"]) ) {
+				$sftp = @ssh2_sftp($conn);
+				if ( $sftp ) {
+					//$ret = @fopen("ssh2.sftp://".intval($sftp).$data["filepath"], $mode);
+					$contents = @file_get_contents("ssh2.sftp://".intval($sftp).$data["filepath"]);
+					$stream = fopen('php://memory', 'r+');
+					fwrite($stream, $contents);
+					rewind($stream);
+					$ret = $stream;
+				}
 			}
 		}
+	}
+	else {
+		$conn = @ftp_ssl_connect($data["ftpdomain"], $data["port"]);
+		if ( $conn && ftp_login($conn, $data["username"], $data["password"]) ) {
+			wfu_check_set_ftps_passive_downloader($conn);
+			$stream = fopen('php://memory', 'r+');
+			ftp_fget($conn, $stream, $data['filepath'], FTP_BINARY, 0);
+			rewind($stream);
+			$ret = $stream;
+		}
+		if ( $conn ) ftp_close($conn);
 	}
 	
 	return $ret;
@@ -339,20 +439,54 @@ function wfu_fopen_for_downloader($filepath, $mode) {
  * @return bool True on success, false otherwise.
  */
 function wfu_unlink_for_downloader($filepath) {
-	if ( substr($filepath, 0, 7) != "sftp://" ) return @unlink($filepath);
+	global $wfu_downloader_data;
+	if ( substr($filepath, 0, 7) !== "sftp://" && substr($filepath, 0, 7) !== "ftps://" ) return @unlink($filepath);
 	$ret = false;
 	$ftpinfo = wfu_decode_ftpurl($filepath);
 	if ( $ftpinfo["error"] ) return $ret;
 	$data = $ftpinfo["data"];
-	{
-		$conn = @ssh2_connect($data["ftpdomain"], $data["port"]);
-		if ( $conn && @ssh2_auth_password($conn, $data["username"], $data["password"]) ) {
-			$sftp = @ssh2_sftp($conn);
-			if ( $sftp ) $ret = @unlink("ssh2.sftp://".intval($sftp).$data["filepath"]);
+	if ( substr($filepath, 0, 7) === "sftp://" ) {
+		$sftp_settings = wfu_decode_settings_downloader($wfu_downloader_data['sftp_settings']);
+		{
+			$conn = @ssh2_connect($data["ftpdomain"], $data["port"]);
+			if ( $conn && @ssh2_auth_password($conn, $data["username"], $data["password"]) ) {
+				$sftp = @ssh2_sftp($conn);
+				if ( $sftp ) $ret = @unlink("ssh2.sftp://".intval($sftp).$data["filepath"]);
+			}
 		}
+	}
+	else {
+		$conn = @ftp_ssl_connect($data["ftpdomain"], $data["port"]);
+		if ( $conn && ftp_login($conn, $data["username"], $data["password"]) ) {
+			wfu_check_set_ftps_passive($conn);
+			$ret = @ftp_delete($conn, $data['filepath']);
+		}
+		if ( $conn ) ftp_close($conn);
 	}
 	
 	return $ret;
+}
+
+/**
+ * Check and Set FTPS Passive Mode.
+ *
+ * It checks the plugin advanced variables to determine whether passive mode
+ * must be used for FTPS operations.
+ *
+ * @since 5.1.5
+ *
+ * @redeclarable
+ *
+ * @param resource $conn The connection resource.
+ */
+function wfu_check_set_ftps_passive_downloader($conn) {
+	global $wfu_downloader_data;
+	$ftps_settings = wfu_decode_settings_downloader($wfu_downloader_data['ftps_settings']);
+	if ( $ftps_settings["use_pasv"] === "1" ) {
+		if ( $ftps_settings["use_pasvaddr"] === "0" )
+			ftp_set_option($conn, FTP_USEPASVADDRESS, false);
+		ftp_pasv($conn, true);
+	}
 }
 
 /**

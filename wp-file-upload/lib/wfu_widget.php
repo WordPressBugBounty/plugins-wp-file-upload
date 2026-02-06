@@ -1,5 +1,20 @@
 <?php
 
+/**
+ * Plugin Widget Functions.
+ *
+ * This file contains the class that provides the plugin's upload form as a
+ * widget.
+ *
+ * @link /lib/wfu_widget.php
+ *
+ * @package Iptanus File Upload Plugin
+ * @subpackage Core Components
+ * @since 3.4.0
+ */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
+
 class WFU_Widget extends WP_Widget {
 	
 	function __construct() {
@@ -47,14 +62,14 @@ class WFU_Widget extends WP_Widget {
 			$shortcode_id = (string)mt_rand(1000, 9999);
 		}
 		?>
-		<input type="hidden" id="<?php echo $this->get_field_id( 'shortcode_id' ); ?>" name="<?php echo $this->get_field_name( 'shortcode_id' ); ?>" value="<?php echo esc_attr( $shortcode_id ); ?>" />
+		<input type="hidden" id="<?php echo esc_attr($this->get_field_id( 'shortcode_id' )); ?>" name="<?php echo esc_attr($this->get_field_name( 'shortcode_id' )); ?>" value="<?php echo esc_attr( $shortcode_id ); ?>" />
 		<p>
-		<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Title:' ); ?></label> 
-		<input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" />
+		<label for="<?php echo esc_attr($this->get_field_id( 'title' )); ?>"><?php esc_attr_e( 'Title:', 'wp-file-upload' ); ?></label> 
+		<input class="widefat" id="<?php echo esc_attr($this->get_field_id( 'title' )); ?>" name="<?php echo esc_attr($this->get_field_name( 'title' )); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" />
 		</p>
 		<p>
-		<label for="<?php echo $this->get_field_id( 'shortcode_attrs' ); ?>"><?php _e( 'Shortcode Attributes:' ); ?></label> 
-		<textarea class="widefat" id="<?php echo $this->get_field_id( 'shortcode_attrs' ); ?>" name="<?php echo $this->get_field_name( 'shortcode_attrs' ); ?>" value="<?php echo esc_attr( $shortcode_attrs ); ?>"><?php echo esc_attr( $shortcode_attrs ); ?></textarea>
+		<label for="<?php echo esc_attr($this->get_field_id( 'shortcode_attrs' )); ?>"><?php esc_attr_e( 'Shortcode Attributes:', 'wp-file-upload' ); ?></label> 
+		<textarea class="widefat" id="<?php echo esc_attr($this->get_field_id( 'shortcode_attrs' )); ?>" name="<?php echo esc_attr($this->get_field_name( 'shortcode_attrs' )); ?>" value="<?php echo esc_attr( $shortcode_attrs ); ?>"><?php echo esc_attr( $shortcode_attrs ); ?></textarea>
 		</p>
 		<?php 
 	}

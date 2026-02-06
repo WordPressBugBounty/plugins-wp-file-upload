@@ -1,6 +1,21 @@
 <?php
 
 /**
+ * Plugin IO Functions
+ *
+ * This file contains functions related to reading and writing to the file
+ * system.
+ *
+ * @link /lib/wfu_io.php
+ *
+ * @package Iptanus File Upload Plugin
+ * @subpackage Core Components
+ * @since 2.1.2
+ */
+ 
+if ( ! defined( 'ABSPATH' ) ) exit;
+
+/**
  * Create FTP Directory Recursively.
  *
  * This function creates an FTP directory recursively (including
@@ -68,6 +83,28 @@ function wfu_is_dir($path, $ftpdata) {
 			}
 		}
 	}
+	elseif ( substr($path, 0, 7) == "ftps://" ) {
+		$ftpinfo = wfu_decode_ftpinfo($ftpdata);
+		if ( !$ftpinfo["error"] ) {
+			$data = $ftpinfo["data"];
+			//extract relative FTP path
+			$ftp_port = $data["port"];
+			$flat_host = preg_replace("/^(.*\.)?([^.]*\..*)$/", "$2", $data["ftpdomain"].":".$ftp_port);
+			$pos1 = strpos($path, $flat_host);
+			if ( $pos1 ) {
+				$path = substr($path, $pos1 + strlen($flat_host));
+				$conn = @ftp_ssl_connect($data["ftpdomain"], $ftp_port);
+				if ( $conn && ftp_login($conn, $data["username"], $data["password"]) ) {
+					$original_dir = ftp_pwd($conn);
+					if ( @ftp_chdir($conn, $path) ) {
+						ftp_chdir($conn, $original_dir);
+						$result = true;
+					}
+					else $result = false;
+				}
+			}
+		}
+	}
 	else $result = is_dir($path);
 	
 	return $result;
@@ -85,11 +122,12 @@ function wfu_is_dir($path, $ftpdata) {
  * @param string $path The path of the directory to create.
  * @param string $method File upload method, 'normal' or 'ftp'.
  * @param string $ftpdata FTP credentials in case of FTP method.
+ * @param bool $passive Optional. True if passive mode is used, false otherwise.
  *
  * @return string Empty string if the directory was created successfully, or an
  *         error message if it failed.
  */
-function wfu_create_directory($path, $method, $ftpdata) {
+function wfu_create_directory($path, $method, $ftpdata, $passive = false) {
 	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$ret_message = "";
 	if ( $method == "" || $method == "normal" ) {
@@ -107,7 +145,10 @@ function wfu_create_directory($path, $method, $ftpdata) {
 			if ( $pos1 ) {
 				$path = substr($path, $pos1 + strlen($flat_host));
 				if ( $data["sftp"] ) {
-					wfu_create_dir_deep_sftp($data["ftpdomain"], $ftp_port, $data["username"], $data["password"], $path);
+					wfu_create_dir_deep_sftp($data["ftpdomain"], $ftp_port, $data["username"], $data["password"], $path, $passive);
+				}
+				elseif ( $data["ftps"] ) {
+					wfu_create_dir_deep_ftps($data["ftpdomain"], $ftp_port, $data["username"], $data["password"], $path, $passive);
 				}
 				else {
 					if ( $ftp_port != "" ) $conn_id = ftp_connect($data["ftpdomain"], $ftp_port);
@@ -195,6 +236,11 @@ function wfu_upload_file($source, $target, $method, $ftpdata, $passive, $fileper
 					$ret_array["uploaded"] = ( $ret_message == "" );
 					wfu_unlink($source, "wfu_upload_file:1");
 				}
+				elseif ( $data["ftps"] ) {
+					$ret_message = wfu_upload_file_ftps($data["ftpdomain"], $ftp_port, $data["username"], $data["password"], $source, $target, $fileperms, ( $passive === "true" ));
+					$ret_array["uploaded"] = ( $ret_message == "" );
+					wfu_unlink($source, "wfu_upload_file:2");
+				}
 				else {
 					if ( $ftp_port != "" ) $conn_id = ftp_connect($data["ftpdomain"], $ftp_port);
 					else $conn_id = ftp_connect($data["ftpdomain"]);
@@ -214,7 +260,7 @@ function wfu_upload_file($source, $target, $method, $ftpdata, $passive, $fileper
 						}
 //						ftp_chmod($conn_id, 0755, $target);
 //						ftp_chmod($conn_id, $target_perms, dirname($target));
-						wfu_unlink($source, "wfu_upload_file:2");
+						wfu_unlink($source, "wfu_upload_file:3");
 						if ( !$ret_array["uploaded"] ) {
 							$ret_message = WFU_ERROR_ADMIN_DIR_PERMISSION;
 						}
@@ -258,11 +304,12 @@ function wfu_upload_file($source, $target, $method, $ftpdata, $passive, $fileper
  * @param string $source The temporary source path of the uploaded file.
  * @param string $target The final path of the uploaded file.
  * @param string $fileperms File permissions of the stored file (FTP method).
+ * @param bool $passive Optional. True if passive mode is used, false otherwise.
  *
  * @return string Empty string if the file was stored successfully, or an error
  *         message if it failed.
  */
-function wfu_upload_file_sftp($ftp_host, $ftp_port, $ftp_username, $ftp_password, $source, $target, $fileperms) {
+function wfu_upload_file_sftp($ftp_host, $ftp_port, $ftp_username, $ftp_password, $source, $target, $fileperms, $passive = false) {
 	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$ret_message = "";
 	{
@@ -300,6 +347,57 @@ function wfu_upload_file_sftp($ftp_host, $ftp_port, $ftp_username, $ftp_password
 }
 
 /**
+ * Store the Uploaded File in FTPS.
+ *
+ * This function stores the uploaded file that was saved in a temporary location
+ * to its final FTPS destination.
+ *
+ * @since 5.1.5
+ *
+ * @redeclarable
+ *
+ * @param string $ftp_host The FTPS host.
+ * @param string $ftp_port The FTPS port.
+ * @param string $ftp_username Username for FTPS authentication.
+ * @param string $ftp_password Password for FTPS authentication.
+ * @param string $source The temporary source path of the uploaded file.
+ * @param string $target The final path of the uploaded file.
+ * @param string $fileperms File permissions of the stored file (FTP method).
+ * @param bool $passive Optional. True if passive mode is used, false otherwise.
+ *
+ * @return string Empty string if the file was stored successfully, or an error
+ *         message if it failed.
+ */
+function wfu_upload_file_ftps($ftp_host, $ftp_port, $ftp_username, $ftp_password, $source, $target, $fileperms, $passive = false) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	$ret_message = "";
+	$conn = @ftp_ssl_connect($ftp_host, $ftp_port, 120);
+	if ( !$conn ) $ret_message = WFU_ERROR_ADMIN_FTPHOST_FAIL;
+	else {
+		if ( !@ftp_login($conn, $ftp_username, $ftp_password) ) $ret_message = WFU_ERROR_ADMIN_FTPLOGIN_FAIL;
+		else {
+			if ( $passive ) {
+				if ( WFU_VAR("WFU_FTPS_USEPASVADDRESS") === "false" )
+					ftp_set_option($conn, FTP_USEPASVADDRESS, false);
+				ftp_pasv($conn, true);
+			}
+			if ( !ftp_put($conn, $target, $source, FTP_BINARY) ) $ret_message = WFU_ERROR_ADMIN_FTPTRANSFER_FAIL;
+			else {
+				$fileperms = trim($fileperms);
+				if ( strlen($fileperms) == 4 && sprintf("%04o", octdec($fileperms)) == $fileperms ) {
+					$fileperms = octdec($fileperms);
+					$fileperms = (int)$fileperms;
+					ftp_chmod($conn_id, $fileperms, $target);
+				}
+			}
+		}
+		ftp_close($conn);
+	}
+	
+	return $ret_message;
+}
+
+/**
  * Create sFTP Directory Recursively.
  *
  * This function creates an sFTP directory recursively (including
@@ -314,13 +412,82 @@ function wfu_upload_file_sftp($ftp_host, $ftp_port, $ftp_username, $ftp_password
  * @param string $ftp_username Username for sFTP authentication.
  * @param string $ftp_password Password for sFTP authentication.
  * @param string $path The path of the directory to create.
+ * @param bool $passive Optional. True if passive mode is used, false otherwise.
  *
  * @return string Empty string if the directory was created successfully, or an
  *         error message if it failed.
  */
-function wfu_create_dir_deep_sftp($ftp_host, $ftp_port, $ftp_username, $ftp_password, $path) {
+function wfu_create_dir_deep_sftp($ftp_host, $ftp_port, $ftp_username, $ftp_password, $path, $passive = false) {
 	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$ret_message = "";
+	{
+		$conn = @ssh2_connect($ftp_host, $ftp_port);
+		if ( !$conn ) $ret_message = WFU_ERROR_ADMIN_FTPHOST_FAIL;
+		else {
+			if ( !@ssh2_auth_password($conn, $ftp_username, $ftp_password) ) $ret_message = WFU_ERROR_ADMIN_FTPLOGIN_FAIL;
+			else {
+				$sftp = @ssh2_sftp($conn);
+				if ( !$sftp ) $ret_message = WFU_ERROR_ADMIN_SFTPINIT_FAIL;
+				else {
+					ssh2_sftp_mkdir($sftp, $path, 493, true );
+				}
+			}
+		}
+	}
+	
+	return $ret_message;
+}
+
+/**
+ * Create FTPS Directory Recursively.
+ *
+ * This function creates an FTPS directory recursively (including
+ * subdirectories).
+ *
+ * @since 5.1.5
+ *
+ * @redeclarable
+ *
+ * @param string $ftp_host The sFTP host.
+ * @param string $ftp_port The sFTP port.
+ * @param string $ftp_username Username for sFTP authentication.
+ * @param string $ftp_password Password for sFTP authentication.
+ * @param string $path The path of the directory to create.
+ * @param bool $passive Optional. True if passive mode is used, false otherwise.
+ *
+ * @return string Empty string if the directory was created successfully, or an
+ *         error message if it failed.
+ */
+function wfu_create_dir_deep_ftps($ftp_host, $ftp_port, $ftp_username, $ftp_password, $path, $passive = false) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	$ret_message = "";
+	$conn = @ftp_ssl_connect($ftp_host, $ftp_port, 120);
+	if ( !$conn ) $ret_message = WFU_ERROR_ADMIN_FTPHOST_FAIL;
+	else {
+		if ( !@ftp_login($conn, $ftp_username, $ftp_password) ) $ret_message = WFU_ERROR_ADMIN_FTPLOGIN_FAIL;
+		else {
+			if ( $passive ) {
+				if ( WFU_VAR("WFU_FTPS_USEPASVADDRESS") === "false" )
+					ftp_set_option($conn, FTP_USEPASVADDRESS, false);
+				ftp_pasv($conn, true);
+			}
+			$dirs = explode('/', trim($path, '/'));
+			$dirpath = "";
+			foreach ( $dirs as $dir ) {
+				$dirpath .= '/' . $dir;
+				if ( @ftp_chdir($conn, $dirpath) ) {
+					ftp_chdir($conn, '/');
+					continue;
+				}
+				if ( !ftp_mkdir($conn, $dirpath) ) {
+					break;
+				}
+			}
+		}
+		ftp_close($conn);
+	}
+	
+	
 	{
 		$conn = @ssh2_connect($ftp_host, $ftp_port);
 		if ( !$conn ) $ret_message = WFU_ERROR_ADMIN_FTPHOST_FAIL;
@@ -371,6 +538,40 @@ function wfu_file_exists_sftp($filepath) {
 }
 
 /**
+ * Check If FTPS File Exists.
+ *
+ * This function checks whether a file stored in an FTPS location exists.
+ *
+ * @since 5.1.5
+ *
+ * @redeclarable
+ *
+ * @param string $filepath The path of the file.
+ *
+ * @return boolean True if the file is a valid FTPS path and exists, false
+ *         otherwise.
+ */
+function wfu_file_exists_ftps($filepath) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	$ret = false;
+	$ftpinfo = wfu_decode_ftpurl($filepath);
+	if ( $ftpinfo["error"] ) return $ret;
+	$data = $ftpinfo["data"];
+	$conn = @ftp_ssl_connect($data["ftpdomain"], $data["port"]);
+	if ( $conn && ftp_login($conn, $data["username"], $data["password"]) ) {
+		wfu_check_set_ftps_passive($conn);
+		$filepath = $data["filepath"];
+		$dirpath = wfu_basedir($filepath);
+		$filename = wfu_basename($filepath);
+		$filelist = @ftp_nlist($conn, $dirpath);
+		$ret = ( $filelist !== false && in_array( $filepath, $filelist ) );
+	}
+	if ( $conn ) ftp_close($conn);
+	
+	return $ret;
+}
+
+/**
  * Get SFTP File Info.
  *
  * This function returns stat information for files stored in an SFTP location.
@@ -393,9 +594,40 @@ function wfu_stat_sftp($filepath) {
 		$conn = @ssh2_connect($data["ftpdomain"], $data["port"]);
 		if ( $conn && @ssh2_auth_password($conn, $data["username"], $data["password"]) ) {
 			$sftp = @ssh2_sftp($conn);
-			if ( $sftp ) $ret = ssh2_sftp_stat($data["filepath"]);
+			if ( $sftp ) $ret = ssh2_sftp_stat($sftp, $data["filepath"]);
 		}
 	}
+	
+	return $ret;
+}
+
+/**
+ * Get FTPS File Info.
+ *
+ * This function returns stat information for files stored in an FTPS location.
+ *
+ * @since 5.1.5
+ *
+ * @redeclarable
+ *
+ * @param string $filepath The path of the file.
+ *
+ * @return array|false The stat array or false on error.
+ */
+function wfu_stat_ftps($filepath) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	$ret = false;
+	$ftpinfo = wfu_decode_ftpurl($filepath);
+	if ( $ftpinfo["error"] ) return $ret;
+	$data = $ftpinfo["data"];
+	$conn = @ftp_ssl_connect($data["ftpdomain"], $data["port"]);
+	if ( $conn && ftp_login($conn, $data["username"], $data["password"]) ) {
+		wfu_check_set_ftps_passive($conn);
+		$size = ftp_size($conn, $data['filepath']);
+		$mtime = ftp_mdtm($conn, $data['filepath']);
+		$ret = array( "mtime" => $mtime, "size" => $size );
+	}
+	if ( $conn ) ftp_close($conn);
 	
 	return $ret;
 }
@@ -426,6 +658,35 @@ function wfu_filesize_sftp($filepath) {
 			if ( $sftp ) $ret = @filesize("ssh2.sftp://".intval($sftp).$data["filepath"]);
 		}
 	}
+	
+	return $ret;
+}
+
+/**
+ * Get FTPS File Size.
+ *
+ * This function returns file size for files stored in an FTPS location.
+ *
+ * @since 5.1.5
+ *
+ * @redeclarable
+ *
+ * @param string $filepath The path of the file.
+ *
+ * @return int|false The file size or false on error.
+ */
+function wfu_filesize_ftps($filepath) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	$ret = false;
+	$ftpinfo = wfu_decode_ftpurl($filepath);
+	if ( $ftpinfo["error"] ) return $ret;
+	$data = $ftpinfo["data"];
+	$conn = @ftp_ssl_connect($data["ftpdomain"], $data["port"]);
+	if ( $conn && ftp_login($conn, $data["username"], $data["password"]) ) {
+		wfu_check_set_ftps_passive($conn);
+		$ret = ftp_size($conn, $data['filepath']);
+	}
+	if ( $conn ) ftp_close($conn);
 	
 	return $ret;
 }
@@ -470,6 +731,40 @@ function wfu_fopen_sftp($filepath, $mode) {
 }
 
 /**
+ * Get FTPS File Stream Handle.
+ *
+ * This function returns a file stream handle for files stored in an FTPS
+ * location.
+ *
+ * @since 5.1.5
+ *
+ * @redeclarable
+ *
+ * @param string $filepath The path of the file.
+ * @param string $mode The file access mode.
+ *
+ * @return resource|false The file stream handle or false on error.
+ */
+function wfu_fopen_ftps($filepath, $mode) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	$ret = false;
+	$ftpinfo = wfu_decode_ftpurl($filepath);
+	if ( $ftpinfo["error"] ) return $ret;
+	$data = $ftpinfo["data"];
+	$conn = @ftp_ssl_connect($data["ftpdomain"], $data["port"]);
+	if ( $conn && ftp_login($conn, $data["username"], $data["password"]) ) {
+		wfu_check_set_ftps_passive($conn);
+		$stream = fopen('php://memory', 'r+');
+		ftp_fget($conn, $stream, $data['filepath'], FTP_BINARY, 0);
+		rewind($stream);
+		$ret = $stream;
+	}
+	if ( $conn ) ftp_close($conn);
+
+	return $ret;
+}
+
+/**
  * Get SFTP File Contents.
  *
  * This function returns the file contents for files stored in an SFTP location.
@@ -500,7 +795,32 @@ function wfu_file_get_contents_sftp($filepath) {
 }
 
 /**
- * Get MD5 of File.
+ * Get FTPS File Contents.
+ *
+ * This function returns the file contents for files stored in an FTPS location.
+ *
+ * @since 5.1.5
+ *
+ * @redeclarable
+ *
+ * @param string $filepath The path of the file.
+ *
+ * @return string|false The file contents as string or false on error.
+ */
+function wfu_file_get_contents_ftps($filepath) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	$ret = false;
+	$stream = wfu_fopen_ftps($filepath, 'r');
+	if ( $stream !== false ) {
+		$ret = @stream_get_contents($stream);
+		fclose($stream);
+	}
+	
+	return $ret;
+}
+
+/**
+ * Get MD5 of sFTP File.
  *
  * This function returns the md5 string of a file stored in an SFTP location.
  *
@@ -533,7 +853,31 @@ function wfu_md5_file_sftp($filepath) {
 }
 
 /**
- * Delete a File.
+ * Get MD5 of FTPS File.
+ *
+ * This function returns the md5 string of a file stored in an FTPS location.
+ *
+ * @since 5.1.5
+ *
+ * @redeclarable
+ *
+ * @param string $filepath The path of the file.
+ *
+ * @return string|false The md5 string of the file or false on error.
+ */
+function wfu_md5_file_ftps($filepath) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	$ret = false;
+	$contents = wfu_file_get_contents_ftps($filepath);
+	if ( $contents !== false ) {
+		$ret = md5($contents);
+	}
+	
+	return $ret;
+}
+
+/**
+ * Delete an sFTP File.
  *
  * This function deletes a file stored in an SFTP location.
  *
@@ -560,4 +904,54 @@ function wfu_unlink_sftp($filepath) {
 	}
 	
 	return $ret;
+}
+
+/**
+ * Delete an FTPS File.
+ *
+ * This function deletes a file stored in an FTPS location.
+ *
+ * @since 5.1.5
+ *
+ * @redeclarable
+ *
+ * @param string $filepath The path of the file.
+ *
+ * @return boolean True on success, false on error.
+ */
+function wfu_unlink_ftps($filepath) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	$ret = false;
+	$ftpinfo = wfu_decode_ftpurl($filepath);
+	if ( $ftpinfo["error"] ) return $ret;
+	$data = $ftpinfo["data"];
+	$conn = @ftp_ssl_connect($data["ftpdomain"], $data["port"]);
+	if ( $conn && ftp_login($conn, $data["username"], $data["password"]) ) {
+		wfu_check_set_ftps_passive($conn);
+		$ret = @ftp_delete($conn, $data['filepath']);
+	}
+	if ( $conn ) ftp_close($conn);
+
+	return $ret;
+}
+
+/**
+ * Check and Set FTPS Passive Mode.
+ *
+ * It checks the plugin advanced variables to determine whether passive mode
+ * must be used for FTPS operations.
+ *
+ * @since 5.1.5
+ *
+ * @redeclarable
+ *
+ * @param resource $conn The connection resource.
+ */
+function wfu_check_set_ftps_passive($conn) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	if ( WFU_VAR("WFU_FTPS_USEPASSIVE") === "true" ) {
+		if ( WFU_VAR("WFU_FTPS_USEPASVADDRESS") === "false" )
+			ftp_set_option($conn, FTP_USEPASVADDRESS, false);
+		ftp_pasv($conn, true);
+	}
 }

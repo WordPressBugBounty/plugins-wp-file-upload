@@ -1,14 +1,15 @@
-=== Wordpress File Upload ===
+=== Iptanus File Upload ===
 Contributors: nickboss
 Donate link: http://www.iptanus.com/support/wordpress-file-upload
-Tags: file, upload, ajax, form, page, post, sidebar, responsive, widget, webcam, ftp
-Requires at least: 2.9.2
-Tested up to: 6.7.2
-Stable tag: "trunk"
-License: GPLv2 or later
+Tags: file, upload, ajax, form, page
+Requires at least: 3.0
+Tested up to: 6.9
+Stable tag: 5.1.7
+License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Simple yet very powerful plugin to allow users to upload files to your website from any page, post or sidebar and manage the uploaded files
+THIS IS FORMER WORDPRESS FILE UPLOAD PLUGIN.
+Simple yet powerful plugin to allow users to upload files from any page, post or sidebar and manage them.
 
 == Description ==
 
@@ -66,9 +67,12 @@ The plugin is translated in the following languages:
 * Persian, kindly provided by Shahriyar Modami http://chabokgroup.com
 * Greek
 
-Please note that old desktop browsers or mobile browsers may not support all of the above functionalities. In order to get full functionality use the latest versions browsers, supporting HTML5, AJAX and CSS3.
+Please note that the plugin contains minified CSS and Javascript files in order to reduce its size and speed-up performance. The unminified version of these files can be found [here](https://plugins.svn.wordpress.org/wp-file-upload/unminified/ "Unminified CSS and JS files of the plugin").
+The source code of the compiled React files of the plugin can be found [here](https://sourceforge.net/p/wordpress-file-upload-react/code/ci/master/tree/ "React source code of the plugin").
 
-For additional features, such as multiple file upload, very large file upload, drag and drop of files, captcha, detailed upload progress bars, list of uploaded files, image gallery and custom css please consider [Wordpress File Upload Professional](http://www.iptanus.com/support/wordpress-file-upload/ "Wordpress File Upload support page").
+Please also note that old desktop browsers or mobile browsers may not support all of the above functionalities. In order to get full functionality use the latest versions browsers, supporting HTML5, AJAX and CSS3.
+
+For additional features, such as multiple file upload, very large file upload, drag and drop of files, captcha, detailed upload progress bars, list of uploaded files, image gallery and custom css please consider [Iptanus File Upload Professional](http://www.iptanus.com/support/wordpress-file-upload/ "Iptanus File Upload support page").
 
 Please visit the **Other Notes** section for customization options of this plugin.
 
@@ -76,7 +80,7 @@ Please visit the **Other Notes** section for customization options of this plugi
 
 1. First install the plugin using Wordpress auto-installer or download the .zip file from wordpress.org and install it from the Plugins section of your Dashboard or copy wordpress_file_upload directory inside wp-contents/plugins directory of your wordpress site.
 1. Activate the plugin from Plugins section of your Dashboard.
-1. In order to use the plugin simply go to the Dashboard / Settings / Wordpress File Upload and follow the instructions in Plugin Instances or alternatively put the shortcode [wordpress_file_upload] in the contents of any page.
+1. In order to use the plugin simply go to the Dashboard / Settings / Iptanus File Upload and follow the instructions in Plugin Instances or alternatively put the shortcode [wordpress_file_upload] in the contents of any page.
 1. Open the page on your browser and you will see the upload form.
 1. You can change the upload directory or any other settings easily by pressing the small edit button found at the left-top corner of the upload form. A new window (or tab) with pop up with plugin options. If you do not see the new window, adjust your browser settings to allow pop-up windows.
 1. Full documentation about the plugin options can be found at https://wordpress.org/plugins/wp-file-upload/other_notes/ or at http://www.iptanus.com/wordpress-plugins/wordpress-file-upload/ (including the Pro version)
@@ -95,7 +99,7 @@ No, you do not need Flash to use the plugin.
 
 = I get a SAFE MODE restriction error when I try to upload a file. Is there an alternative?  =
 
-Your domain has probably turned SAFE MODE ON and you have restrictions uploading and accessing files. Wordpress File Upload includes an alternative way to upload files, using FTP access. Simply add the attribute **accessmethod="ftp"** inside the shortcode, together with FTP access information in **ftpinfo** attribute.
+Your domain has probably turned SAFE MODE ON and you have restrictions uploading and accessing files. Iptanus File Upload includes an alternative way to upload files, using FTP access. Simply add the attribute **accessmethod="ftp"** inside the shortcode, together with FTP access information in **ftpinfo** attribute.
 
 = Can I see the progress of the upload? =
 
@@ -103,7 +107,7 @@ Yes, you can see the progress of the upload. During uploading a progress bar wil
 
 = Can I upload many files at the same time? =
 
-Yes, but not in the free version. If you want to allow multiple file uploads, please consider the [Professional](http://www.iptanus.com/support/wordpress-file-upload/ "Wordpress File Upload support page") version.
+Yes, but not in the free version. If you want to allow multiple file uploads, please consider the [Professional](http://www.iptanus.com/support/wordpress-file-upload/ "Iptanus File Upload support page") version.
 
 = Where do files go after upload? =
 
@@ -111,7 +115,7 @@ Files by default are uploaded inside wp-content directory of your Wordpress webs
 
 = Can I see and download the uploaded files? =
 
-Administrators can view all uploaded files together with associated field data from the plugin's Settings in Dashboard. The [Professional](http://www.iptanus.com/support/wordpress-file-upload/ "Wordpress File Upload support page") version of the plugin allows users to view their uploaded files, either from the Dashboard, or from a page or post.
+Administrators can view all uploaded files together with associated field data from the plugin's Settings in Dashboard. The [Professional](http://www.iptanus.com/support/wordpress-file-upload/ "Iptanus File Upload support page") version of the plugin allows users to view their uploaded files, either from the Dashboard, or from a page or post.
 
 = Are there filters to restrict uploaded content? =
 
@@ -119,15 +123,15 @@ Yes, you can control allowed file size and file extensions by using the appropri
 
 = Are there any upload file size limitations? =
 
-Yes, there are file size limitations imposed by the web server or the host. If you want to upload very large files, please consider the [Professional](http://www.iptanus.com/support/wordpress-file-upload/ "Wordpress File Upload support page") version of the plugin, which surpasses size limitations.
+Yes, there are file size limitations imposed by the web server or the host. If you want to upload very large files, please consider the [Professional](http://www.iptanus.com/support/wordpress-file-upload/ "Iptanus File Upload support page") version of the plugin, which surpasses size limitations.
 
 = Who can upload files? =
 
-By default all users can upload files. You can define which user roles are allowed to upload files. Even guests can be allowed to upload files. If you want to allow only specific users to upload files, then please consider the [Professional](http://www.iptanus.com/support/wordpress-file-upload/ "Wordpress File Upload support page") version of the plugin.
+By default all users can upload files. You can define which user roles are allowed to upload files. Even guests can be allowed to upload files. If you want to allow only specific users to upload files, then please consider the [Professional](http://www.iptanus.com/support/wordpress-file-upload/ "Iptanus File Upload support page") version of the plugin.
 
 = What security is used for uploading files? =
 
-The plugin is designed not to expose website sensitive information. It has been tested by experts and verified that protects against CSRF and XSS attacks. All parameters passing from server to client side are encoded and sanitized. For higher protection, like use of captcha, please consider the [Professional](http://www.iptanus.com/support/wordpress-file-upload/ "Wordpress File Upload support page") version of the plugin.
+The plugin is designed not to expose website sensitive information. It has been tested by experts and verified that protects against CSRF and XSS attacks. All parameters passing from server to client side are encoded and sanitized. For higher protection, like use of captcha, please consider the [Professional](http://www.iptanus.com/support/wordpress-file-upload/ "Iptanus File Upload support page") version of the plugin.
 
 = What happens if connection is lost during a file upload? =
 
@@ -149,6 +153,40 @@ There is an option in plugin's settings in Dashboard to relax the CSS rules, so 
 8. A screenshot of the file browser.
 
 == Changelog ==
+
+= 5.1.7 =
+* fixed File Overwrite Race Condition when uploading files with the same filename concurrently
+
+= 5.1.6 =
+* verified compatibility with latest 6.9 Wordpress version
+
+= 5.1.5 =
+* added support for FTP over TLS (FTPS) uploads
+
+= 5.1.4 =
+* fixed bug where the visual editor throwed warnings for not finding personaldata when Personal Data were deactivated from the plugin's Settings in Dashboard
+* corrected bug where the upload form visual editor was not opening when Material UI theme was active
+* corrected bug where notification emails were not sent when Material UI theme was active
+
+= 5.1.3 =
+* removed Post Method setting
+* all GET and POST requests are now executed using the default Wordpress functions
+
+= 5.1.2 =
+* improvements on how AJAX endpoint is provided
+* corrections to Requires at lease value
+* replacement of eval() in minification function
+
+= 5.1.1 =
+* further security improvements for compliance with wordpress.org
+
+= 5.1.0 =
+* added translation for all backend of the plugin
+* modified plugin code so that all echoed variables to HTML are escaped
+* modified code so that all input is sanitized, including all $_SERVER, $_COOKIE and $_SESSION input
+
+= 5.0.0 =
+* changed the name of the plugin to Iptanus File Upload.
 
 = 4.25.3 =
 * added nonce in wfu_edit_filedetails() function in order to avoid CSRF attacks.
@@ -1087,6 +1125,33 @@ Initial version.
 
 == Upgrade Notice ==
 
+= 5.1.7 =
+Regular update to fix some security issues.
+
+= 5.1.6 =
+Minor maintenance update.
+
+= 5.1.5 =
+Regular update to add some new features.
+
+= 5.1.4 =
+Minor update to fix some bugs.
+
+= 5.1.3 =
+Minor update to introduce improvements.
+
+= 5.1.2 =
+Minor update to introduce improvements.
+
+= 5.1.1 =
+Minor update to introduce improvements.
+
+= 5.1.0 =
+Major update to introduce new features and fix bugs.
+
+= 5.0.0 =
+Major update to change the plugin name.
+
 = 4.25.3 =
 Minor update to fix some security issues.
 
@@ -1587,9 +1652,15 @@ Initial version.
 
 == Plugin Customization Options ==
 
-Please visit the [support page](http://www.iptanus.com/support/wordpress-file-upload/ "Wordpress File Upload support page") of the plugin for detailed description of customization options.
+Please visit the [support page](https://www.iptanus.com/support/wordpress-file-upload/ "Iptanus File Upload support page") of the plugin for detailed description of customization options.
 
 == Requirements ==
 
 The plugin requires to have Javascript enabled in your browser. For Internet Explorer you also need to have Active-X enabled.
 Please note that old desktop browsers or mobile browsers may not support all of the plugin's features. In order to get full functionality use the latest versions of browsers, supporting HTML5, AJAX and CSS3.
+
+== External services ==
+
+The plugin connects to Iptanus servers to retrieve information about the latest version of the plugin.
+It does not send any user data. It just receives the latest version of the plugin.
+The service is provided by the owner of the plugin, Iptanus. [Terms of Service](https://www.iptanus.com/iptanus-file-upload-plugin-server-terms-of-service/ "Iptanus File Upload Plugin Server terms of service"). [Privacy Policy](https://www.iptanus.com/wordpress-file-upload-plugin-server-privacy-policy/ "Iptanus File Upload Plugin Server privacy policy").

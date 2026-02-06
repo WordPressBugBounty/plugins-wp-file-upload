@@ -9,10 +9,12 @@
  *
  * @link /lib/wfu_admin_notifications.php
  *
- * @package WordPress File Upload Plugin
+ * @package Iptanus File Upload Plugin
  * @subpackage Core Components
  * @since 4.20.0
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
  * Display the List of Notifications.
@@ -36,6 +38,7 @@ function wfu_manage_notifications($sort, $page = 1, $only_table_rows = false, $f
 	
 	$siteurl = site_url();
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
+	$admin_nonce = wp_create_nonce('wfu_admin_nonce');
 
 	if ( !current_user_can( 'manage_options' ) ) return;
 	
@@ -45,42 +48,42 @@ function wfu_manage_notifications($sort, $page = 1, $only_table_rows = false, $f
 		"all" => array(
 			"code" => "all",
 			"type" => "all",
-			"title" => "All",
+			"title" => __('All', 'wp-file-upload'),
 			"count" => 0,
 			"checked" => ( $filter == "all" )
 		),
 		"read" => array(
 			"code" => "read",
 			"type" => "status",
-			"title" => "Read",
+			"title" => __('Read', 'wp-file-upload'),
 			"count" => 0,
 			"checked" => ( $filter == "all" || in_array('read', $filters_arr) )
 		),
 		"unread" => array(
 			"code" => "unread",
 			"type" => "status",
-			"title" => "Unread",
+			"title" => __('Unread', 'wp-file-upload'),
 			"count" => 0,
 			"checked" => ( $filter == "all" || in_array('unread', $filters_arr) )
 		),
 		"info" => array(
 			"code" => "info",
 			"type" => "category",
-			"title" => "Info",
+			"title" => __('Info', 'wp-file-upload'),
 			"count" => 0,
 			"checked" => ( $filter == "all" || in_array('info', $filters_arr) )
 		),
 		"warning" => array(
 			"code" => "warning",
 			"type" => "category",
-			"title" => "Warning",
+			"title" => __('Warning', 'wp-file-upload'),
 			"count" => 0,
 			"checked" => ( $filter == "all" || in_array('warning', $filters_arr) )
 		),
 		"error" => array(
 			"code" => "error",
 			"type" => "category",
-			"title" => "Error",
+			"title" => __('Error', 'wp-file-upload'),
 			"count" => 0,
 			"checked" => ( $filter == "all" || in_array('error', $filters_arr) )
 		),
@@ -97,7 +100,7 @@ function wfu_manage_notifications($sort, $page = 1, $only_table_rows = false, $f
 	
 	//define referer (with sort data) to point to this url for use by the
 	//elements
-	$referer = wfu_notifications_url($sort, $page, $filter);
+	$referer = wfu_notifications_url($sort, $page, $filter, $admin_nonce);
 	$referer_code = wfu_safe_store_filepath($referer);
 
 	//get all notifications count from database and update filters
@@ -289,26 +292,27 @@ function wfu_manage_notifications($sort, $page = 1, $only_table_rows = false, $f
 		$echo_str .= wfu_generate_dashboard_menu_title("\n\t");
 		$echo_str .= "\n\t".'<div style="margin-top:20px;">';
 		$echo_str .= wfu_generate_dashboard_menu("\n\t\t", "Notifications");
-		$echo_str .= "\n\t".'<h3 style="margin-bottom: 10px;">Notifications</h3>';
+		$echo_str .= "\n\t".'<h3 style="margin-bottom: 10px;">'.esc_html__('Notifications', 'wp-file-upload').'</h3>';
 		$echo_str .= "\n\t".'<div style="position:relative;">';
-		$echo_str .= "\n\t\t".'<input id="wfu_notifications_cursort" type="hidden" value="'.$sort.'" />';
-		$echo_str .= "\n\t\t".'<input id="wfu_notifications_filter" type="hidden" value="'.$filter.'" />';
+		$echo_str .= "\n\t\t".'<input id="wfu_notifications_cursort" type="hidden" value="'.esc_attr($sort).'" />';
+		$echo_str .= "\n\t\t".'<input id="wfu_notifications_filter" type="hidden" value="'.esc_attr($filter).'" />';
 		$echo_str .= wfu_add_loading_overlay("\n\t\t", "notifications");
 		$notifications_nonce = wp_create_nonce( 'wfu-adminnotifications-page' );
 		$echo_str .= "\n\t\t".'<div class="wfu_notifications_header" style="width: 100%;">';
 		$bulkactions = array(
-			array( "name" => "mark_read", "title" => "Mark Read" ),
-			array( "name" => "mark_unread", "title" => "Mark Unread" ),
-			array( "name" => "delete", "title" => "Delete" ),
+			array( "name" => "mark_read", "title" => __('Mark Read', 'wp-file-upload') ),
+			array( "name" => "mark_unread", "title" => __('Mark Unread', 'wp-file-upload') ),
+			array( "name" => "delete", "title" => __('Delete', 'wp-file-upload') ),
 		);
 		$echo_str .= wfu_add_bulkactions_header("\n\t\t\t", "notifications", $bulkactions);
 		$echo_str .= wfu_add_multifilter_header("\n\t\t\t", "notifications", $filters, false);
 		if ( $maxrows > 0 ) {
 			$echo_str .= wfu_add_pagination_header("\n\t\t\t", "notifications", $page, $pages, $notifications_nonce);
 		}
-		$echo_str .= "\n\t\t\t".'<input id="wfu_notifications_action_url" type="hidden" value="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload" />';
-		$echo_str .= "\n\t\t\t".'<input id="wfu_notifications_referer" type="hidden" value="'.$referer_code.'" />';
-		$echo_str .= "\n\t\t\t".'<input id="wfu_notifications_nonce" type="hidden" value="'.$notifications_nonce.'" />';
+		$echo_str .= "\n\t\t\t".'<input id="wfu_notifications_action_url" type="hidden" value="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload').'" />';
+		$echo_str .= "\n\t\t\t".'<input id="wfu_notifications_referer" type="hidden" value="'.esc_attr($referer_code).'" />';
+		$echo_str .= "\n\t\t\t".'<input id="wfu_notifications_nonce" type="hidden" value="'.esc_attr($notifications_nonce).'" />';
+		$echo_str .= "\n\t\t\t".'<input id="wfu_admin_nonce" type="hidden" value="'.$admin_nonce.'" />';
 		$echo_str .= "\n\t\t".'</div>';
 		$echo_str .= "\n\t\t".'<table id="wfu_notifications_table" class="wfu-notifications wp-list-table widefat fixed striped">';
 		$echo_str .= "\n\t\t\t".'<thead>';
@@ -318,22 +322,22 @@ function wfu_manage_notifications($sort, $page = 1, $only_table_rows = false, $f
 		$echo_str .= "\n\t\t\t\t\t".'</td>';
 		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="50%" class="manage-column column-primary">';
 		$sort_param = ( $notfsort == 'name' ? ( $order == SORT_ASC ? '-name' : 'name' ) : 'name' );
-		$echo_str .= "\n\t\t\t\t\t\t".'<a href="'.wfu_notifications_url($sort_param, $page, $filter).'">Description'.( $notfsort == 'name' ? ( $order == SORT_ASC ? ' &uarr;' : ' &darr;' ) : '' ).'</a>';
+		$echo_str .= "\n\t\t\t\t\t\t".'<a href="'.esc_url(wfu_notifications_url($sort_param, $page, $filter, $admin_nonce)).'">'.esc_html__('Description', 'wp-file-upload').( $notfsort == 'name' ? ( $order == SORT_ASC ? ' &uarr;' : ' &darr;' ) : '' ).'</a>';
 		$echo_str .= "\n\t\t\t\t\t".'</th>';
 		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="15%" class="manage-column">';
 		$sort_param = ( $notfsort == 'date' ? ( $order == SORT_ASC ? '-date' : 'date' ) : 'date' );
-		$echo_str .= "\n\t\t\t\t\t\t".'<a href="'.wfu_notifications_url($sort_param, $page, $filter).'">Date'.( $notfsort == 'date' ? ( $order == SORT_ASC ? ' &uarr;' : ' &darr;' ) : '' ).'</a>';
+		$echo_str .= "\n\t\t\t\t\t\t".'<a href="'.esc_url(wfu_notifications_url($sort_param, $page, $filter, $admin_nonce)).'">'.esc_html__('Date', 'wp-file-upload').( $notfsort == 'date' ? ( $order == SORT_ASC ? ' &uarr;' : ' &darr;' ) : '' ).'</a>';
 		$echo_str .= "\n\t\t\t\t\t".'</th>';
 		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="10%" class="manage-column">';
 		$sort_param = ( $notfsort == 'catg' ? ( $order == SORT_ASC ? '-catg' : 'catg' ) : 'catg' );
-		$echo_str .= "\n\t\t\t\t\t\t".'<a href="'.wfu_notifications_url($sort_param, $page, $filter).'">Category'.( $notfsort == 'catg' ? ( $order == SORT_ASC ? ' &uarr;' : ' &darr;' ) : '' ).'</a>';
+		$echo_str .= "\n\t\t\t\t\t\t".'<a href="'.esc_url(wfu_notifications_url($sort_param, $page, $filter, $admin_nonce)).'">'.esc_html__('Category', 'wp-file-upload').( $notfsort == 'catg' ? ( $order == SORT_ASC ? ' &uarr;' : ' &darr;' ) : '' ).'</a>';
 		$echo_str .= "\n\t\t\t\t\t".'</th>';
 		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="10%" class="manage-column">';
 		$sort_param = ( $notfsort == 'stat' ? ( $order == SORT_ASC ? '-stat' : 'stat' ) : 'stat' );
-		$echo_str .= "\n\t\t\t\t\t\t".'<a href="'.wfu_notifications_url($sort_param, $page, $filter).'">Status'.( $notfsort == 'stat' ? ( $order == SORT_ASC ? ' &uarr;' : ' &darr;' ) : '' ).'</a>';
+		$echo_str .= "\n\t\t\t\t\t\t".'<a href="'.esc_url(wfu_notifications_url($sort_param, $page, $filter, $admin_nonce)).'">'.esc_html__('Status', 'wp-file-upload').( $notfsort == 'stat' ? ( $order == SORT_ASC ? ' &uarr;' : ' &darr;' ) : '' ).'</a>';
 		$echo_str .= "\n\t\t\t\t\t".'</th>';
 		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="10%" class="manage-column">';
-		$echo_str .= "\n\t\t\t\t\t\t".'<label>Actions</label>';
+		$echo_str .= "\n\t\t\t\t\t\t".'<label>'.esc_html__('Actions', 'wp-file-upload').'</label>';
 		$echo_str .= "\n\t\t\t\t\t".'</th>';
 		$echo_str .= "\n\t\t\t\t".'</tr>';
 		$echo_str .= "\n\t\t\t".'</thead>';
@@ -347,36 +351,36 @@ function wfu_manage_notifications($sort, $page = 1, $only_table_rows = false, $f
 	$ii = 1;
 	foreach ( $notificationslist as $notf ) {
 		$key = $notf['id'];
-		$description = $notf['content'];
+		$description = esc_html($notf['content']);
 		if ( $notf['brief'] != '' )
-			$description = '<span class="wfu-notfs-description-main">'.$notf['brief'].'</span><span class="wfu-notfs-description-sub">'.$description.'</span>';
+			$description = '<span class="wfu-notfs-description-main">'.esc_html($notf['brief']).'</span><span class="wfu-notfs-description-sub">'.$description.'</span>';
 		$action = '';
 		if ( $notf['action'] != null ) {
-			$action = '<a href="'.$notf['action']['link'].'">'.$notf['action']['title'].'</a>';
+			$action = '<a href="'.esc_url($notf['action']['link']).'">'.esc_html($notf['action']['title']).'</a>';
 		}
-		$echo_str .= "\n\t\t\t\t".'<tr class="wfu-notifications-row wfu-'.$notf['status'].'" onmouseover="var actions=document.getElementsByName(\'wfu_notf_actions\'); for (var i=0; i<actions.length; i++) {actions[i].style.visibility=\'hidden\';} document.getElementById(\'wfu_notf_actions_'.$ii.'\').style.visibility=\'visible\'" onmouseout="var actions=document.getElementsByName(\'wfu_notf_actions\'); for (var i=0; i<actions.length; i++) {actions[i].style.visibility=\'hidden\';}">';
+		$echo_str .= "\n\t\t\t\t".'<tr class="wfu-notifications-row wfu-'.esc_attr($notf['status']).'" onmouseover="var actions=document.getElementsByName(\'wfu_notf_actions\'); for (var i=0; i<actions.length; i++) {actions[i].style.visibility=\'hidden\';} document.getElementById(\'wfu_notf_actions_'.$ii.'\').style.visibility=\'visible\'" onmouseout="var actions=document.getElementsByName(\'wfu_notf_actions\'); for (var i=0; i<actions.length; i++) {actions[i].style.visibility=\'hidden\';}">';
 		$echo_str .= "\n\t\t\t\t\t".'<th scope="row" class="check-column">';
-		$echo_str .= "\n\t\t\t\t\t\t".'<input name="'.$key.'" class="wfu_selectors wfu_selcode_'.$key.'" type="checkbox"  />';
+		$echo_str .= "\n\t\t\t\t\t\t".'<input name="'.esc_attr($key).'" class="wfu_selectors wfu_selcode_'.esc_attr($key).'" type="checkbox"  />';
 		$echo_str .= "\n\t\t\t\t\t".'</th>';
-		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Description" class="column-primary">';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="'.esc_html__('Description', 'wp-file-upload').'" class="column-primary">';
 		$echo_str .= "\n\t\t\t\t\t\t".'<span>'.$description.'</span>';
 		$echo_str .= "\n\t\t\t\t\t\t".'<div id="wfu_notf_actions_'.$ii.'" name="wfu_notf_actions" style="visibility:hidden;">';
 		$echo_str .= "\n\t\t\t\t\t\t\t".'<div id="wfu_notf_mark_action_'.$ii.'">';
 		$echo_str .= "\n\t\t\t\t\t\t\t\t".'<span>';
-		$echo_str .= "\n\t\t\t\t\t\t\t\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=mark_notification_'.( $notf['status'] == 'read' ? 'unread' : 'read' ).'&key='.$key.'&sort='.$sort.'&pageid='.$page.'&filter='.$filter.'" title="Mark this notification '.( $notf['status'] == 'read' ? 'unread' : 'read' ).'">Mark '.( $notf['status'] == 'read' ? 'Unread' : 'Read' ).'</a>';
+		$echo_str .= "\n\t\t\t\t\t\t\t\t\t".'<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=mark_notification_'.( $notf['status'] == 'read' ? 'unread' : 'read' ).'&key='.$key.'&sort='.$sort.'&pageid='.$page.'&filter='.$filter.'&c='.$admin_nonce).'" title="'.( $notf['status'] == 'read' ? esc_html__('Mark this notification unread', 'wp-file-upload') : esc_html__('Mark this notification read', 'wp-file-upload') ).'">'.( $notf['status'] == 'read' ? esc_html__('Mark Unread', 'wp-file-upload') : esc_html__('Mark Read', 'wp-file-upload') ).'</a>';
 		$echo_str .= "\n\t\t\t\t\t\t\t\t\t".' | ';
 		$echo_str .= "\n\t\t\t\t\t\t\t\t".'</span>';
 		$echo_str .= "\n\t\t\t\t\t\t\t\t".'<span>';
-		$echo_str .= "\n\t\t\t\t\t\t\t\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=delete_notification&key='.$key.'&sort='.$sort.'&pageid='.$page.'&filter='.$filter.'" title="Delete this notification">Delete</a>';
+		$echo_str .= "\n\t\t\t\t\t\t\t\t\t".'<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=delete_notification&key='.$key.'&sort='.$sort.'&pageid='.$page.'&filter='.$filter.'&c='.$admin_nonce).'" title="'.esc_html__('Delete this notification', 'wp-file-upload').'">'.esc_html__('Delete', 'wp-file-upload').'</a>';
 		$echo_str .= "\n\t\t\t\t\t\t\t\t".'</span>';
 		$echo_str .= "\n\t\t\t\t\t\t\t".'</div>';
 		$echo_str .= "\n\t\t\t\t\t\t".'</div>';
-		$echo_str .= "\n\t\t\t\t\t\t".'<button type="button" class="toggle-row"><span class="screen-reader-text">Show more details</span></button>';
+		$echo_str .= "\n\t\t\t\t\t\t".'<button type="button" class="toggle-row"><span class="screen-reader-text">'.esc_html__('Show more details', 'wp-file-upload').'</span></button>';
 		$echo_str .= "\n\t\t\t\t\t".'</td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Date">'.$notf['date'].'</td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Category">'.$filters[$notf['category']]['title'].'</td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Status">'.$filters[$notf['status']]['title'].'</td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Actions">'.$action.'</td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="'.esc_html__('Date', 'wp-file-upload').'">'.esc_html($notf['date']).'</td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="'.esc_html__('Category', 'wp-file-upload').'">'.esc_html($filters[$notf['category']]['title']).'</td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="'.esc_html__('Status', 'wp-file-upload').'">'.esc_html($filters[$notf['status']]['title']).'</td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="'.esc_html__('Actions', 'wp-file-upload').'">'.$action.'</td>';
 		$echo_str .= "\n\t\t\t\t".'</tr>';
 		$ii ++;
 	}
@@ -401,9 +405,9 @@ function wfu_manage_notifications($sort, $page = 1, $only_table_rows = false, $f
  *
  * @return string The URL of this page.
  */
-function wfu_notifications_url($sort, $page, $filter) {
+function wfu_notifications_url($sort, $page, $filter, $nonce) {
 	$siteurl = site_url();
-	return $siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=plugin_notifications&sort='.$sort.'&pageid='.$page.'&filter='.$filter;
+	return $siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=plugin_notifications&sort='.$sort.'&pageid='.$page.'&filter='.$filter.'&c='.$nonce;
 }
 
 /**
@@ -464,18 +468,18 @@ function wfu_admin_toolbar_admin_notifications() {
 			$mark = $unread_admin_notification_stats['single']['category'];
 			$description = $unread_admin_notification_stats['single']['brief'];
 			if ( $description == '' ) $description = $unread_admin_notification_stats['single']['content'];
-			$title = $description . ' Click to review it and take actions.';
+			$title = $description . ' '.__('Click to review it and take actions.', 'wp-file-upload');
 		}
 		else {
 			if ( $unread_admin_notification_stats['error'] > 0 ) $mark = 'error';
 			elseif ( $unread_admin_notification_stats['warning'] > 0 ) $mark = 'warning';
-			$title = 'You have unread upload '.$mark.' notifications. Click to review them and take actions.';
+			$title = sprintf(__('You have unread upload %s notifications. Click to review them and take actions.', 'wp-file-upload'), $mark);
 		}
 
 		$args = array(
 			'id'     => 'wfu_notifications',
-			'title'  => '<span class="ab-icon wfu-mark-'.$mark.'"></span><span class="screen-reader-text">'.$title.'</span>',
-			'href'   => admin_url( 'options-general.php?page=wordpress_file_upload&action=plugin_notifications' ),
+			'title'  => '<span class="ab-icon wfu-mark-'.esc_attr($mark).'"></span><span class="screen-reader-text">'.esc_html($title).'</span>',
+			'href'   => admin_url( 'options-general.php?page=wordpress_file_upload&action=plugin_notifications&c='.wp_create_nonce('wfu_admin_nonce') ),
 			'group'  => false,
 			'meta'   => array(
 				'title'    => $title,

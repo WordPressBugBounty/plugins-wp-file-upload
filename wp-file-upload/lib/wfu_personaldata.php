@@ -7,10 +7,12 @@
  *
  * @link /lib/wfu_personaldata.php
  *
- * @package WordPress File Upload Plugin
+ * @package Iptanus File Upload Plugin
  * @subpackage Core Components
  * @since 4.5.0
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 function wfu_load_pd_policies() {
 	$pd_policies = array();
@@ -41,6 +43,7 @@ function wfu_manage_personaldata_policies($error_message = "") {
 	if ( !current_user_can( 'manage_options' ) ) return;
 	$siteurl = site_url();
 	$basic = true;
+	$admin_nonce = wp_create_nonce('wfu_admin_nonce');
 
 	$echo_str = "";
 	$echo_str .= "\n".'<div class="wrap">';
@@ -61,17 +64,17 @@ function wfu_manage_personaldata_policies($error_message = "") {
 	
 	//select user
 	$echo_str .= "\n\t".'<div style="margin-top:20px;">';
-	$echo_str .= "\n\t\t".'<h3 style="margin-bottom: 10px;">Select User</h3>';
+	$echo_str .= "\n\t\t".'<h3 style="margin-bottom: 10px;">'.esc_html__('Select User', 'wp-file-upload').'</h3>';
 	$echo_str .= "\n\t\t".'<table class="form-table">';
 	$echo_str .= "\n\t\t\t".'<tbody>';
 	$echo_str .= "\n\t\t\t\t".'<tr>';
 	$echo_str .= "\n\t\t\t\t\t".'<th scope="row">';
-	$echo_str .= "\n\t\t\t\t\t\t".'<label>Type user in text box</label><br />';
+	$echo_str .= "\n\t\t\t\t\t\t".'<label>'.esc_html__('Type user in text box', 'wp-file-upload').'</label><br />';
 	$echo_str .= "\n\t\t\t\t\t\t".'<input type="text" id="wfu_pd_user_box0" class="wfu_pd_user_box0" value="" /><br />';
 	$echo_str .= "\n\t\t\t\t\t\t".'<select id="wfu_pd_user_select0" class="wfu_pd_user_select0" size="10"></select>';
 	$echo_str .= "\n\t\t\t\t\t".'</th>';
 	$echo_str .= "\n\t\t\t\t\t".'<td>';
-	$echo_str .= "\n\t\t\t\t\t\t".'<label>Select a user to perform operations (export or delete) on his/her personal data. Type an asterisk (*) in the text box to display all users.</label>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<label>'.esc_html__('Select a user to perform operations (export or delete) on his/her personal data. Type an asterisk (*) in the text box to display all users.', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t\t\t\t".'</td>';
 	$echo_str .= "\n\t\t\t\t".'</tr>';
 	$echo_str .= "\n\t\t\t".'</tbody>';
@@ -79,16 +82,16 @@ function wfu_manage_personaldata_policies($error_message = "") {
 	$echo_str .= "\n\t".'</div>';
 	//export actions
 	$echo_str .= "\n\t".'<div style="margin-top:20px;">';
-	$echo_str .= "\n\t\t".'<h3 style="margin-bottom: 10px;">Export Operations</h3>';
+	$echo_str .= "\n\t\t".'<h3 style="margin-bottom: 10px;">'.esc_html__('Export Operations', 'wp-file-upload').'</h3>';
 	$echo_str .= "\n\t\t".'<table class="form-table">';
 	$echo_str .= "\n\t\t\t".'<tbody>';
 	$echo_str .= "\n\t\t\t\t".'<tr>';
 	$echo_str .= "\n\t\t\t\t\t".'<th scope="row">';
-	$echo_str .= "\n\t\t\t\t\t\t".'<a href="javascript:wfu_export_user_data();" class="button" title="Export File Data of User">Export File Data of User</a>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<a href="javascript:wfu_export_user_data();" class="button" title="'.esc_html__('Export File Data of User', 'wp-file-upload').'">'.esc_html__('Export File Data of User', 'wp-file-upload').'</a>';
 	$echo_str .= "\n\t\t\t\t\t\t".'<input id="wfu_download_file_nonce" type="hidden" value="'.wp_create_nonce('wfu_download_file_invoker').'" />';
 	$echo_str .= "\n\t\t\t\t\t".'</th>';
 	$echo_str .= "\n\t\t\t\t\t".'<td>';
-	$echo_str .= "\n\t\t\t\t\t\t".'<label>Export uploaded valid file data, together with any userdata fields, to a comma-separated text file.</label>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<label>'.esc_html__('Export uploaded valid file data, together with any userdata fields, to a comma-separated text file.', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t\t\t\t\t".'<div id="wfu_file_download_container_1" style="display: none;"></div>';
 	$echo_str .= "\n\t\t\t\t\t".'</td>';
 	$echo_str .= "\n\t\t\t\t".'</tr>';
@@ -99,15 +102,15 @@ function wfu_manage_personaldata_policies($error_message = "") {
 	$echo_str .= "\n\t".'</div>';
 	//delete actions
 	$echo_str .= "\n\t".'<div style="margin-top:20px;">';
-	$echo_str .= "\n\t\t".'<h3 style="margin-bottom: 10px;">Erase Operations</h3>';
+	$echo_str .= "\n\t\t".'<h3 style="margin-bottom: 10px;">'.esc_html__('Erase Operations', 'wp-file-upload').'</h3>';
 	$echo_str .= "\n\t\t".'<table class="form-table">';
 	$echo_str .= "\n\t\t\t".'<tbody>';
 	$echo_str .= "\n\t\t\t\t".'<tr>';
 	$echo_str .= "\n\t\t\t\t\t".'<th scope="row">';
-	$echo_str .= "\n\t\t\t\t\t\t".'<a id="wfu_erase_userdata0" href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=erase_userdata_ask" class="button" title="Erase All User Data" onclick="if (!wfu_erase_user_data_check()) return false;">Erase All User Data</a>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<a id="wfu_erase_userdata0" href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;c='.$admin_nonce.'&amp;action=erase_userdata_ask').'" class="button" title="'.esc_html__('Erase All User Data', 'wp-file-upload').'" onclick="if (!wfu_erase_user_data_check()) return false;">'.esc_html__('Erase All User Data', 'wp-file-upload').'</a>';
 	$echo_str .= "\n\t\t\t\t\t".'</th>';
 	$echo_str .= "\n\t\t\t\t\t".'<td>';
-	$echo_str .= "\n\t\t\t\t\t\t".'<label>Erase all data of user kept in database.</label>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<label>'.esc_html__('Erase all data of user kept in database.', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t\t\t\t".'</td>';
 	$echo_str .= "\n\t\t\t\t".'</tr>';
 	$echo_str .= "\n\t\t\t".'</tbody>';
@@ -116,14 +119,19 @@ function wfu_manage_personaldata_policies($error_message = "") {
 	$echo_str .= "\n\t".'<script type="text/javascript">if(window.addEventListener) { window.addEventListener("load", '.$handler.', false); } else if(window.attachEvent) { window.attachEvent("onload", '.$handler.'); } else { window["onload"] = '.$handler.'; }</script>';
 	$echo_str .= "\n\t".'</div>';
 	
-	if ( $basic ) return $echo_str;
+	if ( $basic ) {
+		$echo_str .= "\n\t".'</div>';
+		$echo_str .= "\n".'</div>';
+		return $echo_str;
+	}
 	$echo_str = $echo_str2;
 	
-	$echo_str .= "\n\t\t".'<form enctype="multipart/form-data" name="personaldata" id="personaldata" method="post" action="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=manage_pd_policies" class="validate">';
+	$echo_str .= "\n\t\t".'<form enctype="multipart/form-data" name="personaldata" id="personaldata" method="post" action="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=manage_pd_policies').'" class="validate">';
 	$nonce = wp_nonce_field('wfu_manage_pd_policies', '_wpnonce', false, false);
 	$nonce_ref = wp_referer_field(false);
 	$echo_str .= "\n\t\t\t".$nonce;
 	$echo_str .= "\n\t\t\t".$nonce_ref;
+	$echo_str .= "\n\t\t\t".'<input type="hidden" name="c" value="'.$admin_nonce.'" />';
 	$echo_str .= "\n\t\t\t".'<input type="hidden" name="action" value="manage_pd_policies" />';
 	$echo_str .= "\n\t\t\t".'<div class="tablenav top">';
 	$echo_str .= "\n\t\t\t\t".'<div class="alignleft actions bulkactions">';
@@ -135,7 +143,7 @@ function wfu_manage_personaldata_policies($error_message = "") {
 	$echo_str .= "\n\t\t\t\t\t".'</select>';
 	$echo_str .= "\n\t\t\t\t\t".'<input type="submit" id="doaction" name="doaction" class="button action" value="Apply" />';
 	$echo_str .= "\n\t\t\t\t".'</div>';
-	$echo_str .= "\n\t\t\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=add_policy" class="button" title="add new personal data policy" style="float:right;">Add New Personal Data Policy</a>';
+	$echo_str .= "\n\t\t\t\t".'<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=add_policy&amp;c='.$admin_nonce).'" class="button" title="add new personal data policy" style="float:right;">Add New Personal Data Policy</a>';
 	$echo_str .= "\n\t\t\t".'</div>';
 	$echo_str .= "\n\t\t\t".'<table class="wp-list-table widefat fixed striped">';
 	$echo_str .= "\n\t\t\t\t".'<thead>';
@@ -167,6 +175,7 @@ function wfu_manage_personaldata_policies($error_message = "") {
 
 function wfu_edit_pd_policy($key = "", $error_status = "") {
 	$siteurl = site_url();
+	$admin_nonce = wp_create_nonce('wfu_admin_nonce');
 
 	if ( !current_user_can( 'manage_options' ) ) return;
 	
@@ -174,25 +183,25 @@ function wfu_edit_pd_policy($key = "", $error_status = "") {
 
 	$echo_str = "";
 	$echo_str = '<div class="wrap">';
-	$echo_str .= "\n\t".'<h2>Wordpress File Upload Control Panel</h2>';
+	$echo_str .= "\n\t".'<h2>Iptanus File Upload Control Panel</h2>';
 	if ( $error_status == "error" ) {
 		$echo_str .= "\n\t".'<div class="error">';
 		$echo_str .= "\n\t\t".'<p>'.'an error occurred'.'</p>';
 		$echo_str .= "\n\t".'</div>';
 	}
 	$echo_str .= "\n\t".'<div style="margin-top:20px;">';
-	$echo_str .= "\n\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=personal_data" class="button" title="go back">Go back</a>';
+	$echo_str .= "\n\t\t".'<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=personal_data&amp;c='.$admin_nonce).'" class="button" title="go back">Go back</a>';
 	$echo_str .= "\n\t\t".'<h2 style="margin-bottom: 10px; margin-top: 20px;">'.( $key == "" ? 'Add New Policy' : 'Edit Policy' ).'</h2>';
-	$echo_str .= "\n\t\t".'<form enctype="multipart/form-data" name="updatepolicy" id="updatepolicy" method="post" action="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=updatepolicy" class="validate">';
+	$echo_str .= "\n\t\t".'<form enctype="multipart/form-data" name="updatepolicy" id="updatepolicy" method="post" action="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=updatepolicy&amp;c='.$admin_nonce).'" class="validate">';
 	$nonce = wp_nonce_field('wfu_edit_policy', '_wpnonce', false, false);
 	$nonce_ref = wp_referer_field(false);
 	$echo_str .= "\n\t\t\t".$nonce;
 	$echo_str .= "\n\t\t\t".$nonce_ref;
 	$echo_str .= "\n\t\t\t".'<input type="hidden" name="action" value="updatepolicy">';
-	$echo_str .= "\n\t\t\t".'<input type="hidden" name="wfu_key" value="'.$key.'">';
+	$echo_str .= "\n\t\t\t".'<input type="hidden" name="wfu_key" value="'.esc_attr($key).'">';
 	$echo_str .= "\n\t\t\t".'<input type="hidden" id="wfu_PD_bank" name="wfu_PD_bank" value="">';
 	$echo_str .= "\n\t\t\t".'<div id="titlediv">';
-	$echo_str .= "\n\t\t\t\t".'<input type="text" id="title" value="'.$policy->get_name().'">';
+	$echo_str .= "\n\t\t\t\t".'<input type="text" id="title" value="'.esc_attr($policy->get_name()).'">';
 	$echo_str .= "\n\t\t\t".'</div>';
 	$echo_str .= "\n\t\t\t".'<h3 style="margin-top: 40px;">Plugin Operations';
 	$echo_str .= "\n\t\t\t\t".'<div class="wfu_pdheader_button wfu_pdop_header_button"></div>';
@@ -313,14 +322,14 @@ function wfu_render_pd_operations($dlp, $operations) {
 function _wfu_render_nested_pd_operations(&$html, $operations, $level, $dlp) {
 	foreach ( $operations as $def ) {
 		$atomic = ( count($def["children"]) == 0 );
-		$html .= $dlp.'<div class="wfu_pdop_container" id="wfu_pdop_container_'.$def["ID"].'">';
-		$html .= $dlp."\t".'<div class="wfu_pdop_header'.( $atomic || ( $level == WFU_VAR("WFU_PD_VISIBLE_OPLEVELS") ) ? " atomic" : "" ).'" id="wfu_pdop_header_'.$def["ID"].'">';
-		$html .= $dlp."\t\t".'<label>'.$def["Name"].'</label>';
-		$html .= $dlp."\t\t".'<input type="checkbox" id="wfu_pdop_'.$def["ID"].'" class="wfu_pdop_selector" onchange="wfu_pdop_toggle(this);" />';
+		$html .= $dlp.'<div class="wfu_pdop_container" id="wfu_pdop_container_'.esc_attr($def["ID"]).'">';
+		$html .= $dlp."\t".'<div class="wfu_pdop_header'.( $atomic || ( $level == WFU_VAR("WFU_PD_VISIBLE_OPLEVELS") ) ? " atomic" : "" ).'" id="wfu_pdop_header_'.esc_attr($def["ID"]).'">';
+		$html .= $dlp."\t\t".'<label>'.esc_html($def["Name"]).'</label>';
+		$html .= $dlp."\t\t".'<input type="checkbox" id="wfu_pdop_'.esc_attr($def["ID"]).'" class="wfu_pdop_selector" onchange="wfu_pdop_toggle(this);" />';
 		if ( !$atomic && ( WFU_VAR("WFU_PD_VISIBLE_OPLEVELS") < 1 || $level < WFU_VAR("WFU_PD_VISIBLE_OPLEVELS") ) ) $html .= $dlp."\t\t".'<div class="wfu_pdop_button"></div>';
 		$html .= $dlp."\t".'</div>';
 		if ( !$atomic ) {
-			$html .= $dlp."\t".'<div class="wfu_pdop_panel wfu_pdop_level_'.($level + 1).'" id="wfu_pdop_panel_'.$def["ID"].'">';
+			$html .= $dlp."\t".'<div class="wfu_pdop_panel wfu_pdop_level_'.($level + 1).'" id="wfu_pdop_panel_'.esc_attr($def["ID"]).'">';
 			_wfu_render_nested_pd_operations($html, $def["children"], $level + 1, $dlp."\t\t");
 			$html .= $dlp."\t".'</div>';
 		}
@@ -340,14 +349,14 @@ function wfu_render_consent_operations($dlp, $operations) {
 function _wfu_render_nested_consent_operations(&$html, $operations, $level, $dlp) {
 	foreach ( $operations as $def ) {
 		$atomic = ( count($def["children"]) == 0 );
-		$html .= $dlp.'<div class="wfu_conop_container" id="wfu_conop_container_'.$def["ID"].'">';
-		$html .= $dlp."\t".'<div class="wfu_conop_header'.( $atomic || ( $level == WFU_VAR("WFU_PD_VISIBLE_OPLEVELS") ) ? " atomic" : "" ).'" id="wfu_conop_header_'.$def["ID"].'">';
-		$html .= $dlp."\t\t".'<label>'.$def["Name"].'</label>';
-		$html .= $dlp."\t\t".'<input type="checkbox" id="wfu_conop_'.$def["ID"].'" class="wfu_conop_selector" onchange="wfu_conop_toggle(this);" />';
+		$html .= $dlp.'<div class="wfu_conop_container" id="wfu_conop_container_'.esc_attr($def["ID"]).'">';
+		$html .= $dlp."\t".'<div class="wfu_conop_header'.( $atomic || ( $level == WFU_VAR("WFU_PD_VISIBLE_OPLEVELS") ) ? " atomic" : "" ).'" id="wfu_conop_header_'.esc_attr($def["ID"]).'">';
+		$html .= $dlp."\t\t".'<label>'.esc_attr($def["Name"]).'</label>';
+		$html .= $dlp."\t\t".'<input type="checkbox" id="wfu_conop_'.esc_attr($def["ID"]).'" class="wfu_conop_selector" onchange="wfu_conop_toggle(this);" />';
 		if ( !$atomic && ( WFU_VAR("WFU_PD_VISIBLE_OPLEVELS") < 1 || $level < WFU_VAR("WFU_PD_VISIBLE_OPLEVELS") ) ) $html .= $dlp."\t\t".'<div class="wfu_conop_button"></div>';
 		$html .= $dlp."\t".'</div>';
 		if ( !$atomic ) {
-			$html .= $dlp."\t".'<div class="wfu_conop_panel wfu_conop_level_'.($level + 1).'" id="wfu_conop_panel_'.$def["ID"].'">';
+			$html .= $dlp."\t".'<div class="wfu_conop_panel wfu_conop_level_'.($level + 1).'" id="wfu_conop_panel_'.esc_attr($def["ID"]).'">';
 			_wfu_render_nested_consent_operations($html, $def["children"], $level + 1, $dlp."\t\t");
 			$html .= $dlp."\t".'</div>';
 		}
@@ -358,10 +367,10 @@ function _wfu_render_nested_consent_operations(&$html, $operations, $level, $dlp
 function wfu_render_consent_questions() {
 	$html = '<div class="wfu_conquestion_topmost_panel">';
 	$html .= '<div style="display:none;">';
-	$html .= '<div class="wfu_conquestion_btn wfu_conquestion_add" id="wfu_conquestion_add"><img class="wfu_conquestion_add" src="'.WFU_IMAGE_ADMIN_USERDATA_ADD.'" /></div>';
-	$html .= '<div class="wfu_conquestion_btn wfu_conquestion_remove" id="wfu_conquestion_remove"><img class="wfu_conquestion_remove" src="'.WFU_IMAGE_ADMIN_USERDATA_REMOVE.'" /></div>';
-	$html .= '<div class="wfu_conquestion_btn wfu_conquestion_up" id="wfu_conquestion_up"><img class="wfu_conquestion_up" src="'.WFU_IMAGE_ADMIN_USERDATA_UP.'" /></div>';
-	$html .= '<div class="wfu_conquestion_btn wfu_conquestion_down" id="wfu_conquestion_down"><img class="wfu_conquestion_down" src="'.WFU_IMAGE_ADMIN_USERDATA_DOWN.'" /></div>';
+	$html .= '<div class="wfu_conquestion_btn wfu_conquestion_add" id="wfu_conquestion_add"><img class="wfu_conquestion_add" src="'.esc_url(WFU_IMAGE_ADMIN_USERDATA_ADD).'" /></div>';
+	$html .= '<div class="wfu_conquestion_btn wfu_conquestion_remove" id="wfu_conquestion_remove"><img class="wfu_conquestion_remove" src="'.esc_url(WFU_IMAGE_ADMIN_USERDATA_REMOVE).'" /></div>';
+	$html .= '<div class="wfu_conquestion_btn wfu_conquestion_up" id="wfu_conquestion_up"><img class="wfu_conquestion_up" src="'.esc_url(WFU_IMAGE_ADMIN_USERDATA_UP).'" /></div>';
+	$html .= '<div class="wfu_conquestion_btn wfu_conquestion_down" id="wfu_conquestion_down"><img class="wfu_conquestion_down" src="'.esc_url(WFU_IMAGE_ADMIN_USERDATA_DOWN).'" /></div>';
 	$html .= '</div>';
 	$html .= '<div class="wfu_conquestions_operations">';
 	$html .= '<label>Operations</label>';
@@ -397,7 +406,7 @@ function wfu_render_pd_permissions($dlp) {
 	$html .= $dlp."\t\t\t\t".'<th colspan="'.count($locations).'">Locations</th>';
 	$html .= $dlp."\t\t\t\t".'</tr>';
 	$html .= $dlp."\t\t\t\t".'<tr>';
-	foreach ( $locations as $location ) $html .= $dlp."\t\t\t\t".'<th>'.$location["Name"].'</th>';
+	foreach ( $locations as $location ) $html .= $dlp."\t\t\t\t".'<th>'.esc_html($location["Name"]).'</th>';
 	$html .= $dlp."\t\t\t\t".'</tr>';
 	$html .= $dlp."\t\t\t".'</thead>';
 	$html .= $dlp."\t\t\t".'<tbody>';
@@ -415,9 +424,9 @@ function _wfu_render_nested_pd_permissions(&$permissions, $locations, $level, $d
 	$html = "";
 	foreach ( $permissions["children"] as $def ) {
 		$atomic = ( count($def["children"]) == 0 );
-		$html .= $dlp.'<tr class="wfu_perm_row" id="wfu_perm_row_'.$def["ID"].'" style="display:'.($level <= 1 ? 'table-row' : 'none').';">';
+		$html .= $dlp.'<tr class="wfu_perm_row" id="wfu_perm_row_'.esc_attr($def["ID"]).'" style="display:'.($level <= 1 ? 'table-row' : 'none').';">';
 		$html .= $dlp."\t".'<td class="wfu_perm_cell">';
-		$html .= $dlp."\t\t".'<div class="wfu_perm_container wfu_perm_level_'.$level.'">';
+		$html .= $dlp."\t\t".'<div class="wfu_perm_container wfu_perm_level_'.$esc_attr(level).'">';
 		$html .= $dlp."\t\t\t".'<label>'.$def["Name"].'</label>';
 		if ( !$atomic && ( WFU_VAR("WFU_PD_VISIBLE_PERLEVELS") < 1 || $level < WFU_VAR("WFU_PD_VISIBLE_PERLEVELS") ) ) $html .= $dlp."\t\t\t".'<div class="wfu_perm_button" onclick="wfu_perm_button_action(this);"></div>';
 		$html .= $dlp."\t\t".'</div>';
@@ -532,7 +541,7 @@ function wfu_render_pd_logactions($dlp) {
 	$html .= $dlp."\t\t\t\t".'<th colspan="'.count($entities).'">Entities</th>';
 	$html .= $dlp."\t\t\t\t".'</tr>';
 	$html .= $dlp."\t\t\t\t".'<tr>';
-	foreach ( $entities as $entity ) $html .= $dlp."\t\t\t\t".'<th>'.$entity["Name"].'</th>';
+	foreach ( $entities as $entity ) $html .= $dlp."\t\t\t\t".'<th>'.esc_html($entity["Name"]).'</th>';
 	$html .= $dlp."\t\t\t\t".'</tr>';
 	$html .= $dlp."\t\t\t".'</thead>';
 	$html .= $dlp."\t\t\t".'<tbody>';
@@ -550,10 +559,10 @@ function _wfu_render_nested_pd_logactions(&$logactions, $entities, $level, $dlp)
 	$html = "";
 	foreach ( $logactions["children"] as $def ) {
 		$atomic = ( count($def["children"]) == 0 );
-		$html .= $dlp.'<tr class="wfu_log_row" id="wfu_log_row_'.$def["ID"].'" style="display:'.($level <= 1 ? 'table-row' : 'none').';">';
+		$html .= $dlp.'<tr class="wfu_log_row" id="wfu_log_row_'.esc_attr($def["ID"]).'" style="display:'.($level <= 1 ? 'table-row' : 'none').';">';
 		$html .= $dlp."\t".'<td class="wfu_log_cell">';
-		$html .= $dlp."\t\t".'<div class="wfu_log_container wfu_log_level_'.$level.'">';
-		$html .= $dlp."\t\t\t".'<label>'.$def["Name"].'</label>';
+		$html .= $dlp."\t\t".'<div class="wfu_log_container wfu_log_level_'.esc_attr($level).'">';
+		$html .= $dlp."\t\t\t".'<label>'.esc_attr($def["Name"]).'</label>';
 		if ( !$atomic && ( WFU_VAR("WFU_PD_VISIBLE_LOGLEVELS") < 1 || $level < WFU_VAR("WFU_PD_VISIBLE_LOGLEVELS") ) ) $html .= $dlp."\t\t\t".'<div class="wfu_log_button" onclick="wfu_log_button_action(this);"></div>';
 		$html .= $dlp."\t\t".'</div>';
 		$html .= $dlp."\t".'</td>';
@@ -576,14 +585,14 @@ function wfu_render_pd_users($dlp) {
 	$html .= $dlp."\t".'<div class="wfu_pdusers_rolepanel">';
 	$roletype = "in";
 	for ( $i = 1; $i <= 2; $i++ ) {
-		$html .= $dlp."\t\t".'<div class="wfu_pdusers_roles_container" id="wfu_pdusers_roles_'.$roletype.'_container">';
+		$html .= $dlp."\t\t".'<div class="wfu_pdusers_roles_container" id="wfu_pdusers_roles_'.esc_attr($roletype).'_container">';
 		$html .= $dlp."\t\t\t".'<input type="radio" name="wfu_pdusers_roletypes" value="'.( $roletype == "in" ? "include" : "exclude" ).'" onchange="wfu_pdusers_roletype_handler(this);" />';
 		$html .= $dlp."\t\t\t".'<label>'.( $roletype == "in" ? "Include" : "Exclude" ).'</label>';
 		$html .= $dlp."\t\t\t".'<div class="wfu_pdusers_roles_toppanel">';
 		$html .= $dlp."\t\t\t\t".'<div class="wfu_pdusers_roles_leftpanel">';
 		$html .= $dlp."\t\t\t\t\t".'<select class="wfu_pdusers_roles_list" multiple>';
 		$roles = $wp_roles->get_names();
-		foreach ( $roles as $role => $rolename ) $html .= $dlp."\t\t\t\t\t\t".'<option value="'.$role.'">'.$rolename.'</option>';
+		foreach ( $roles as $role => $rolename ) $html .= $dlp."\t\t\t\t\t\t".'<option value="'.esc_attr($role).'">'.esc_html($rolename).'</option>';
 		$html .= $dlp."\t\t\t\t\t".'</select>';
 		$html .= $dlp."\t\t\t\t".'</div>';
 		$html .= $dlp."\t\t\t\t".'<div class="wfu_pdusers_roles_midpanel">';
@@ -604,7 +613,7 @@ function wfu_render_pd_users($dlp) {
 	$html .= $dlp."\t".'<div class="wfu_pdusers_userpanel">';
 	$usertype = "in";
 	for ( $i = 1; $i <= 2; $i++ ) {
-		$html .= $dlp."\t\t".'<div class="wfu_pdusers_users_container" id="wfu_pdusers_users_'.$usertype.'_container">';
+		$html .= $dlp."\t\t".'<div class="wfu_pdusers_users_container" id="wfu_pdusers_users_'.esc_attr($usertype).'_container">';
 		$html .= $dlp."\t\t\t".'<label>'.( $usertype == "in" ? "Include" : "Exclude" ).'</label>';
 		$html .= $dlp."\t\t\t".'<div class="wfu_pdusers_users_toppanel">';
 		$html .= $dlp."\t\t\t\t".'<div class="wfu_pdusers_users_leftpanel">';
@@ -642,25 +651,28 @@ function wfu_update_pd_policy() {
 
 function wfu_erase_userdata_ask_prompt($username) {
 	$siteurl = site_url();
+	$admin_nonce = wp_create_nonce('wfu_admin_nonce');
 
 	if ( !current_user_can( 'manage_options' ) ) return wfu_manage_personaldata_policies();
 
+	$username = sanitize_user( $username );
 	$user = get_user_by('login', $username);
 	if ( $user->ID == 0 ) return wfu_manage_personaldata_policies();
 
 	$echo_str = "\n".'<div class="wrap">';
 	$echo_str .= "\n\t".'<div style="margin-top:20px;">';
-	$echo_str .= "\n\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=personal_data" class="button" title="go back">Go back</a>';
+	$echo_str .= "\n\t\t".'<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=personal_data&amp;c='.$admin_nonce).'" class="button" title="go back">Go back</a>';
 	$echo_str .= "\n\t".'</div>';
 	$echo_str .= "\n\t".'<h2 style="margin-bottom: 10px;">Erase All User Data</h2>';
-	$echo_str .= "\n\t".'<form enctype="multipart/form-data" name="erase_userdata" id="erase_userdata" method="post" action="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload" class="validate">';
+	$echo_str .= "\n\t".'<form enctype="multipart/form-data" name="erase_userdata" id="erase_userdata" method="post" action="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload').'" class="validate">';
 	$nonce = wp_nonce_field('erase_userdata', '_wpnonce', false, false);
 	$nonce_ref = wp_referer_field(false);
 	$echo_str .= "\n\t\t".$nonce;
 	$echo_str .= "\n\t\t".$nonce_ref;
 	$echo_str .= "\n\t\t".'<input type="hidden" name="action" value="erase_userdata">';
-	$echo_str .= "\n\t\t".'<input type="hidden" name="username" value="'.$username.'">';
-	$echo_str .= "\n\t\t".'<label>Are you sure that you want to erase all data of user <strong>'.$user->display_name.' ('.$username.')</strong>? </label><br/>';
+	$echo_str .= "\n\t\t".'<input type="hidden" name="c" value="'.$admin_nonce.'" />';
+	$echo_str .= "\n\t\t".'<input type="hidden" name="username" value="'.esc_attr($username).'">';
+	$echo_str .= "\n\t\t".'<label>Are you sure that you want to erase all data of user <strong>'.esc_attr($user->display_name).' ('.esc_attr($username).')</strong>? </label><br/>';
 	$echo_str .= "\n\t\t".'<p class="submit">';
 	$echo_str .= "\n\t\t\t".'<input type="submit" class="button-primary" name="submit" value="Yes">';
 	$echo_str .= "\n\t\t\t".'<input type="submit" class="button-primary" name="submit" value="Cancel">';
@@ -676,6 +688,7 @@ function wfu_erase_userdata($username) {
 
 	if ( !current_user_can( 'manage_options' ) ) return -1;
 	if ( !check_admin_referer('erase_userdata') ) return -1;
+	$username = sanitize_user( $username );
 	$user = get_user_by('login', $username);
 	if ( $user->ID == 0 ) return -1;
 

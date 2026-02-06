@@ -10,6 +10,9 @@
  * required to declare all functions of the template but only those that are
  * different.
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
+
 class WFU_UploaderTemplate_MaterialUI extends WFU_Original_Template {
 
 private static $instance = null;
@@ -83,11 +86,11 @@ function wfu_contents_template($data) {?>
 		$contents = preg_replace("/<shadowdom_post>(.*?)<\/shadowdom_post>/s", "", $contents);
 	}
 ?>
-<template id="r_wfu_template_<?php echo $ID; ?>"><div id="wordpress_file_upload_block_<?php echo $ID; ?>" class="wfu_container r_wfu_container"><?php echo ($contents); ?></div></template>
-<template id="r_wfu_template_<?php echo $ID; ?>_pre"><?php echo ($pre_contents); ?></template>
-<template id="r_wfu_template_<?php echo $ID; ?>_post"><?php echo ($post_contents); ?></template>
-<template id="r_wfu_styles_template_<?php echo $ID; ?>"><style>
-	@import url('<?php echo WPFILEUPLOAD_DIR.'vendor/file-icons-js/src/style.css'; ?>');
+<template id="r_wfu_template_<?php echo esc_attr($ID); ?>"><div id="wordpress_file_upload_block_<?php echo esc_attr($ID); ?>" class="wfu_container r_wfu_container"><?php echo ($contents); ?></div></template>
+<template id="r_wfu_template_<?php echo esc_attr($ID); ?>_pre"><?php echo ($pre_contents); ?></template>
+<template id="r_wfu_template_<?php echo esc_attr($ID); ?>_post"><?php echo ($post_contents); ?></template>
+<template id="r_wfu_styles_template_<?php echo esc_attr($ID); ?>"><style>
+	@import url('<?php echo esc_url(WPFILEUPLOAD_DIR.'vendor/file-icons-js/src/style.css'); ?>');
 </style></template>
 <script type="text/javascript">
 	/**
@@ -101,7 +104,7 @@ function wfu_contents_template($data) {?>
 	 * @since 4.21.0
 	*/
 	(function() {
-		const sid = '<?php echo $ID; ?>';
+		const sid = '<?php echo esc_attr($ID); ?>';
 		const template = document.getElementById('r_wfu_template_' + sid);
 		const pre_template = document.getElementById('r_wfu_template_' + sid + '_pre');
 		const post_template = document.getElementById('r_wfu_template_' + sid + '_post');
@@ -146,13 +149,13 @@ function wfu_row_container_template($data) {?>
 ?>
 <?php if ( $responsive ): ?>
 <?php foreach ( $item_props as $p ): ?>
-	<div id="<?php echo $p["title"]; ?>" class="file_div_clean_responsive_r" style="<?php echo esc_html($p["style"]); ?>">
+	<div id="<?php echo esc_attr($p["title"]); ?>" class="file_div_clean_responsive_r" style="<?php echo esc_html($p["style"]); ?>">
 	<?php foreach ( $p["lines"] as $line ): ?>
 		<?php echo $line; ?>
 	<?php endforeach ?>
 		<div class="file_space_clean_r"></div>
 	<?php if ( isset($p["object"]) ): ?>
-		<script type="text/javascript">wfu_run_js("<?php echo $p["object"]; ?>", "init");</script>
+		<script type="text/javascript">wfu_run_js("<?php echo esc_attr($p["object"]); ?>", "init");</script>
 	<?php endif ?>
 	</div>
 <?php endforeach ?>
@@ -164,13 +167,13 @@ function wfu_row_container_template($data) {?>
 				<tr>
 				<?php foreach ( $item_props as $p ): ?>
 					<td class="file_td_clean_r" style="<?php echo ( $p["is_last"] ? "" : "padding: 0 4px 0 0;" ); ?>">
-						<div id="<?php echo $p["title"]; ?>" class="file_div_clean_r" style="<?php echo esc_html($p["style"]); ?>">
+						<div id="<?php echo esc_attr($p["title"]); ?>" class="file_div_clean_r" style="<?php echo esc_html($p["style"]); ?>">
 						<?php foreach ( $p["lines"] as $line ): ?>
 							<?php echo $line; ?>
 						<?php endforeach ?>
 							<div class="file_space_clean_r"></div>
 						<?php if ( isset($p["object"]) ): ?>
-							<script type="text/javascript">wfu_run_js("<?php echo $p["object"]; ?>", "init");</script>
+							<script type="text/javascript">wfu_run_js("<?php echo esc_attr($p["object"]); ?>", "init");</script>
 						<?php endif ?>
 						</div>
 					</td>
@@ -200,7 +203,7 @@ function wfu_visualeditorbutton_template($data) {?>
 <script type="text/javascript">
 GlobalData.WFU[$ID].visualeditorbutton.init = function() {
 
-	let data = JSON.parse(wfu_plugin_decode_string('<?php echo $dataEnc; ?>'));
+	let data = JSON.parse(wfu_plugin_decode_string('<?php echo esc_html($dataEnc); ?>'));
 	data.slot = 'renderVisualEditorButton';
 	wfu_create_react_dom('r_wfu_visualeditorbutton_$ID', data);
 	wfu_render_react_component(data);
@@ -224,7 +227,7 @@ function wfu_title_template($data) {?>
 <script type="text/javascript">
 GlobalData.WFU[$ID].title.init = function() {
 
-	let data = JSON.parse(wfu_plugin_decode_string('<?php echo $dataEnc; ?>'));
+	let data = JSON.parse(wfu_plugin_decode_string('<?php echo esc_html($dataEnc); ?>'));
 	data.slot = 'renderTitle';
 	wfu_create_react_dom('r_wfu_title_$ID', data);
 	wfu_render_react_component(data);
@@ -245,7 +248,7 @@ function wfu_textbox_template($data) {?>
 <script type="text/javascript">
 GlobalData.WFU[$ID].textbox.init = function() {
 
-	let data = JSON.parse(wfu_plugin_decode_string('<?php echo $dataEnc; ?>'));
+	let data = JSON.parse(wfu_plugin_decode_string('<?php echo esc_html($dataEnc); ?>'));
 	data.slot = 'renderTextbox';
 	wfu_create_react_dom('r_wfu_textbox_$ID', data);
 	wfu_render_react_component(data);
@@ -271,7 +274,7 @@ function wfu_subfolders_template($data) {?>
 <script type="text/javascript">
 GlobalData.WFU[$ID].subfolders.init = function() {
 
-	let data = JSON.parse(wfu_plugin_decode_string('<?php echo $dataEnc; ?>'));
+	let data = JSON.parse(wfu_plugin_decode_string('<?php echo esc_html($dataEnc); ?>'));
 	data.slot = 'renderSubfolders';
 	wfu_create_react_dom('r_wfu_subfolders_$ID', data);
 	wfu_render_react_component(data);
@@ -303,7 +306,7 @@ function wfu_uploadform_template($data) {?>
 <script type="text/javascript">
 GlobalData.WFU[$ID].uploadform.init = function() {
 
-	let data = JSON.parse(wfu_plugin_decode_string('<?php echo $dataEnc; ?>'));
+	let data = JSON.parse(wfu_plugin_decode_string('<?php echo esc_html($dataEnc); ?>'));
 	data.slot = 'renderUploadform';
 	wfu_create_react_dom('r_wfu_uploadform_$ID', data);
 	wfu_render_react_component(data);
@@ -338,7 +341,7 @@ function wfu_submit_template($data) {?>
 <script type="text/javascript">
 GlobalData.WFU[$ID].submit.init = function() {
 
-	let data = JSON.parse(wfu_plugin_decode_string('<?php echo $dataEnc; ?>'));
+	let data = JSON.parse(wfu_plugin_decode_string('<?php echo esc_html($dataEnc); ?>'));
 	data.slot = 'renderSubmit';
 	wfu_create_react_dom('r_wfu_submit_$ID', data);
 	wfu_render_react_component(data);
@@ -361,7 +364,7 @@ function wfu_progressbar_template($data) {?>
 <script type="text/javascript">
 GlobalData.WFU[$ID].progressbar.init = function() {
 
-	let data = JSON.parse(wfu_plugin_decode_string('<?php echo $dataEnc; ?>'));
+	let data = JSON.parse(wfu_plugin_decode_string('<?php echo esc_html($dataEnc); ?>'));
 	data.slot = 'renderProgressbar';
 	wfu_create_react_dom('r_wfu_progressbar_$ID', data);
 	wfu_render_react_component(data);
@@ -389,14 +392,14 @@ function wfu_userdata_template($data) {?>
 <script type="text/javascript">
 GlobalData.WFU[$ID].userdata.init = function() {
 
-	let data = JSON.parse(wfu_plugin_decode_string('<?php echo $dataEnc; ?>'));
+	let data = JSON.parse(wfu_plugin_decode_string('<?php echo esc_html($dataEnc); ?>'));
 	data.slot = 'renderUserdata';
 	wfu_render_react_component(data);
 
 	this.initField = function(props) {
 		let slotProps = {
 			ID: '$ID',
-			forceSpecificity: '<?php echo $params["muioverridecssmethod"]; ?>',
+			forceSpecificity: '<?php echo esc_attr($params["muioverridecssmethod"]); ?>',
 			slot: 'renderUserdata.initField',
 			props: props
 		};
@@ -420,11 +423,11 @@ GlobalData.WFU[$ID].userdata.init = function() {
 }
 </script>
 <?php foreach ( $props as $p ): ?>
-<userdata_<?php echo $p["key"]; ?>_template>
-<div id="userdata_$ID_<?php echo $p["key"]; ?>" class="file_userdata_container">
-<div id="r_wfu_userdata_$ID_<?php echo $p["key"]; ?>"></div>
+<userdata_<?php echo esc_attr($p["key"]); ?>_template>
+<div id="userdata_$ID_<?php echo esc_attr($p["key"]); ?>" class="file_userdata_container">
+<div id="r_wfu_userdata_$ID_<?php echo esc_attr($p["key"]); ?>"></div>
 </div>
-</userdata_<?php echo $p["key"]; ?>_template>
+</userdata_<?php echo esc_attr($p["key"]); ?>_template>
 <?php endforeach ?>
 <?php }
 
@@ -508,7 +511,7 @@ div.wfu_file_webcam_wrapper {
 	justify-content: center;
 	width: 100%;
 	height: 100%;
-	background: <?php echo $params["webcambg"] ?>;
+	background: <?php echo esc_html($params["webcambg"]) ?>;
 }
 
 div.wfu_file_webcam_image {
@@ -520,7 +523,7 @@ div.wfu_file_webcam_image {
 	height: 100%;
 	top: 0;
 	left: 0;
-	background: <?php echo $params["webcambg"] ?>;
+	background: <?php echo esc_html($params["webcambg"]) ?>;
 }
 
 img.wfu_file_webcam_screenshot {
@@ -1144,34 +1147,34 @@ this.ended = function() {
 ****************************************************************************/ ?>
 <div id="webcam_$ID" class="wfu_file_webcam" style="<?php echo esc_html($styles); ?>">
 	<div id="webcam_$ID_inner" class="wfu_file_webcam_inner">
-		<label id="webcam_$ID_notsupported" class="wfu_webcam_notsupported_label" style="display:none;"><?php echo WFU_ERROR_WEBCAM_NOTSUPPORTED; ?></label>
-		<img id="webcam_$ID_btns" src="<?php echo WFU_IMAGE_MEDIA_BUTTONS; ?>" style="display:none;" />
+		<label id="webcam_$ID_notsupported" class="wfu_webcam_notsupported_label" style="display:none;"><?php echo esc_html(WFU_ERROR_WEBCAM_NOTSUPPORTED); ?></label>
+		<img id="webcam_$ID_btns" src="<?php echo esc_url(WFU_IMAGE_MEDIA_BUTTONS); ?>" style="display:none;" />
 <?php if ( $params["webcamswitch"] == "true" ): ?>
-		<svg viewBox="0 0 8 8" id="webcam_$ID_btn_switchcam" class="wfu_file_webcam_btn wfu_file_webcam_btn_switchcam" onclick="wfu_webcam_switch<?php echo ( WFU_VAR("WFU_WEBCAMSWITCHMODE") == "side" ? "" : "_devices" ) ?>($ID);" style="display:none;"><use xlink:href="#loop-circular"></use><rect width="8" height="8" fill="transparent"><title><?php echo WFU_WEBCAM_SWITCHCAM_BTN; ?></title></rect></svg>
+		<svg viewBox="0 0 8 8" id="webcam_$ID_btn_switchcam" class="wfu_file_webcam_btn wfu_file_webcam_btn_switchcam" onclick="wfu_webcam_switch<?php echo ( WFU_VAR("WFU_WEBCAMSWITCHMODE") == "side" ? "" : "_devices" ) ?>($ID);" style="display:none;"><use xlink:href="#loop-circular"></use><rect width="8" height="8" fill="transparent"><title><?php echo esc_attr(WFU_WEBCAM_SWITCHCAM_BTN); ?></title></rect></svg>
 <?php endif ?>
-		<svg viewBox="0 0 8 8" id="webcam_$ID_btn_onoff" class="wfu_file_webcam_btn wfu_file_webcam_btn_onoff" onclick="wfu_webcam_onoff($ID);" style="display:none;"><use xlink:href="#power-standby"></use><rect width="8" height="8" fill="transparent"><title><?php echo WFU_WEBCAM_TURNONOFF_BTN; ?></title></rect></svg>
+		<svg viewBox="0 0 8 8" id="webcam_$ID_btn_onoff" class="wfu_file_webcam_btn wfu_file_webcam_btn_onoff" onclick="wfu_webcam_onoff($ID);" style="display:none;"><use xlink:href="#power-standby"></use><rect width="8" height="8" fill="transparent"><title><?php echo esc_attr(WFU_WEBCAM_TURNONOFF_BTN); ?></title></rect></svg>
 		<div id="webcam_$ID_wrapper" class="wfu_file_webcam_wrapper">
 			<div id="webcam_$ID_image" class="wfu_file_webcam_image" style="display:none;">
 				<img id="webcam_$ID_screenshot" class="wfu_file_webcam_screenshot" onerror="wfu_webcam_screenshot_error($ID);" />
 				<canvas id="webcam_$ID_canvas" style="display:none;"></canvas>
 			</div>
-			<video playsinline autoplay="true" id="webcam_$ID_box" class="wfu_file_webcam_box"><?php echo WFU_ERROR_WEBCAM_NOTSUPPORTED; ?></video>
+			<video playsinline autoplay="true" id="webcam_$ID_box" class="wfu_file_webcam_box"><?php echo esc_html(WFU_ERROR_WEBCAM_NOTSUPPORTED); ?></video>
 		</div>
 		<div class="wfu_file_webcam_nav_container">
 			<div id="webcam_$ID_nav" class="wfu_file_webcam_nav wfu_rec_ready" style="display:none;">
 				<input id="webcam_$ID_btns_converted" type="hidden" value="" />
-				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_video" class="wfu_file_webcam_btn wfu_file_webcam_btn_video" onclick="wfu_webcam_golive($ID);"><use xlink:href="#video"></use><rect width="8" height="8" fill="transparent"><title><?php echo WFU_WEBCAM_GOLIVE_BTN; ?></title></rect></svg>
-				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_record" class="wfu_file_webcam_btn wfu_file_webcam_btn_record" onclick="wfu_webcam_start_rec($ID);"><use xlink:href="#media-record"></use><rect width="8" height="8" fill="transparent"><title><?php echo WFU_WEBCAM_RECVIDEO_BTN; ?></title></rect></svg>
-				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_stop" class="wfu_file_webcam_btn wfu_file_webcam_btn_stop" onclick="wfu_webcam_stop_rec($ID);"><use xlink:href="#media-stop"></use><rect width="8" height="8" fill="transparent"><title><?php echo WFU_WEBCAM_STOPREC_BTN; ?></title></rect></svg>
-				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_play" class="wfu_file_webcam_btn wfu_file_webcam_btn_play" onclick="wfu_webcam_play($ID);"><use xlink:href="#media-play"></use><rect width="8" height="8" fill="transparent"><title><?php echo WFU_WEBCAM_PLAY_BTN; ?></title></rect></svg>
-				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_pause" class="wfu_file_webcam_btn wfu_file_webcam_btn_pause" onclick="wfu_webcam_pause($ID);"><use xlink:href="#media-pause"></use><rect width="8" height="8" fill="transparent"><title><?php echo WFU_WEBCAM_PAUSE_BTN; ?></title></rect></svg>
+				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_video" class="wfu_file_webcam_btn wfu_file_webcam_btn_video" onclick="wfu_webcam_golive($ID);"><use xlink:href="#video"></use><rect width="8" height="8" fill="transparent"><title><?php echo esc_attr(WFU_WEBCAM_GOLIVE_BTN); ?></title></rect></svg>
+				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_record" class="wfu_file_webcam_btn wfu_file_webcam_btn_record" onclick="wfu_webcam_start_rec($ID);"><use xlink:href="#media-record"></use><rect width="8" height="8" fill="transparent"><title><?php echo esc_attr(WFU_WEBCAM_RECVIDEO_BTN); ?></title></rect></svg>
+				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_stop" class="wfu_file_webcam_btn wfu_file_webcam_btn_stop" onclick="wfu_webcam_stop_rec($ID);"><use xlink:href="#media-stop"></use><rect width="8" height="8" fill="transparent"><title><?php echo esc_attr(WFU_WEBCAM_STOPREC_BTN); ?></title></rect></svg>
+				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_play" class="wfu_file_webcam_btn wfu_file_webcam_btn_play" onclick="wfu_webcam_play($ID);"><use xlink:href="#media-play"></use><rect width="8" height="8" fill="transparent"><title><?php echo esc_attr(WFU_WEBCAM_PLAY_BTN); ?></title></rect></svg>
+				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_pause" class="wfu_file_webcam_btn wfu_file_webcam_btn_pause" onclick="wfu_webcam_pause($ID);"><use xlink:href="#media-pause"></use><rect width="8" height="8" fill="transparent"><title><?php echo esc_attr(WFU_WEBCAM_PAUSE_BTN); ?></title></rect></svg>
 				<div id="webcam_$ID_btn_pos" class="wfu_file_webcam_btn_pos">
 					<svg viewBox="0 0 8 8" class="wfu_file_webcam_btn_bar" preserveAspectRatio="none"><use xlink:href="#minus"></use></svg>
 					<svg viewBox="1 1 6 6" id="webcam_$ID_btn_pointer" class="wfu_file_webcam_btn_pointer" preserveAspectRatio="none"><use xlink:href="#media-stop" transform="rotate(0)"></use></svg>
 				</div>
-				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_back" class="wfu_file_webcam_btn wfu_file_webcam_btn_back" onclick="wfu_webcam_back($ID);"><use xlink:href="#media-skip-backward"></use><rect width="8" height="8" fill="transparent"><title><?php echo WFU_WEBCAM_GOBACK_BTN; ?></title></rect></svg>
-				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_fwd" class="wfu_file_webcam_btn wfu_file_webcam_btn_fwd" onclick="wfu_webcam_fwd($ID);"><use xlink:href="#media-skip-forward"></use><rect width="8" height="8" fill="transparent"><title><?php echo WFU_WEBCAM_GOFWD_BTN; ?></title></rect></svg>
-				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_picture" class="wfu_file_webcam_btn wfu_file_webcam_btn_picture" onclick="wfu_webcam_take_picture($ID);"><use xlink:href="#aperture"></use><rect width="8" height="8" fill="transparent"><title><?php echo WFU_WEBCAM_TAKEPIC_BTN; ?></title></rect></svg>
+				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_back" class="wfu_file_webcam_btn wfu_file_webcam_btn_back" onclick="wfu_webcam_back($ID);"><use xlink:href="#media-skip-backward"></use><rect width="8" height="8" fill="transparent"><title><?php echo esc_attr(WFU_WEBCAM_GOBACK_BTN); ?></title></rect></svg>
+				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_fwd" class="wfu_file_webcam_btn wfu_file_webcam_btn_fwd" onclick="wfu_webcam_fwd($ID);"><use xlink:href="#media-skip-forward"></use><rect width="8" height="8" fill="transparent"><title><?php echo esc_attr(WFU_WEBCAM_GOFWD_BTN); ?></title></rect></svg>
+				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_picture" class="wfu_file_webcam_btn wfu_file_webcam_btn_picture" onclick="wfu_webcam_take_picture($ID);"><use xlink:href="#aperture"></use><rect width="8" height="8" fill="transparent"><title><?php echo esc_attr(WFU_WEBCAM_TAKEPIC_BTN); ?></title></rect></svg>
 				<div id="webcam_$ID_btn_time" class="wfu_file_webcam_btn_time">
 					<table class="wfu_file_webcam_btn_time_tb">
 						<tbody>
@@ -1203,7 +1206,7 @@ function wfu_message_template($data) {?>
 <script type="text/javascript">
 GlobalData.WFU[$ID].message.init = function() {
 	
-	let data = JSON.parse(wfu_plugin_decode_string('<?php echo $dataEnc; ?>'));
+	let data = JSON.parse(wfu_plugin_decode_string('<?php echo esc_html($dataEnc); ?>'));
 	data.slot = 'renderMessage';
 	wfu_create_react_dom('r_wfu_message_$ID', data);
 	wfu_render_react_component(data);
@@ -1230,7 +1233,7 @@ function wfu_consent_template($data) {?>
 <script type="text/javascript">
 GlobalData.WFU[$ID].consent.init = function() {
 
-	let data = JSON.parse(wfu_plugin_decode_string('<?php echo $dataEnc; ?>'));
+	let data = JSON.parse(wfu_plugin_decode_string('<?php echo esc_html($dataEnc); ?>'));
 	data.slot = 'renderConsent';
 	wfu_create_react_dom('r_wfu_consent_$ID', data);
 	wfu_render_react_component(data);

@@ -7,10 +7,12 @@
  *
  * @link /lib/wfu_pd_classes.php
  *
- * @package WordPress File Upload Plugin
+ * @package Iptanus File Upload Plugin
  * @subpackage Core Components
  * @since 4.5.0
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
  * Personal Data Policy Class
@@ -168,7 +170,7 @@ class WFU_Personal_Data_Policy {
 		//for all operations requiring consent
 		$defitem = array(
 			"index"			=> 1,
-			"label"			=> "I agree to allow the plugin to use my personal data",
+			"label"			=> __('I agree to allow the plugin to use my personal data', 'wp-file-upload'),
 			"location"		=> "right",
 			"preselect"		=> 0,
 			"operations"	=> array()

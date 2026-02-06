@@ -10,6 +10,9 @@
  * required to declare all functions of the template but only those that are
  * different.
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
+
 class WFU_UploaderTemplate_Custom1 extends WFU_Original_Template {
 
 private static $instance = null;

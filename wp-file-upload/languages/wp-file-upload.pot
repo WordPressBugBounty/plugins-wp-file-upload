@@ -1,12 +1,13 @@
+#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: Iptanus File Upload\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-17 16:48+0200\n"
-"PO-Revision-Date: 2025-11-17 16:48+0200\n"
+"POT-Creation-Date: 2025-11-17 16:47+0200\n"
+"PO-Revision-Date: 2018-12-22 19:37+0200\n"
 "Last-Translator: nickboss <info@iptanus.com>\n"
 "Language-Team: Iptanus Team <info@iptanus.com>\n"
-"Language: es\n"
+"Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -36,16 +37,12 @@ msgid "Amazon S3 requires activation."
 msgstr ""
 
 #: extensions/wfu_amazons3/wfu_amazons3_admin.php:33
-#, fuzzy
-#| msgid "All files uploaded successfully"
 msgid "Amazon S3 uploads were successfully reset."
-msgstr "Todos los archivos fueron cargados satisfactoriamente"
+msgstr ""
 
 #: extensions/wfu_amazons3/wfu_amazons3_admin.php:38
-#, fuzzy
-#| msgid "All files uploaded successfully"
 msgid "Amazon S3 uploads were successfully cleared."
-msgstr "Todos los archivos fueron cargados satisfactoriamente"
+msgstr ""
 
 #: extensions/wfu_amazons3/wfu_amazons3_admin_browser.php:29
 msgid "Send this file to Amazon S3"
@@ -165,7 +162,7 @@ msgstr ""
 #: lib/wfu_backend_browser.php:202 lib/wfu_backend_browser.php:276
 #: lib/wfu_constants.php:65
 msgid "Delete"
-msgstr "Eliminar"
+msgstr ""
 
 #: extensions/wfu_amazons3/wfu_amazons3_attributes.php:105
 msgid ""
@@ -378,12 +375,10 @@ msgid ""
 msgstr ""
 
 #: extensions/wfu_amazons3/wfu_amazons3_maintenance.php:24
-#, fuzzy
-#| msgid "Files are being uploaded. Are you sure you want to exit the page?"
 msgid ""
 "You are about to clear all pending Amazon S3 uploads. Are you sure you want "
 "to continue?"
-msgstr "Los archivos están siendo cargados. ¿Desea salir de la página?"
+msgstr ""
 
 #: extensions/wfu_amazons3/wfu_amazons3_maintenance.php:24
 msgid "Clear Amazon S3 Uploads"
@@ -406,10 +401,8 @@ msgstr ""
 #: extensions/wfu_facebook/wfu_facebook_settings.php:37
 #: extensions/wfu_gdrive/wfu_gdrive_settings.php:40
 #: extensions/wfu_onedrive/wfu_onedrive_settings.php:39
-#, fuzzy
-#| msgid "No file was deleted!"
 msgid "Not supported!"
-msgstr "Ningún archivo fue eliminado!"
+msgstr ""
 
 #: extensions/wfu_amazons3/wfu_amazons3_settings.php:37
 #, php-format
@@ -503,10 +496,8 @@ msgid "Dropbox uploads were successfully cleared."
 msgstr ""
 
 #: extensions/wfu_dropbox/wfu_dropbox_admin_browser.php:29
-#, fuzzy
-#| msgid "Some files failed to upload!"
 msgid "Send this file to Dropbox"
-msgstr "Falló la carga de algunos archivos!"
+msgstr ""
 
 #: extensions/wfu_dropbox/wfu_dropbox_admin_browser.php:29
 msgid "Send to Dropbox"
@@ -752,12 +743,10 @@ msgid ""
 msgstr ""
 
 #: extensions/wfu_dropbox/wfu_dropbox_maintenance.php:24
-#, fuzzy
-#| msgid "Files are being uploaded. Are you sure you want to exit the page?"
 msgid ""
 "You are about to clear all pending Dropbox uploads. Are you sure you want to "
 "continue?"
-msgstr "Los archivos están siendo cargados. ¿Desea salir de la página?"
+msgstr ""
 
 #: extensions/wfu_dropbox/wfu_dropbox_maintenance.php:24
 msgid "Clear Dropbox Uploads"
@@ -791,10 +780,8 @@ msgstr ""
 
 #: extensions/wfu_dropbox/wfu_dropbox_settings.php:37
 #: extensions/wfu_onedrive/wfu_onedrive_settings.php:42
-#, fuzzy
-#| msgid "Upload in progress"
 msgid "and then press"
-msgstr "Carga en progreso"
+msgstr ""
 
 #: extensions/wfu_dropbox/wfu_dropbox_settings.php:38
 msgid "To reset Dropbox activation"
@@ -817,15 +804,12 @@ msgid ""
 msgstr ""
 
 #: extensions/wfu_facebook/wfu_facebook_admin.php:46
-#, fuzzy
 msgid "Facebook uploads were successfully reset."
-msgstr "Archivo %filename% uploaded satisfactoriamente"
+msgstr ""
 
 #: extensions/wfu_facebook/wfu_facebook_admin.php:51
-#, fuzzy
-#| msgid "File uploaded successfully but there are warnings!"
 msgid "Facebook uploads were successfully cleared."
-msgstr "El archivo fue cargado satisfactoriamente pero hubo advertencias!"
+msgstr ""
 
 #: extensions/wfu_facebook/wfu_facebook_attributes.php:10
 #: extensions/wfu_facebook/wfu_facebook_settings.php:30
@@ -858,10 +842,8 @@ msgstr ""
 
 #: extensions/wfu_facebook/wfu_facebook_attributes.php:48
 #: lib/wfu_admin_browser.php:1707
-#, fuzzy
-#| msgid "Upload files"
 msgid "Upload Details"
-msgstr "Cargar archivos"
+msgstr ""
 
 #: extensions/wfu_facebook/wfu_facebook_attributes.php:60
 #, php-format
@@ -873,10 +855,8 @@ msgstr ""
 
 #: extensions/wfu_facebook/wfu_facebook_attributes.php:63
 #: lib/wfu_attributes.php:1794
-#, fuzzy
-#| msgid "Upload Files"
 msgid "Attach Uploaded Files"
-msgstr "Cargar Archivos"
+msgstr ""
 
 #: extensions/wfu_facebook/wfu_facebook_attributes.php:75
 msgid ""
@@ -951,16 +931,11 @@ msgid ""
 msgstr ""
 
 #: extensions/wfu_facebook/wfu_facebook_constants.php:28
-#, fuzzy, php-format
-#| msgid ""
-#| "Insert variable %filepath% inside text. It will be replaced by the full "
-#| "filepath of the uploaded file."
+#, php-format
 msgid ""
 "Insert variable %%uploaddetails%% inside text. It will be replaced by a link "
 "showing details about the upload when clicked."
 msgstr ""
-"Insertar la variable %filepath% dentro del texto. Será reemplazada por la "
-"ruta completa al archivo cargado."
 
 #: extensions/wfu_facebook/wfu_facebook_constants.php:29
 msgid "You need to login as administrator to see this page!"
@@ -1003,16 +978,12 @@ msgid "Google Drive requires activation."
 msgstr ""
 
 #: extensions/wfu_gdrive/wfu_gdrive_admin.php:31
-#, fuzzy
-#| msgid "All files uploaded successfully"
 msgid "Google drive uploads were successfully reset."
-msgstr "Todos los archivos fueron cargados satisfactoriamente"
+msgstr ""
 
 #: extensions/wfu_gdrive/wfu_gdrive_admin.php:36
-#, fuzzy
-#| msgid "All files uploaded successfully"
 msgid "Google drive uploads were successfully cleared."
-msgstr "Todos los archivos fueron cargados satisfactoriamente"
+msgstr ""
 
 #: extensions/wfu_gdrive/wfu_gdrive_admin_browser.php:29
 msgid "Send this file to Google Drive"
@@ -1035,10 +1006,8 @@ msgid "Finalizing authorization, please wait..."
 msgstr ""
 
 #: extensions/wfu_gdrive/wfu_gdrive_attributes.php:18
-#, fuzzy
-#| msgid "Upload in progress"
 msgid "Upload To Google Drive"
-msgstr "Carga en progreso"
+msgstr ""
 
 #: extensions/wfu_gdrive/wfu_gdrive_attributes.php:30
 msgid ""
@@ -1283,12 +1252,10 @@ msgid ""
 msgstr ""
 
 #: extensions/wfu_gdrive/wfu_gdrive_maintenance.php:24
-#, fuzzy
-#| msgid "Files are being uploaded. Are you sure you want to exit the page?"
 msgid ""
 "You are about to clear all pending Google Drive uploads. Are you sure you "
 "want to continue?"
-msgstr "Los archivos están siendo cargados. ¿Desea salir de la página?"
+msgstr ""
 
 #: extensions/wfu_gdrive/wfu_gdrive_maintenance.php:24
 msgid "Clear Google Drive Uploads"
@@ -1390,10 +1357,8 @@ msgid "The upload folder of the upload form in Extensions tab."
 msgstr ""
 
 #: extensions/wfu_licensing/wfu_licensing_constants.php:19
-#, fuzzy
-#| msgid "Iptanus File Upload Form"
 msgid "Extensions Tab Upload Form ID"
-msgstr "Formulario Iptanus File Upload"
+msgstr ""
 
 #: extensions/wfu_licensing/wfu_licensing_constants.php:19
 msgid "Set the ID of the upload form in Extensions tab."
@@ -1530,10 +1495,8 @@ msgstr ""
 
 #: extensions/wfu_licensing/wfu_licensing_functions.php:378
 #: extensions/wfu_standalone/wfu_standalone_functions.php:219
-#, fuzzy
-#| msgid "Iptanus File Upload plugin uploader for sidebars"
 msgid "Iptanus File Upload plugin activation failed."
-msgstr "Cargador de complemento Iptanus File Uploader para sidebars"
+msgstr ""
 
 #: extensions/wfu_licensing/wfu_licensing_maintenance.php:21
 msgid "Licensing Actions"
@@ -1747,16 +1710,12 @@ msgid "Microsoft OneDrive requires activation."
 msgstr ""
 
 #: extensions/wfu_onedrive/wfu_onedrive_admin.php:31
-#, fuzzy
-#| msgid "All files uploaded successfully"
 msgid "Onedrive uploads were successfully reset."
-msgstr "Todos los archivos fueron cargados satisfactoriamente"
+msgstr ""
 
 #: extensions/wfu_onedrive/wfu_onedrive_admin.php:36
-#, fuzzy
-#| msgid "All files uploaded successfully"
 msgid "Onedrive uploads were successfully cleared."
-msgstr "Todos los archivos fueron cargados satisfactoriamente"
+msgstr ""
 
 #: extensions/wfu_onedrive/wfu_onedrive_admin_browser.php:29
 msgid "Send this file to Microsoft OneDrive"
@@ -2173,10 +2132,8 @@ msgid "The number of rows per page of the quarantined exceptions table."
 msgstr ""
 
 #: extensions/wfu_quarantine/wfu_quarantine_exceptions_tab.php:71
-#, fuzzy
-#| msgid "Upload files"
 msgid "Upload Exceptions"
-msgstr "Cargar archivos"
+msgstr ""
 
 #: extensions/wfu_quarantine/wfu_quarantine_exceptions_tab.php:98
 #: extensions/wfu_quarantine/wfu_quarantine_exceptions_tab.php:135
@@ -2223,10 +2180,8 @@ msgstr ""
 #: lib/wfu_admin_remotefiles.php:221 lib/wfu_admin_remotefiles.php:273
 #: lib/wfu_admin_transfers.php:104 lib/wfu_admin_uploadedfiles.php:171
 #: lib/wfu_admin_uploadedfiles.php:433
-#, fuzzy
-#| msgid "Bulk Actions"
 msgid "Actions"
-msgstr "Acciones en conjunto"
+msgstr ""
 
 #: extensions/wfu_quarantine/wfu_quarantine_exceptions_tab.php:153
 msgid "No exceptions have beed created yet."
@@ -2292,21 +2247,14 @@ msgid ""
 msgstr ""
 
 #: extensions/wfu_quarantine/wfu_quarantine_functions.php:248
-#, fuzzy
-#| msgid "File was not deleted!"
 msgid "File has no MIME type."
-msgstr "El archivo no fue eliminado!"
+msgstr ""
 
 #: extensions/wfu_quarantine/wfu_quarantine_functions.php:250
-#, fuzzy, php-format
-#| msgid ""
-#| "Error. This file was rejected because its extension is not correct. Its "
-#| "proper filename is: "
+#, php-format
 msgid ""
 "MIME type %s of file cannot be verified because the file has no extension."
 msgstr ""
-"Error. Este archivo fue rechazado debido a que su extensión no es correcta. "
-"El nombre adecuado es:"
 
 #: extensions/wfu_quarantine/wfu_quarantine_functions.php:251
 #, php-format
@@ -2321,16 +2269,11 @@ msgid "Accept all files having a MIME type of %s and no extension."
 msgstr ""
 
 #: extensions/wfu_quarantine/wfu_quarantine_functions.php:255
-#, fuzzy, php-format
-#| msgid ""
-#| "Error. This file was rejected because its extension is not correct. Its "
-#| "proper filename is: "
+#, php-format
 msgid ""
 "MIME type %s of file cannot be verified because extension .%s has no "
 "associated MIME types."
 msgstr ""
-"Error. Este archivo fue rechazado debido a que su extensión no es correcta. "
-"El nombre adecuado es:"
 
 #: extensions/wfu_quarantine/wfu_quarantine_functions.php:256
 #: extensions/wfu_quarantine/wfu_quarantine_functions.php:261
@@ -2381,16 +2324,13 @@ msgid "Quarantined file rejected by admin on %s."
 msgstr ""
 
 #: extensions/wfu_quarantine/wfu_quarantine_maintenance.php:48
-#, fuzzy
-#| msgid "No file was deleted!"
 msgid "No files affected"
-msgstr "Ningún archivo fue eliminado!"
+msgstr ""
 
 #: extensions/wfu_quarantine/wfu_quarantine_maintenance.php:48
-#, fuzzy, php-format
-#| msgid "No file was deleted!"
+#, php-format
 msgid "%s file affected"
-msgstr "Ningún archivo fue eliminado!"
+msgstr ""
 
 #: extensions/wfu_quarantine/wfu_quarantine_maintenance.php:49
 msgid "Completed quarantined files cleanup."
@@ -2446,15 +2386,13 @@ msgstr ""
 #: lib/wfu_admin_uploadedfiles.php:146 lib/wfu_admin_uploadedfiles.php:424
 #: lib/wfu_constants.php:57
 msgid "File"
-msgstr "Archivo"
+msgstr ""
 
 #: extensions/wfu_quarantine/wfu_quarantine_tab.php:105
 #: extensions/wfu_quarantine/wfu_quarantine_tab.php:147
 #: lib/wfu_attributes.php:957
-#, fuzzy
-#| msgid "Upload Media"
 msgid "Upload Path"
-msgstr "Cargar Medios"
+msgstr ""
 
 #: extensions/wfu_quarantine/wfu_quarantine_tab.php:109
 #: extensions/wfu_quarantine/wfu_quarantine_tab.php:148
@@ -2463,15 +2401,13 @@ msgstr "Cargar Medios"
 #: lib/wfu_admin_remotefiles.php:214 lib/wfu_admin_remotefiles.php:271
 #: lib/wfu_backend_browser.php:229 lib/wfu_constants.php:59
 msgid "Size"
-msgstr "Tamaño"
+msgstr ""
 
 #: extensions/wfu_quarantine/wfu_quarantine_tab.php:113
 #: extensions/wfu_quarantine/wfu_quarantine_tab.php:149
 #: lib/wfu_admin_uploadedfiles.php:151 lib/wfu_admin_uploadedfiles.php:429
-#, fuzzy
-#| msgid "Upload File"
 msgid "Upload Date"
-msgstr "Cargar archivo"
+msgstr ""
 
 #: extensions/wfu_quarantine/wfu_quarantine_tab.php:115
 #: extensions/wfu_quarantine/wfu_quarantine_tab.php:150
@@ -2484,16 +2420,13 @@ msgid "Accept"
 msgstr ""
 
 #: extensions/wfu_quarantine/wfu_quarantine_tab.php:165
-#, fuzzy
-#| msgid "No files have been selected!"
 msgid "No files have beed quarantined yet."
-msgstr "Ningún archivo seleccionado!"
+msgstr ""
 
 #: extensions/wfu_quarantine/wfu_quarantine_tab.php:257
-#, fuzzy, php-format
-#| msgid "No files have been selected!"
+#, php-format
 msgid "Quarantined file %s has been rejected."
-msgstr "Ningún archivo seleccionado!"
+msgstr ""
 
 #: extensions/wfu_quarantine/wfu_quarantine_tab.php:316 lib/wfu_admin.php:2004
 #: lib/wfu_admin_browser.php:774 lib/wfu_admin_browser.php:775
@@ -2527,10 +2460,9 @@ msgid "Accept Quarantined File %s"
 msgstr ""
 
 #: extensions/wfu_quarantine/wfu_quarantine_tab.php:328
-#, fuzzy, php-format
-#| msgid "Are you sure that you want to cancel the upload?"
+#, php-format
 msgid "Are you sure that you want to accept file %s?"
-msgstr "¿Desea cancelar la carga?"
+msgstr ""
 
 #: extensions/wfu_quarantine/wfu_quarantine_tab.php:330
 msgid "Quarantine Reason:"
@@ -2567,10 +2499,9 @@ msgid "Quarantined file %s has been accepted."
 msgstr ""
 
 #: extensions/wfu_quarantine/wfu_quarantine_tab.php:481
-#, fuzzy, php-format
-#| msgid "No files have been selected!"
+#, php-format
 msgid "Quarantined files %s have been accepted."
-msgstr "Ningún archivo seleccionado!"
+msgstr ""
 
 #: extensions/wfu_quarantine/wfu_quarantine_tab.php:484
 msgid ""
@@ -2593,23 +2524,17 @@ msgid "Standalone Activation Key"
 msgstr ""
 
 #: lib/wfu_admin.php:206 lib/wfu_admin.php:211
-#, fuzzy
-#| msgid "Iptanus File Upload Form"
 msgid "Iptanus File Upload"
-msgstr "Formulario Iptanus File Upload"
+msgstr ""
 
 #: lib/wfu_admin.php:230 lib/wfu_admin.php:232
-#, fuzzy
-#| msgid "Upload Files"
 msgid "Uploaded Files"
-msgstr "Cargar Archivos"
+msgstr ""
 
 #: lib/wfu_admin.php:625 lib/wfu_admin.php:1015
 #: lib/wfu_admin_uploadedfiles.php:40 lib/wfu_backend_browser.php:35
-#, fuzzy
-#| msgid "File not allowed."
 msgid "Not allowed!"
-msgstr "Archivo no admitido."
+msgstr ""
 
 #: lib/wfu_admin.php:1093 lib/wfu_admin_extensions.php:115
 #: lib/wfu_admin_extensions.php:162 lib/wfu_admin_hooks.php:91
@@ -2697,16 +2622,12 @@ msgid "(Your server supports files up to 1 Exabyte, practically unlimited)"
 msgstr ""
 
 #: lib/wfu_admin.php:1249
-#, fuzzy
-#| msgid "Your browser does not support webcam capture!"
 msgid "(Your server does not support files larger than 2GB)"
-msgstr "Su navegador no soporta captura desde webcam!"
+msgstr ""
 
 #: lib/wfu_admin.php:1250
-#, fuzzy
-#| msgid "unknown"
 msgid "Unknown"
-msgstr "desconocido"
+msgstr ""
 
 #: lib/wfu_admin.php:1250
 msgid "(The maximum file size supported by the server cannot be determined)"
@@ -2751,10 +2672,8 @@ msgstr ""
 
 #: lib/wfu_admin.php:1386 lib/wfu_admin.php:1388
 #: lib/wfu_admin_notifications.php:295 lib/wfu_attributes.php:202
-#, fuzzy
-#| msgid "File Upload Notification"
 msgid "Notifications"
-msgstr "Notificación de carga"
+msgstr ""
 
 #: lib/wfu_admin.php:1389
 msgid "File Browser"
@@ -2806,16 +2725,12 @@ msgid "File transfers"
 msgstr ""
 
 #: lib/wfu_admin.php:1401 lib/wfu_admin_remotefiles.php:173
-#, fuzzy
-#| msgid "Select File"
 msgid "Remote Files"
-msgstr "Seleccionar archivo"
+msgstr ""
 
 #: lib/wfu_admin.php:1401
-#, fuzzy
-#| msgid "Delete this file"
 msgid "Remote files"
-msgstr "Eliminar este archivo"
+msgstr ""
 
 #: lib/wfu_admin.php:1402
 msgid "Manage extensions"
@@ -2855,22 +2770,16 @@ msgid "You have unread %s notifications. Click to review them."
 msgstr ""
 
 #: lib/wfu_admin.php:1493
-#, fuzzy
-#| msgid "Iptanus File Upload Consent Status"
 msgid "Iptanus File Upload Control Panel"
-msgstr "Formulario Iptanus File Upload"
+msgstr ""
 
 #: lib/wfu_admin.php:1619
-#, fuzzy
-#| msgid "Upload cancelled!"
 msgid "Uploader Instances"
-msgstr "Carga cancelada!"
+msgstr ""
 
 #: lib/wfu_admin.php:1623
-#, fuzzy
-#| msgid "Upload Files"
 msgid "Uploaded File List Instances"
-msgstr "Cargar Archivos"
+msgstr ""
 
 #: lib/wfu_admin.php:1706
 msgid "Press"
@@ -2890,10 +2799,8 @@ msgid "here"
 msgstr ""
 
 #: lib/wfu_admin.php:1712
-#, fuzzy
-#| msgid "please wait while redirecting..."
 msgid "please wait..."
-msgstr "por favor espere mientras se redirecciona..."
+msgstr ""
 
 #: lib/wfu_admin.php:1714
 #, php-format
@@ -2902,7 +2809,7 @@ msgstr ""
 
 #: lib/wfu_admin.php:1714 lib/wfu_constants.php:61 lib/wfu_constants.php:250
 msgid "Page"
-msgstr "Página"
+msgstr ""
 
 #: lib/wfu_admin.php:1714
 msgid "Post"
@@ -2952,10 +2859,8 @@ msgid "Edit"
 msgstr ""
 
 #: lib/wfu_admin.php:1777
-#, fuzzy
-#| msgid "Delete this file"
 msgid "Delete this shortcode"
-msgstr "Eliminar este archivo"
+msgstr ""
 
 #: lib/wfu_admin.php:2004 lib/wfu_admin_composer.php:165
 msgid "Go to Main Menu"
@@ -2966,10 +2871,9 @@ msgid "Delete Shortcode"
 msgstr ""
 
 #: lib/wfu_admin.php:2011
-#, fuzzy, php-format
-#| msgid "Are you sure you want to delete these files?"
+#, php-format
 msgid "Are you sure that you want to delete shortcode for %s ?\""
-msgstr "¿Desea eliminar estos archivos?"
+msgstr ""
 
 #: lib/wfu_admin.php:2011
 msgid "Position"
@@ -3016,22 +2920,18 @@ msgstr ""
 #: lib/wfu_attributes.php:611 lib/wfu_backend_browser.php:233
 #: lib/wfu_constants.php:58
 msgid "Date"
-msgstr "Fecha"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:393 lib/wfu_admin_browser.php:413
 #: lib/wfu_admin_browser.php:441 lib/wfu_admin_browser.php:509
-#, fuzzy
-#| msgid "Upload Media"
 msgid "Uploaded By"
-msgstr "Cargar Medios"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:396 lib/wfu_admin_browser.php:414
 #: lib/wfu_admin_browser.php:442 lib/wfu_admin_browser.php:510
 #: lib/wfu_backend_browser.php:236
-#, fuzzy
-#| msgid "User"
 msgid "User Data"
-msgstr "Usuario"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:409
 msgid "go up"
@@ -3048,16 +2948,12 @@ msgid "View and edit file details"
 msgstr ""
 
 #: lib/wfu_admin_browser.php:566 lib/wfu_backend_browser.php:270
-#, fuzzy
-#| msgid "Delete this file"
 msgid "Rename this file"
-msgstr "Eliminar este archivo"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:567
-#, fuzzy
-#| msgid "Delete this file"
 msgid "Move this file"
-msgstr "Eliminar este archivo"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:567 lib/wfu_admin_browser.php:874
 msgid "Move"
@@ -3066,43 +2962,37 @@ msgstr ""
 #: lib/wfu_admin_browser.php:568 lib/wfu_backend_browser.php:276
 #: lib/wfu_constants.php:66
 msgid "Delete this file"
-msgstr "Eliminar este archivo"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:569 lib/wfu_backend_browser.php:283
 #: lib/wfu_constants.php:64
 msgid "Download this file"
-msgstr "Descargar este archivo"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:569 lib/wfu_backend_browser.php:283
 #: lib/wfu_constants.php:63
 msgid "Download"
-msgstr "Descargar"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:574
 msgid "Include file in plugin's database"
 msgstr ""
 
 #: lib/wfu_admin_browser.php:574 lib/wfu_admin_browser.php:1466
-#, fuzzy
-#| msgid "Select File"
 msgid "Include File"
-msgstr "Seleccionar archivo"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:576
-#, fuzzy
-#| msgid "File was not deleted!"
 msgid "File could not be included!"
-msgstr "El archivo no fue eliminado!"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:777
 msgid "Rename Folder"
 msgstr ""
 
 #: lib/wfu_admin_browser.php:777
-#, fuzzy
-#| msgid "Select File"
 msgid "Rename File"
-msgstr "Seleccionar archivo"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:785
 msgid "Enter new name for folder"
@@ -3113,10 +3003,8 @@ msgid "Enter new filename for file"
 msgstr ""
 
 #: lib/wfu_admin_browser.php:851
-#, fuzzy
-#| msgid "File"
 msgid "Move File"
-msgstr "Archivo"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:859
 msgid "Enter destination folder for file"
@@ -3134,12 +3022,12 @@ msgstr ""
 #: lib/wfu_admin_maintenance.php:568 lib/wfu_admin_settings.php:156
 #: lib/wfu_attributes.php:1903 lib/wfu_constants.php:54
 msgid "Yes"
-msgstr "Si"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:871 lib/wfu_admin_settings.php:156
 #: lib/wfu_attributes.php:1903 lib/wfu_constants.php:55
 msgid "No"
-msgstr "No"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:874
 msgid ""
@@ -3152,10 +3040,8 @@ msgid "Error: New folder name cannot be empty!"
 msgstr ""
 
 #: lib/wfu_admin_browser.php:927
-#, fuzzy
-#| msgid "cannot be empty!"
 msgid "Error: New file name cannot be empty!"
-msgstr "no puede estar vacío!"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:929
 msgid ""
@@ -3197,10 +3083,8 @@ msgid "Error: Destination path is the same as source path!"
 msgstr ""
 
 #: lib/wfu_admin_browser.php:999
-#, fuzzy
-#| msgid "Targer folder doesn't exist."
 msgid "Error: Destination folder does not exist!"
-msgstr "La carpeta de destino no existe."
+msgstr ""
 
 #: lib/wfu_admin_browser.php:1002
 msgid "Error: Destination folder cannot be outside the root of the website!"
@@ -3213,52 +3097,39 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_admin_browser.php:1090
-#, fuzzy
-#| msgid "Delete"
 msgid "Delete Folder"
-msgstr "Eliminar"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:1090
-#, fuzzy
-#| msgid "Select File"
 msgid "Delete File"
-msgstr "Seleccionar archivo"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:1099
-#, fuzzy, php-format
-#| msgid "Are you sure you want to delete these files?"
+#, php-format
 msgid "Are you sure that you want to delete folder %s?"
-msgstr "¿Desea eliminar estos archivos?"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:1099
-#, fuzzy, php-format
-#| msgid "Are you sure you want to delete these files?"
+#, php-format
 msgid "Are you sure that you want to delete file %s?"
-msgstr "¿Desea eliminar estos archivos?"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:1101
-#, fuzzy
-#| msgid "Are you sure you want to delete this file?"
 msgid "Are you sure that you want to delete folder:"
-msgstr "¿Desea eliminar este archivo?"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:1101
-#, fuzzy
-#| msgid "Are you sure you want to delete these files?"
 msgid "Are you sure that you want to delete files:"
-msgstr "¿Desea eliminar estos archivos?"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:1230
-#, fuzzy
-#| msgid "Delete this file"
 msgid "Remove Remote File"
-msgstr "Eliminar este archivo"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:1239
-#, fuzzy, php-format
-#| msgid "Are you sure you want to delete these files?"
+#, php-format
 msgid "Are you sure that you want to remove remote file %s?"
-msgstr "¿Desea eliminar estos archivos?"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:1240
 msgid ""
@@ -3268,10 +3139,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_admin_browser.php:1243
-#, fuzzy
-#| msgid "Are you sure you want to delete these files?"
 msgid "Are you sure that you want to remove remote files:"
-msgstr "¿Desea eliminar estos archivos?"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:1248
 msgid ""
@@ -3298,16 +3167,13 @@ msgid "Create"
 msgstr ""
 
 #: lib/wfu_admin_browser.php:1474
-#, fuzzy, php-format
-#| msgid "Are you sure that you want to cancel the upload?"
+#, php-format
 msgid "Are you sure that you want to include file %s?"
-msgstr "¿Desea cancelar la carga?"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:1476
-#, fuzzy
-#| msgid "Are you sure that you want to cancel the upload?"
 msgid "Are you sure that you want to include files:"
-msgstr "¿Desea cancelar la carga?"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:1483
 msgid "Include"
@@ -3319,10 +3185,8 @@ msgid "Details of File: %s"
 msgstr ""
 
 #: lib/wfu_admin_browser.php:1682
-#, fuzzy
-#| msgid "File does not exist!"
 msgid "File does not exist on the server anymore!"
-msgstr "El archivo no existe!"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:1687
 msgid "This record is old. The file is associated with another record."
@@ -3341,22 +3205,16 @@ msgid "Change User"
 msgstr ""
 
 #: lib/wfu_admin_browser.php:1765
-#, fuzzy
-#| msgid "File"
 msgid "File Size"
-msgstr "Archivo"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:1773
-#, fuzzy
-#| msgid "File"
 msgid "File Date"
-msgstr "Archivo"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:1781
-#, fuzzy
-#| msgid "Upload File"
 msgid "Uploaded From Page"
-msgstr "Cargar archivo"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:1790
 msgid "Upload Plugin ID"
@@ -3428,10 +3286,9 @@ msgid "File moved to %s by user %s"
 msgstr ""
 
 #: lib/wfu_admin_browser.php:1917
-#, fuzzy, php-format
-#| msgid "File testfile 1 under test"
+#, php-format
 msgid "File deleted by user %s"
-msgstr "Archivo testfile 1 en prueba"
+msgstr ""
 
 #: lib/wfu_admin_browser.php:1919
 #, php-format
@@ -3444,16 +3301,12 @@ msgid "File upload user modified by user %s"
 msgstr ""
 
 #: lib/wfu_admin_browser.php:2048
-#, fuzzy
-#| msgid "All files uploaded successfully"
 msgid "File details updated successfully!"
-msgstr "Todos los archivos fueron cargados satisfactoriamente"
+msgstr ""
 
 #: lib/wfu_admin_composer.php:167
-#, fuzzy
-#| msgid "Test Mode"
 msgid "Test"
-msgstr "Modo de Prueba"
+msgstr ""
 
 #: lib/wfu_admin_composer.php:167
 #, php-format
@@ -3496,10 +3349,8 @@ msgid "Plural"
 msgstr ""
 
 #: lib/wfu_admin_composer.php:410
-#, fuzzy
-#| msgid "User"
 msgid "Username"
-msgstr "Usuario"
+msgstr ""
 
 #: lib/wfu_admin_composer.php:411 lib/wfu_attributes.php:483
 msgid "Password"
@@ -3514,10 +3365,8 @@ msgid "Port"
 msgstr ""
 
 #: lib/wfu_admin_composer.php:414
-#, fuzzy
-#| msgid "Test Mode"
 msgid "FTP Mode"
-msgstr "Modo de Prueba"
+msgstr ""
 
 #: lib/wfu_admin_composer.php:415 lib/wfu_attributes.php:1207
 msgid "FTP"
@@ -3566,10 +3415,8 @@ msgid "make it default"
 msgstr ""
 
 #: lib/wfu_admin_composer.php:449
-#, fuzzy
-#| msgid "Delete"
 msgid "elete item"
-msgstr "Eliminar"
+msgstr ""
 
 #: lib/wfu_admin_composer.php:455 lib/wfu_attributes.php:326
 #: lib/wfu_attributes.php:358 lib/wfu_attributes.php:390
@@ -3605,10 +3452,8 @@ msgstr ""
 #: lib/wfu_admin_composer.php:531 lib/wfu_admin_composer.php:546
 #: lib/wfu_admin_composer.php:572 lib/wfu_admin_composer.php:608
 #: lib/wfu_admin_composer.php:650
-#, fuzzy
-#| msgid "Select File"
 msgid "Select all"
-msgstr "Seleccionar archivo"
+msgstr ""
 
 #: lib/wfu_admin_composer.php:547 lib/wfu_admin_composer.php:573
 msgid "Include guests"
@@ -3627,10 +3472,8 @@ msgid "Only From Current Site"
 msgstr ""
 
 #: lib/wfu_admin_composer.php:670
-#, fuzzy
-#| msgid "User Fields"
 msgid "Field"
-msgstr "Campos de Usuario"
+msgstr ""
 
 #: lib/wfu_admin_composer.php:672
 msgid "equal to"
@@ -3657,10 +3500,8 @@ msgid "does not start with"
 msgstr ""
 
 #: lib/wfu_admin_composer.php:678
-#, fuzzy
-#| msgid "File does not exist!"
 msgid "does not end with"
-msgstr "El archivo no existe!"
+msgstr ""
 
 #: lib/wfu_admin_composer.php:679
 msgid "does not contain"
@@ -3734,20 +3575,16 @@ msgid "Descending"
 msgstr ""
 
 #: lib/wfu_admin_composer.php:809 lib/wfu_admin_composer.php:851
-#, fuzzy
-#| msgid " (required)"
 msgid "Required"
-msgstr "(requerido)"
+msgstr ""
 
 #: lib/wfu_admin_composer.php:840
 msgid "Type"
 msgstr ""
 
 #: lib/wfu_admin_composer.php:852
-#, fuzzy
-#| msgid "Captcha not completed!"
 msgid "Do not autocomplete"
-msgstr "Captcha no completado!"
+msgstr ""
 
 #: lib/wfu_admin_composer.php:853
 msgid "Validate"
@@ -3798,7 +3635,7 @@ msgstr ""
 #: lib/wfu_admin_hooks.php:69 lib/wfu_attributes.php:2664
 #: lib/wfu_constants.php:248 lib/wfu_functions.php:7036
 msgid "Bulk Actions"
-msgstr "Acciones en conjunto"
+msgstr ""
 
 #: lib/wfu_admin_hooks.php:71 lib/wfu_admin_hooks.php:125
 msgid "Activate"
@@ -3811,7 +3648,7 @@ msgstr ""
 #: lib/wfu_admin_hooks.php:74 lib/wfu_constants.php:249
 #: lib/wfu_functions.php:7040
 msgid "Apply"
-msgstr "Aplicar"
+msgstr ""
 
 #: lib/wfu_admin_hooks.php:76
 msgid "add new hook"
@@ -3832,10 +3669,8 @@ msgid "Edit this hook"
 msgstr ""
 
 #: lib/wfu_admin_hooks.php:121
-#, fuzzy
-#| msgid "Delete this file"
 msgid "Delete this hook"
-msgstr "Eliminar este archivo"
+msgstr ""
 
 #: lib/wfu_admin_hooks.php:125
 msgid "Deactivate this hook"
@@ -3928,22 +3763,17 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_admin_hooks.php:552
-#, fuzzy
-#| msgid "Delete"
 msgid "Delete Hook"
-msgstr "Eliminar"
+msgstr ""
 
 #: lib/wfu_admin_hooks.php:560
-#, fuzzy, php-format
-#| msgid "Are you sure you want to delete these files?"
+#, php-format
 msgid "Are you sure that you want to delete hook with title: %s?"
-msgstr "¿Desea eliminar estos archivos?"
+msgstr ""
 
 #: lib/wfu_admin_hooks.php:562
-#, fuzzy
-#| msgid "Are you sure you want to delete this file?"
 msgid "Are you sure that you want to delete hooks with title:"
-msgstr "¿Desea eliminar este archivo?"
+msgstr ""
 
 #: lib/wfu_admin_hooks.php:647
 #, php-format
@@ -3956,16 +3786,14 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_admin_log.php:80 lib/wfu_admin_log.php:160
-#, fuzzy
-#| msgid "Bulk Actions"
 msgid "Action"
-msgstr "Acciones en conjunto"
+msgstr ""
 
 #: lib/wfu_admin_log.php:86 lib/wfu_admin_log.php:162
 #: lib/wfu_admin_uploadedfiles.php:156 lib/wfu_admin_uploadedfiles.php:430
 #: lib/wfu_constants.php:60
 msgid "User"
-msgstr "Usuario"
+msgstr ""
 
 #: lib/wfu_admin_log.php:89 lib/wfu_admin_log.php:163
 #: lib/wfu_admin_uploadedfiles.php:166 lib/wfu_admin_uploadedfiles.php:432
@@ -3985,16 +3813,12 @@ msgid "Previous filepath:"
 msgstr ""
 
 #: lib/wfu_admin_log.php:282 lib/wfu_attributes.php:1828
-#, fuzzy
-#| msgid "User"
 msgid "Userdata"
-msgstr "Usuario"
+msgstr ""
 
 #: lib/wfu_admin_log.php:291
-#, fuzzy
-#| msgid "Test upload message"
 msgid "Previous upload user:"
-msgstr "Mensaje de prueba de carga."
+msgstr ""
 
 #: lib/wfu_admin_log.php:300
 msgid "Transferred to"
@@ -4056,16 +3880,12 @@ msgid "Clean-up all log"
 msgstr ""
 
 #: lib/wfu_admin_maintenance.php:96
-#, fuzzy
-#| msgid "Select File"
 msgid "Select date"
-msgstr "Seleccionar archivo"
+msgstr ""
 
 #: lib/wfu_admin_maintenance.php:100
-#, fuzzy
-#| msgid "Select File"
 msgid "Select period"
-msgstr "Seleccionar archivo"
+msgstr ""
 
 #: lib/wfu_admin_maintenance.php:103
 msgid "days"
@@ -4118,20 +3938,16 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_admin_maintenance.php:140
-#, fuzzy
-#| msgid "Bulk Actions"
 msgid "Export Actions"
-msgstr "Acciones en conjunto"
+msgstr ""
 
 #: lib/wfu_admin_maintenance.php:145
 msgid "Export uploaded file data"
 msgstr ""
 
 #: lib/wfu_admin_maintenance.php:145
-#, fuzzy
-#| msgid "Upload File"
 msgid "Export Uploaded File Data"
-msgstr "Cargar archivo"
+msgstr ""
 
 #: lib/wfu_admin_maintenance.php:149 lib/wfu_personaldata.php:94
 msgid ""
@@ -4194,10 +4010,8 @@ msgid "Clear the debug log file data. The file currently has %s."
 msgstr ""
 
 #: lib/wfu_admin_maintenance.php:197
-#, fuzzy
-#| msgid "Bulk Actions"
 msgid "Thumbnail Actions"
-msgstr "Acciones en conjunto"
+msgstr ""
 
 #: lib/wfu_admin_maintenance.php:202
 msgid "Update all thumbnails"
@@ -4304,20 +4118,16 @@ msgid "<b>%s</b> files will be deleted"
 msgstr ""
 
 #: lib/wfu_admin_maintenance.php:438
-#, fuzzy
-#| msgid "Are you sure that you want to cancel the upload?"
 msgid "Are you sure that you want to continue?"
-msgstr "¿Desea cancelar la carga?"
+msgstr ""
 
 #: lib/wfu_admin_maintenance.php:440
 msgid "Click to see affected files"
 msgstr ""
 
 #: lib/wfu_admin_maintenance.php:441
-#, fuzzy
-#| msgid "Clear file list?"
 msgid "Close list"
-msgstr "Limpiar lista de archivos?"
+msgstr ""
 
 #: lib/wfu_admin_maintenance.php:448
 #, php-format
@@ -4358,22 +4168,17 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_admin_maintenance.php:566
-#, fuzzy
-#| msgid "Are you sure you want to delete this file?"
 msgid "Are you sure you want to continue?"
-msgstr "¿Desea eliminar este archivo?"
+msgstr ""
 
 #: lib/wfu_admin_maintenance.php:832
-#, fuzzy
-#| msgid "no item selected!"
 msgid "No items affected"
-msgstr "ningún item seleccionado!"
+msgstr ""
 
 #: lib/wfu_admin_maintenance.php:832
-#, fuzzy, php-format
-#| msgid "no item selected!"
+#, php-format
 msgid "%s item affected"
-msgstr "ningún item seleccionado!"
+msgstr ""
 
 #: lib/wfu_admin_maintenance.php:833
 msgid "Completed cleaning database periodic action."
@@ -4413,10 +4218,8 @@ msgid "Mark this notification read"
 msgstr ""
 
 #: lib/wfu_admin_notifications.php:374
-#, fuzzy
-#| msgid "Delete this file"
 msgid "Delete this notification"
-msgstr "Eliminar este archivo"
+msgstr ""
 
 #: lib/wfu_admin_notifications.php:471
 msgid "Click to review it and take actions."
@@ -4456,33 +4259,26 @@ msgstr ""
 
 #: lib/wfu_admin_remotefiles.php:351 lib/wfu_admin_uploadedfiles.php:398
 #: lib/wfu_admin_uploadedfiles.php:640
-#, fuzzy
-#| msgid "Clear file list?"
 msgid "Open file link"
-msgstr "Limpiar lista de archivos?"
+msgstr ""
 
 #: lib/wfu_admin_remotefiles.php:358 lib/wfu_admin_uploadedfiles.php:404
 #: lib/wfu_admin_uploadedfiles.php:649
-#, fuzzy
-#| msgid "Download this file"
 msgid "Download file"
-msgstr "Descargar este archivo"
+msgstr ""
 
 #: lib/wfu_admin_remotefiles.php:442
 msgid "Unlink Remote File"
 msgstr ""
 
 #: lib/wfu_admin_remotefiles.php:450
-#, fuzzy, php-format
-#| msgid "Are you sure that you want to cancel the upload?"
+#, php-format
 msgid "Are you sure that you want to unlink file %s?"
-msgstr "¿Desea cancelar la carga?"
+msgstr ""
 
 #: lib/wfu_admin_remotefiles.php:452
-#, fuzzy
-#| msgid "Are you sure you want to delete this file?"
 msgid "Are you sure that you want to unlink files:"
-msgstr "¿Desea eliminar este archivo?"
+msgstr ""
 
 #: lib/wfu_admin_settings.php:156 lib/wfu_admin_settings.php:159
 msgid "Current value:"
@@ -4493,10 +4289,8 @@ msgid "General Settings"
 msgstr ""
 
 #: lib/wfu_admin_settings.php:217
-#, fuzzy
-#| msgid "Upload Files"
 msgid "Hash Files"
-msgstr "Cargar Archivos"
+msgstr ""
 
 #: lib/wfu_admin_settings.php:220
 msgid ""
@@ -4505,10 +4299,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_admin_settings.php:226
-#, fuzzy
-#| msgid "Select File"
 msgid "Base Directory"
-msgstr "Seleccionar archivo"
+msgstr ""
 
 #: lib/wfu_admin_settings.php:238
 msgid ""
@@ -4517,10 +4309,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_admin_settings.php:246
-#, fuzzy
-#| msgid "Test Mode"
 msgid "Post Method"
-msgstr "Modo de Prueba"
+msgstr ""
 
 #: lib/wfu_admin_settings.php:250
 msgid "Using WP (default)"
@@ -4687,10 +4477,8 @@ msgstr ""
 
 #: lib/wfu_admin_settings.php:478 lib/wfu_admin_settings.php:512
 #: lib/wfu_admin_settings.php:566 lib/wfu_admin_settings.php:624
-#, fuzzy
-#| msgid "Download"
 msgid "download"
-msgstr "Descargar"
+msgstr ""
 
 #: lib/wfu_admin_settings.php:481 lib/wfu_admin_settings.php:515
 #: lib/wfu_admin_settings.php:569 lib/wfu_admin_settings.php:627
@@ -4699,10 +4487,8 @@ msgstr ""
 
 #: lib/wfu_admin_settings.php:484 lib/wfu_admin_settings.php:518
 #: lib/wfu_admin_settings.php:572 lib/wfu_admin_settings.php:630
-#, fuzzy
-#| msgid "Delete"
 msgid "delete"
-msgstr "Eliminar"
+msgstr ""
 
 #: lib/wfu_admin_settings.php:554
 msgid "Default User"
@@ -4758,20 +4544,16 @@ msgid "transfer failed"
 msgstr ""
 
 #: lib/wfu_admin_transfers.php:177
-#, fuzzy
-#| msgid "end recording"
 msgid "pending"
-msgstr "finalizar grabación"
+msgstr ""
 
 #: lib/wfu_admin_transfers.php:181
 msgid "remove upload"
 msgstr ""
 
 #: lib/wfu_admin_uploadedfiles.php:129
-#, fuzzy
-#| msgid "Upload Files"
 msgid "List of Uploaded Files"
-msgstr "Cargar Archivos"
+msgstr ""
 
 #: lib/wfu_admin_uploadedfiles.php:161 lib/wfu_admin_uploadedfiles.php:431
 msgid "Properties"
@@ -4814,28 +4596,20 @@ msgid "File is Ok"
 msgstr ""
 
 #: lib/wfu_admin_uploadedfiles.php:538
-#, fuzzy
-#| msgid "File does not exist!"
 msgid "File does not exist"
-msgstr "El archivo no existe!"
+msgstr ""
 
 #: lib/wfu_admin_uploadedfiles.php:539
-#, fuzzy
-#| msgid "record video"
 msgid "Record is invalid"
-msgstr "grabar video"
+msgstr ""
 
 #: lib/wfu_admin_uploadedfiles.php:544
-#, fuzzy
-#| msgid "File uploaded successfully but there are warnings!"
 msgid "File uploaded successfully to the website"
-msgstr "El archivo fue cargado satisfactoriamente pero hubo advertencias!"
+msgstr ""
 
 #: lib/wfu_admin_uploadedfiles.php:545
-#, fuzzy
-#| msgid "File does not exist!"
 msgid "File does not exist anymore in the website"
-msgstr "El archivo no existe!"
+msgstr ""
 
 #: lib/wfu_admin_uploadedfiles.php:546
 msgid "Record is not valid anymore"
@@ -4880,26 +4654,21 @@ msgid "Open remote %s file link"
 msgstr ""
 
 #: lib/wfu_admin_uploadedfiles.php:783
-#, fuzzy
-#| msgid "Upload failed! No file was uploaded."
 msgid "No new files uploaded"
-msgstr "Fallo en la carga! No se cargó ningún archivo."
+msgstr ""
 
 #: lib/wfu_admin_uploadedfiles.php:783
-#, fuzzy, php-format
-#| msgid "File failed to upload"
+#, php-format
 msgid "%s new file uploaded"
-msgstr "Falló la carga del archivo"
+msgstr ""
 
 #: lib/wfu_admin_uploadedfiles.php:815
 msgid "Files per page"
 msgstr ""
 
 #: lib/wfu_ajaxactions.php:386
-#, fuzzy
-#| msgid "Upload failed!"
 msgid "Session failed!"
-msgstr "Fallo en la carga!"
+msgstr ""
 
 #: lib/wfu_ajaxactions.php:386
 msgid "Session Data:"
@@ -4910,10 +4679,8 @@ msgid "Post Data:"
 msgstr ""
 
 #: lib/wfu_ajaxactions.php:408
-#, fuzzy
-#| msgid "User Fields"
 msgid "User failed!"
-msgstr "Campos de Usuario"
+msgstr ""
 
 #: lib/wfu_ajaxactions.php:408
 msgid "User Data:"
@@ -4929,11 +4696,11 @@ msgstr ""
 
 #: lib/wfu_ajaxactions.php:1165 lib/wfu_constants.php:184
 msgid "File does not exist!"
-msgstr "El archivo no existe!"
+msgstr ""
 
 #: lib/wfu_ajaxactions.php:1166 lib/wfu_constants.php:185
 msgid "Could not download file!"
-msgstr "No se puede descargar el archivo!"
+msgstr ""
 
 #: lib/wfu_attributes.php:33
 msgid "Plugin"
@@ -4944,10 +4711,8 @@ msgid "A title text for the plugin"
 msgstr ""
 
 #: lib/wfu_attributes.php:39
-#, fuzzy
-#| msgid "File"
 msgid "Filename"
-msgstr "Archivo"
+msgstr ""
 
 #: lib/wfu_attributes.php:43
 msgid ""
@@ -4955,10 +4720,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_attributes.php:47
-#, fuzzy
-#| msgid "Select File"
 msgid "Select Button"
-msgstr "Seleccionar archivo"
+msgstr ""
 
 #: lib/wfu_attributes.php:51
 msgid "Represents the button to select the files for upload."
@@ -5008,10 +4771,8 @@ msgid "Subfolders"
 msgstr ""
 
 #: lib/wfu_attributes.php:85 lib/wfu_attributes.php:1552
-#, fuzzy
-#| msgid "Upload File"
 msgid "Upload Folder Label"
-msgstr "Cargar archivo"
+msgstr ""
 
 #: lib/wfu_attributes.php:85
 msgid "Subfolders Label"
@@ -5026,10 +4787,8 @@ msgid "Allows the user to select the upload folder from a dropdown list."
 msgstr ""
 
 #: lib/wfu_attributes.php:92
-#, fuzzy
-#| msgid "File"
 msgid "Filelist"
-msgstr "Archivo"
+msgstr ""
 
 #: lib/wfu_attributes.php:96
 msgid ""
@@ -5062,19 +4821,15 @@ msgstr ""
 #: lib/wfu_attributes.php:117 lib/wfu_attributes.php:119
 #: lib/wfu_constants.php:62
 msgid "User Fields"
-msgstr "Campos de Usuario"
+msgstr ""
 
 #: lib/wfu_attributes.php:119
-#, fuzzy
-#| msgid "User Fields"
 msgid "User Fields Label"
-msgstr "Campos de Usuario"
+msgstr ""
 
 #: lib/wfu_attributes.php:119
-#, fuzzy
-#| msgid "User Fields"
 msgid "User Fields Value"
-msgstr "Campos de Usuario"
+msgstr ""
 
 #: lib/wfu_attributes.php:121
 msgid ""
@@ -5095,10 +4850,8 @@ msgid "Displays a checkbox asking user's consent for storing personal data."
 msgstr ""
 
 #: lib/wfu_attributes.php:133
-#, fuzzy
-#| msgid "Your message"
 msgid "Message"
-msgstr "Su mensaje"
+msgstr ""
 
 #: lib/wfu_attributes.php:137
 msgid ""
@@ -5123,10 +4876,8 @@ msgid "Filters"
 msgstr ""
 
 #: lib/wfu_attributes.php:172
-#, fuzzy
-#| msgid "Upload Files"
 msgid "Upload Path and Files"
-msgstr "Cargar Archivos"
+msgstr ""
 
 #: lib/wfu_attributes.php:173
 msgid "Redirection"
@@ -5153,22 +4904,16 @@ msgid "Buttons"
 msgstr ""
 
 #: lib/wfu_attributes.php:188
-#, fuzzy
-#| msgid "Upload File"
 msgid "Upload Folder"
-msgstr "Cargar archivo"
+msgstr ""
 
 #: lib/wfu_attributes.php:192
-#, fuzzy
-#| msgid "Captcha not completed!"
 msgid "Captcha Parameters"
-msgstr "Captcha no completado!"
+msgstr ""
 
 #: lib/wfu_attributes.php:196
-#, fuzzy
-#| msgid "Upload Media"
 msgid "Upload Messages"
-msgstr "Cargar Medios"
+msgstr ""
 
 #: lib/wfu_attributes.php:197
 msgid "Webcam Labels"
@@ -5179,10 +4924,8 @@ msgid "Other Labels"
 msgstr ""
 
 #: lib/wfu_attributes.php:204
-#, fuzzy
-#| msgid "File Upload Notification"
 msgid "Email Notifications"
-msgstr "Notificación de carga"
+msgstr ""
 
 #: lib/wfu_attributes.php:210
 msgid "General Personal Data Options"
@@ -5209,10 +4952,8 @@ msgid "Colors"
 msgstr ""
 
 #: lib/wfu_attributes.php:224
-#, fuzzy
-#| msgid "Upload Media"
 msgid "Upload Message Colors"
-msgstr "Cargar Medios"
+msgstr ""
 
 #: lib/wfu_attributes.php:228
 msgid "Dimensions"
@@ -5573,10 +5314,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_attributes.php:675
-#, fuzzy
-#| msgid "Date"
 msgid "DateTime"
-msgstr "Fecha"
+msgstr ""
 
 #: lib/wfu_attributes.php:682
 msgid "if checked, then a date and time must be entered before file upload"
@@ -5703,10 +5442,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_attributes.php:896
-#, fuzzy
-#| msgid "File failed to upload"
 msgid "Multiple Files Upload"
-msgstr "Falló la carga del archivo"
+msgstr ""
 
 #: lib/wfu_attributes.php:908
 msgid ""
@@ -5785,10 +5522,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_attributes.php:1002
-#, fuzzy
-#| msgid "Test Mode"
 msgid "Reset Form Mode"
-msgstr "Modo de Prueba"
+msgstr ""
 
 #: lib/wfu_attributes.php:1006
 msgid "Always"
@@ -5820,10 +5555,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_attributes.php:1033
-#, fuzzy
-#| msgid "correct captcha"
 msgid "Include Captcha"
-msgstr "captcha correcto"
+msgstr ""
 
 #: lib/wfu_attributes.php:1048
 msgid "Captcha Type"
@@ -5907,10 +5640,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_attributes.php:1111
-#, fuzzy
-#| msgid "Upload files"
 msgid "Upload Roles"
-msgstr "Cargar archivos"
+msgstr ""
 
 #: lib/wfu_attributes.php:1123
 msgid ""
@@ -5921,10 +5652,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_attributes.php:1127
-#, fuzzy
-#| msgid "Upload files"
 msgid "Upload Users"
-msgstr "Cargar archivos"
+msgstr ""
 
 #: lib/wfu_attributes.php:1139
 msgid ""
@@ -6047,10 +5776,8 @@ msgid "It defines if a label with the upload directory will be shown."
 msgstr ""
 
 #: lib/wfu_attributes.php:1293
-#, fuzzy
-#| msgid "Select File"
 msgid "Select Subfolder"
-msgstr "Seleccionar archivo"
+msgstr ""
 
 #: lib/wfu_attributes.php:1305
 msgid ""
@@ -6090,10 +5817,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_attributes.php:1338
-#, fuzzy
-#| msgid "File %filename% not uploaded"
 msgid "File Rename Rule"
-msgstr "El archivo %filename% no fue cargado"
+msgstr ""
 
 #: lib/wfu_attributes.php:1342
 msgid "Index"
@@ -6112,10 +5837,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_attributes.php:1354
-#, fuzzy
-#| msgid "Upload Files"
 msgid "Upload Big Files in Chunks"
-msgstr "Cargar Archivos"
+msgstr ""
 
 #: lib/wfu_attributes.php:1366
 msgid ""
@@ -6186,7 +5909,7 @@ msgstr ""
 
 #: lib/wfu_attributes.php:1445 lib/wfu_constants.php:235
 msgid "Test Mode"
-msgstr "Modo de Prueba"
+msgstr ""
 
 #: lib/wfu_attributes.php:1457
 msgid ""
@@ -6196,10 +5919,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_attributes.php:1460
-#, fuzzy
-#| msgid "Test Mode"
 msgid "Debug Mode"
-msgstr "Modo de Prueba"
+msgstr ""
 
 #: lib/wfu_attributes.php:1472
 msgid ""
@@ -6237,10 +5958,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_attributes.php:1521
-#, fuzzy
-#| msgid "Select File"
 msgid "Select Button Caption for Directory"
-msgstr "Seleccionar archivo"
+msgstr ""
 
 #: lib/wfu_attributes.php:1533
 msgid "The caption of the select button when selecting a directory."
@@ -6271,10 +5990,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_attributes.php:1583
-#, fuzzy
-#| msgid "Captcha not completed!"
 msgid "Captcha Prompt Label"
-msgstr "Captcha no completado!"
+msgstr ""
 
 #: lib/wfu_attributes.php:1595
 msgid ""
@@ -6283,10 +6000,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_attributes.php:1599
-#, fuzzy
-#| msgid "Test upload message"
 msgid "Success Upload Message"
-msgstr "Mensaje de prueba de carga."
+msgstr ""
 
 #: lib/wfu_attributes.php:1611
 msgid ""
@@ -6295,10 +6010,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_attributes.php:1614
-#, fuzzy
-#| msgid "Test upload message"
 msgid "Warning Upload Message"
-msgstr "Mensaje de prueba de carga."
+msgstr ""
 
 #: lib/wfu_attributes.php:1626
 msgid ""
@@ -6307,10 +6020,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_attributes.php:1629
-#, fuzzy
-#| msgid "Test upload message"
 msgid "Error Upload Message"
-msgstr "Mensaje de prueba de carga."
+msgstr ""
 
 #: lib/wfu_attributes.php:1641
 msgid ""
@@ -6319,20 +6030,16 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_attributes.php:1644
-#, fuzzy
-#| msgid "Test upload message"
 msgid "Wait Upload Message"
-msgstr "Mensaje de prueba de carga."
+msgstr ""
 
 #: lib/wfu_attributes.php:1656
 msgid "This is the message that will be shown while file is uploading."
 msgstr ""
 
 #: lib/wfu_attributes.php:1659
-#, fuzzy
-#| msgid "Upload Media"
 msgid "Upload Media Button Caption"
-msgstr "Cargar Medios"
+msgstr ""
 
 #: lib/wfu_attributes.php:1671
 msgid ""
@@ -6439,10 +6146,8 @@ msgid "Personal Data Types"
 msgstr ""
 
 #: lib/wfu_attributes.php:1828
-#, fuzzy
-#| msgid "Upload files"
 msgid "Userdata and files"
-msgstr "Cargar archivos"
+msgstr ""
 
 #: lib/wfu_attributes.php:1836
 msgid ""
@@ -6677,10 +6382,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_attributes.php:2233
-#, fuzzy
-#| msgid "Upload Files"
 msgid "Add Uploaded Files To Media"
-msgstr "Cargar Archivos"
+msgstr ""
 
 #: lib/wfu_attributes.php:2245
 msgid ""
@@ -6989,36 +6692,28 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_attributes.php:2724
-#, fuzzy
-#| msgid "Download"
 msgid "Can Download"
-msgstr "Descargar"
+msgstr ""
 
 #: lib/wfu_attributes.php:2736
 msgid "If activated then the user can download the files shown in the list."
 msgstr ""
 
 #: lib/wfu_attributes.php:2739
-#, fuzzy
-#| msgid "Delete"
 msgid "Can Delete"
-msgstr "Eliminar"
+msgstr ""
 
 #: lib/wfu_attributes.php:2751
 msgid "If activated then the user can delete the files shown in the list."
 msgstr ""
 
 #: lib/wfu_attributes.php:2754
-#, fuzzy
-#| msgid "Delete"
 msgid "Who Can Delete"
-msgstr "Eliminar"
+msgstr ""
 
 #: lib/wfu_attributes.php:2758
-#, fuzzy
-#| msgid "Upload File"
 msgid "Uploader"
-msgstr "Cargar archivo"
+msgstr ""
 
 #: lib/wfu_attributes.php:2766
 msgid ""
@@ -7028,10 +6723,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_attributes.php:2769
-#, fuzzy
-#| msgid "Test Mode"
 msgid "Strict Mode"
-msgstr "Modo de Prueba"
+msgstr ""
 
 #: lib/wfu_attributes.php:2781
 msgid ""
@@ -7099,10 +6792,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_attributes.php:2874
-#, fuzzy
-#| msgid "Upload Files"
 msgid "Upload Form IDs"
-msgstr "Cargar Archivos"
+msgstr ""
 
 #: lib/wfu_attributes.php:2886
 msgid ""
@@ -7132,10 +6823,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_attributes.php:2919
-#, fuzzy
-#| msgid "File Upload Notification"
 msgid "File Upload Date After"
-msgstr "Notificación de carga"
+msgstr ""
 
 #: lib/wfu_attributes.php:2931
 msgid ""
@@ -7145,10 +6834,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_attributes.php:2934
-#, fuzzy
-#| msgid "File Upload Notification"
 msgid "File Upload Date Before"
-msgstr "Notificación de carga"
+msgstr ""
 
 #: lib/wfu_attributes.php:2946
 msgid ""
@@ -7197,10 +6884,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_attributes.php:2994
-#, fuzzy
-#| msgid "User Fields"
 msgid "Filter by User Fields"
-msgstr "Campos de Usuario"
+msgstr ""
 
 #: lib/wfu_attributes.php:3006
 msgid ""
@@ -7259,50 +6944,40 @@ msgid "Defines the title of the post/page column."
 msgstr ""
 
 #: lib/wfu_attributes.php:3099
-#, fuzzy
-#| msgid "User Fields"
 msgid "User Fields Column"
-msgstr "Campos de Usuario"
+msgstr ""
 
 #: lib/wfu_attributes.php:3111
 msgid "Defines the title of the user fields column."
 msgstr ""
 
 #: lib/wfu_attributes.php:3114
-#, fuzzy
-#| msgid "Download this file"
 msgid "Download Link Label"
-msgstr "Descargar este archivo"
+msgstr ""
 
 #: lib/wfu_attributes.php:3126
 msgid "Defines the text of the download link."
 msgstr ""
 
 #: lib/wfu_attributes.php:3129
-#, fuzzy
-#| msgid "Delete this file"
 msgid "Delete Link Label"
-msgstr "Eliminar este archivo"
+msgstr ""
 
 #: lib/wfu_attributes.php:3141
 msgid "Defines the text of the delete link."
 msgstr ""
 
 #: lib/wfu_attributes.php:3144
-#, fuzzy
-#| msgid "Delete this file"
 msgid "Remove Remote Link Label"
-msgstr "Eliminar este archivo"
+msgstr ""
 
 #: lib/wfu_attributes.php:3156
 msgid "Defines the text of the remove remote link."
 msgstr ""
 
 #: lib/wfu_attributes.php:3159
-#, fuzzy
-#| msgid "Download this file"
 msgid "Download Link Title"
-msgstr "Descargar este archivo"
+msgstr ""
 
 #: lib/wfu_attributes.php:3171
 msgid ""
@@ -7311,10 +6986,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_attributes.php:3174
-#, fuzzy
-#| msgid "Delete this file"
 msgid "Delete Link Title"
-msgstr "Eliminar este archivo"
+msgstr ""
 
 #: lib/wfu_attributes.php:3186
 msgid ""
@@ -7323,10 +6996,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_attributes.php:3189
-#, fuzzy
-#| msgid "Delete this file"
 msgid "Remove Remote Link Title"
-msgstr "Eliminar este archivo"
+msgstr ""
 
 #: lib/wfu_attributes.php:3201
 msgid ""
@@ -7371,10 +7042,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_backend_browser.php:193
-#, fuzzy
-#| msgid "Upload Files"
 msgid "Uploaded Files Browser"
-msgstr "Cargar Archivos"
+msgstr ""
 
 #: lib/wfu_backend_browser.php:203 lib/wfu_backend_browser.php:277
 #: lib/wfu_constants.php:67
@@ -7382,94 +7051,83 @@ msgid "Remove Remote"
 msgstr ""
 
 #: lib/wfu_backend_browser.php:277 lib/wfu_constants.php:68
-#, fuzzy
-#| msgid "Delete this file"
 msgid "Remove this remote file"
-msgstr "Eliminar este archivo"
+msgstr ""
 
 #: lib/wfu_constants.php:30
 msgid "Upload files"
-msgstr "Cargar archivos"
+msgstr ""
 
 #: lib/wfu_constants.php:33
 msgid "Select File/Select Files"
-msgstr "Seleccionar archivo(s)"
+msgstr ""
 
 #: lib/wfu_constants.php:34
-#, fuzzy
-#| msgid "Select File"
 msgid "Select Directory"
-msgstr "Seleccionar archivo"
+msgstr ""
 
 #: lib/wfu_constants.php:35
 msgid "Upload File/Upload Files"
-msgstr "Cargar archivo(s)"
+msgstr ""
 
 #: lib/wfu_constants.php:38
 msgid "Select File"
-msgstr "Seleccionar archivo"
+msgstr ""
 
 #: lib/wfu_constants.php:39
 msgid "Upload File"
-msgstr "Cargar archivo"
+msgstr ""
 
 #: lib/wfu_constants.php:41
 msgid "File Upload Notification"
-msgstr "Notificación de carga"
+msgstr ""
 
 #: lib/wfu_constants.php:42
-#, fuzzy, php-format
-#| msgid ""
-#| "Dear Recipient,%n%%n%   This is an automatic delivery message to notify "
-#| "you that a new file has been uploaded.%n%%n%Best Regards"
+#, php-format
 msgid ""
 "Dear Recipient,%%n%%%%n%%   This is an automatic delivery message to notify "
 "you that a new file has been uploaded.%%n%%%%n%%Best Regards"
 msgstr ""
-"Estimado Receptor, %n%%n%  Este es un mensaje enviado automáticamente para "
-"notificarle que un nuevo archivo ha sido cargado.%n%%n%Saludos"
 
 #: lib/wfu_constants.php:43
-#, fuzzy, php-format
+#, php-format
 msgid "File %%filename%% uploaded successfully"
-msgstr "Archivo %filename% uploaded satisfactoriamente"
+msgstr ""
 
 #: lib/wfu_constants.php:44
-#, fuzzy, php-format
+#, php-format
 msgid "File %%filename%% uploaded successfully but with warnings"
-msgstr "Archivo %filename% uploaded satisfactoriamente pero con advertencias"
+msgstr ""
 
 #: lib/wfu_constants.php:45
-#, fuzzy, php-format
-#| msgid "File %filename% not uploaded"
+#, php-format
 msgid "File %%filename%% not uploaded"
-msgstr "El archivo %filename% no fue cargado"
+msgstr ""
 
 #: lib/wfu_constants.php:46
-#, fuzzy, php-format
-#| msgid "File %filename% is being uploaded"
+#, php-format
 msgid "File %%filename%% is being uploaded"
-msgstr "El archivo %filename% está siendo cargado"
+msgstr ""
 
 #: lib/wfu_constants.php:47
 msgid "Your message"
-msgstr "Su mensaje"
+msgstr ""
 
 #: lib/wfu_constants.php:48
 msgid "Please fill in the above words: "
-msgstr "Por favor complete las siguientes palabras:"
+msgstr ""
 
 #: lib/wfu_constants.php:49
 msgid "Upload Media"
-msgstr "Cargar Medios"
+msgstr ""
 
 #: lib/wfu_constants.php:50
 msgid "videostream"
-msgstr "videostream"
+msgstr ""
 
 #: lib/wfu_constants.php:51
 msgid "screenshot"
-msgstr "captura"
+msgstr ""
 
 #: lib/wfu_constants.php:52
 msgid ""
@@ -7484,45 +7142,37 @@ msgstr ""
 
 #: lib/wfu_constants.php:69
 msgid "Sort list based on this column"
-msgstr "Ordenar lista basado en columna"
+msgstr ""
 
 #: lib/wfu_constants.php:70
 msgid "guest"
-msgstr "visitante"
+msgstr ""
 
 #: lib/wfu_constants.php:71
 msgid "unknown"
-msgstr "desconocido"
+msgstr ""
 
 #: lib/wfu_constants.php:73
 msgid ""
 "Error. Could not resolve ftp target filedir. Check the domain in 'ftpinfo' "
 "attribute."
 msgstr ""
-"Error. No se pudo encontrar el destino ftp. Verificar el dominio en el "
-"atributo 'ftpinfo'."
 
 #: lib/wfu_constants.php:74
 msgid "Error. Invalid ftp information. Check 'ftpinfo' attribute."
 msgstr ""
-"Error. Información de ftp inválida en el atributo 'ftpinfo'. Verificar el "
-"atributo 'ftpinfo'."
 
 #: lib/wfu_constants.php:75
 msgid ""
 "Error. Could not extract ftp information from 'ftpinfo' attribute. Check its "
 "syntax."
 msgstr ""
-"Error. No se pudo extraer la información de ftp desde el atributo 'ftpinfo'. "
-"Verificar su sintaxis."
 
 #: lib/wfu_constants.php:76
 msgid ""
 "Error. Could not resolve ftp target filename. Check the domain in 'ftpinfo' "
 "attribute."
 msgstr ""
-"Error. No se pudo encontrar el archivo de destino. Verificar el dominio en "
-"el atributo 'ftpinfo'."
 
 #: lib/wfu_constants.php:77
 msgid ""
@@ -7557,10 +7207,8 @@ msgid "Error. The web server does not support sftp."
 msgstr ""
 
 #: lib/wfu_constants.php:83
-#, fuzzy
-#| msgid "Your browser does not support webcam capture!"
 msgid "Error. The web server does not support ftps."
-msgstr "Su navegador no soporta captura desde webcam!"
+msgstr ""
 
 #: lib/wfu_constants.php:84
 #, php-format
@@ -7607,115 +7255,57 @@ msgid ""
 "Error. Permission denied to write to target folder.\n"
 "Check and correct read/write permissions of target folder."
 msgstr ""
-"Error. Permiso denegado para escribir en la carpeta de destino.\n"
-"Verificar y corregir los permisos de lectura/escritura de la carpeta destino."
 
 #: lib/wfu_constants.php:87
 msgid ""
 "Error. This file was rejected because its extension is not correct. Its "
 "proper filename is: "
 msgstr ""
-"Error. Este archivo fue rechazado debido a que su extensión no es correcta. "
-"El nombre adecuado es:"
 
 #: lib/wfu_constants.php:88
-#, fuzzy
-#| msgid ""
-#| "Error. This file was rejected because its extension is not correct. Its "
-#| "proper filename is: "
 msgid "Error. This file was rejected because it does not have a MIME type."
 msgstr ""
-"Error. Este archivo fue rechazado debido a que su extensión no es correcta. "
-"El nombre adecuado es:"
 
 #: lib/wfu_constants.php:89
-#, fuzzy
-#| msgid ""
-#| "Error. This file was rejected because its extension is not correct. Its "
-#| "proper filename is: "
 msgid "Error. This file was rejected because it does not have an extension."
 msgstr ""
-"Error. Este archivo fue rechazado debido a que su extensión no es correcta. "
-"El nombre adecuado es:"
 
 #: lib/wfu_constants.php:90
-#, fuzzy
-#| msgid ""
-#| "Error. This file was rejected because its extension is not correct. Its "
-#| "proper filename is: "
 msgid ""
 "Error. This file was rejected because its extension does not have any "
 "associated MIME types."
 msgstr ""
-"Error. Este archivo fue rechazado debido a que su extensión no es correcta. "
-"El nombre adecuado es:"
 
 #: lib/wfu_constants.php:91
-#, fuzzy
-#| msgid ""
-#| "Error. This file was rejected because its extension is not correct. Its "
-#| "proper filename is: "
 msgid ""
 "Error. This file was rejected because its MIME type is invalid. Its MIME "
 "type is: "
 msgstr ""
-"Error. Este archivo fue rechazado debido a que su extensión no es correcta. "
-"El nombre adecuado es:"
 
 #: lib/wfu_constants.php:92
-#, fuzzy
-#| msgid ""
-#| "Error. This file was rejected because its extension is not correct. Its "
-#| "proper filename is: "
 msgid ""
 "Error. This file was rejected because of an unknown error during MIME check."
 msgstr ""
-"Error. Este archivo fue rechazado debido a que su extensión no es correcta. "
-"El nombre adecuado es:"
 
 #: lib/wfu_constants.php:93
-#, fuzzy
-#| msgid ""
-#| "Error. This file was rejected because its extension is not correct. Its "
-#| "proper filename is: "
 msgid "Error. This file was rejected because its not a valid image."
 msgstr ""
-"Error. Este archivo fue rechazado debido a que su extensión no es correcta. "
-"El nombre adecuado es:"
 
 #: lib/wfu_constants.php:94
-#, fuzzy
-#| msgid ""
-#| "Error. This file was rejected because its extension is not correct. Its "
-#| "proper filename is: "
 msgid ""
 "Error. This file was rejected because script tags were detected in its "
 "contents."
 msgstr ""
-"Error. Este archivo fue rechazado debido a que su extensión no es correcta. "
-"El nombre adecuado es:"
 
 #: lib/wfu_constants.php:95
-#, fuzzy
-#| msgid ""
-#| "Error. This file was rejected because its extension is not correct. Its "
-#| "proper filename is: "
 msgid ""
 "Error. This file was rejected because heuristic patterns were detected in "
 "its contents."
 msgstr ""
-"Error. Este archivo fue rechazado debido a que su extensión no es correcta. "
-"El nombre adecuado es:"
 
 #: lib/wfu_constants.php:96
-#, fuzzy
-#| msgid ""
-#| "Error. This file was rejected because its extension is not correct. Its "
-#| "proper filename is: "
 msgid "Error. This file was rejected because its contents could not be read."
 msgstr ""
-"Error. Este archivo fue rechazado debido a que su extensión no es correcta. "
-"El nombre adecuado es:"
 
 #: lib/wfu_constants.php:97
 msgid ""
@@ -7723,18 +7313,12 @@ msgid ""
 "Of-Service attack, so file was rejected. Please check the upload log for "
 "suspicious behaviour."
 msgstr ""
-"Muchos archivos fueron cargados en un corto lapso de tiempo. Esto puede "
-"tratarse de un ataque de Denegación-De-Servicio, así que se rechazó el "
-"archivo. Por favor verifique el registro de carga por comportamientos "
-"sospechosos."
 
 #: lib/wfu_constants.php:98
 msgid ""
 "File not uploaded in order to prevent overflow of the website. Please "
 "contact administrator."
 msgstr ""
-"El archivo no fue cargado para prevenir una sobrecarga del sitio. Por favor "
-"contacte al administrador."
 
 #: lib/wfu_constants.php:99
 msgid "Target folder doesn't exist."
@@ -7742,7 +7326,7 @@ msgstr ""
 
 #: lib/wfu_constants.php:100
 msgid "Upload failed! Missing a temporary folder."
-msgstr "Fallo en la carga! Falta una carpeta temporal."
+msgstr ""
 
 #: lib/wfu_constants.php:101
 msgid "Not allowed to upload to target folder."
@@ -7751,133 +7335,92 @@ msgstr ""
 #: lib/wfu_constants.php:102
 msgid "Upload failed! Permission denied to write to target folder."
 msgstr ""
-"Fallo en la carga! Permiso denegado para escribir en la carpeta de destino."
 
 #: lib/wfu_constants.php:103
 msgid "File not allowed."
-msgstr "Archivo no admitido."
+msgstr ""
 
 #: lib/wfu_constants.php:104
 msgid "File is suspicious and was rejected."
-msgstr "El archivo es sospechoso y fue rechazado."
+msgstr ""
 
 #: lib/wfu_constants.php:107
-#, fuzzy
-#| msgid "File is suspicious and was rejected."
 msgid "File is suspicious and was quarantined"
-msgstr "El archivo es sospechoso y fue rechazado."
+msgstr ""
 
 #: lib/wfu_constants.php:108
-#, fuzzy
-#| msgid ""
-#| "Error. This file was rejected because its extension is not correct. Its "
-#| "proper filename is: "
 msgid "Error. This file was quarantined because it does not have a MIME type."
 msgstr ""
-"Error. Este archivo fue rechazado debido a que su extensión no es correcta. "
-"El nombre adecuado es:"
 
 #: lib/wfu_constants.php:109
-#, fuzzy
-#| msgid ""
-#| "Error. This file was rejected because its extension is not correct. Its "
-#| "proper filename is: "
 msgid "Error. This file was quarantined because it does not have an extension."
 msgstr ""
-"Error. Este archivo fue rechazado debido a que su extensión no es correcta. "
-"El nombre adecuado es:"
 
 #: lib/wfu_constants.php:110
-#, fuzzy
-#| msgid ""
-#| "Error. This file was rejected because its extension is not correct. Its "
-#| "proper filename is: "
 msgid ""
 "Error. This file was quarantined because its extension does not have any "
 "associated MIME types."
 msgstr ""
-"Error. Este archivo fue rechazado debido a que su extensión no es correcta. "
-"El nombre adecuado es:"
 
 #: lib/wfu_constants.php:111
-#, fuzzy
-#| msgid ""
-#| "Error. This file was rejected because its extension is not correct. Its "
-#| "proper filename is: "
 msgid ""
 "Error. This file was quarantined because its MIME type is invalid. Its MIME "
 "type is: "
 msgstr ""
-"Error. Este archivo fue rechazado debido a que su extensión no es correcta. "
-"El nombre adecuado es:"
 
 #: lib/wfu_constants.php:112
-#, fuzzy
-#| msgid ""
-#| "Error. This file was rejected because its extension is not correct. Its "
-#| "proper filename is: "
 msgid ""
 "Error. This file was quarantined because of an unknown error during MIME "
 "check."
 msgstr ""
-"Error. Este archivo fue rechazado debido a que su extensión no es correcta. "
-"El nombre adecuado es:"
 
 #: lib/wfu_constants.php:115
 msgid "The uploaded file exceeds the file size limit."
-msgstr "El archivo cargado excede el límite de tamaño permitido."
+msgstr ""
 
 #: lib/wfu_constants.php:116
 msgid "The uploaded file exceeds 2GB and is not supported by this server."
-msgstr "El archivo cargado excede 2GB y el servidor no lo soporta."
+msgstr ""
 
 #: lib/wfu_constants.php:117
 msgid ""
 "Upload failed! The uploaded file exceeds the file size limit of the server. "
 "Please contact the administrator."
 msgstr ""
-"Fallo en la carga! El archivo cargado excede el límite de tamaño admitido "
-"por el servidor. Por favor contacte al administrador."
 
 #: lib/wfu_constants.php:118
 msgid ""
 "Upload failed! The duration of the upload exceeded the time limit of the "
 "server. Please contact the administrator."
 msgstr ""
-"Fallo en la carga! La duración de la carga excede el límite de tiempo "
-"establecido por el servidor. Por favor contacte al administrador."
 
 #: lib/wfu_constants.php:119
 msgid ""
 "Upload failed! The uploaded file exceeds the MAX_FILE_SIZE directive that "
 "was specified in the HTML form."
 msgstr ""
-"Fallo en la carga! El archivo cargado excede la directiva MAX_FILE_SIZE "
-"especificada en el formulario HTML."
 
 #: lib/wfu_constants.php:120
 msgid "Upload failed! The uploaded file was only partially uploaded."
-msgstr "Fallo en la carga! El archivo fue cargado sólo parcialmente."
+msgstr ""
 
 #: lib/wfu_constants.php:121
 msgid "Upload failed! No file was uploaded."
-msgstr "Fallo en la carga! No se cargó ningún archivo."
+msgstr ""
 
 #: lib/wfu_constants.php:122
 msgid "Upload failed! Failed to write file to disk."
-msgstr "Fallo en la carga! Fallo al escribir el archivo al disco."
+msgstr ""
 
 #: lib/wfu_constants.php:123
 msgid ""
 "Upload failed! Error occured while moving temporary file. Please contact "
 "administrator."
 msgstr ""
-"Fallo en la carga! Ocurrió un error al mover el archivo temporal. Por favor "
-"contacte al administrador."
 
 #: lib/wfu_constants.php:124 lib/wfu_constants.php:273
 msgid "Upload cancelled!"
-msgstr "Carga cancelada!"
+msgstr ""
 
 #: lib/wfu_constants.php:125
 msgid ""
@@ -7885,327 +7428,295 @@ msgid ""
 "a way to ascertain which extension caused the file upload to stop; examining "
 "the list of loaded extensions with phpinfo() may help."
 msgstr ""
-"Fallo en la carga! Una extensión PHP detuvo la carga. PHP no provee una "
-"manera de determinar cuál extensión ocasionó que la carga se detenga; "
-"examinar la lista de extensiones cargadas con phpinfo() puede ayudar."
 
 #: lib/wfu_constants.php:126
 msgid "Upload failed! Error occured while attemting to upload the file."
-msgstr "Fallo en la carga! Ocurrió un error al intentar cargar el archivo."
+msgstr ""
 
 #: lib/wfu_constants.php:127 lib/wfu_constants.php:268
 msgid "Upload failed!"
-msgstr "Fallo en la carga!"
+msgstr ""
 
 #: lib/wfu_constants.php:128
 msgid "No file!"
-msgstr "Sin archivo!"
+msgstr ""
 
 #: lib/wfu_constants.php:129
 msgid ""
 "Upload failed! The upload has been canceled by the user or the browser "
 "dropped the connection."
 msgstr ""
-"Fallo en la carga! La carga fue cancelada por el usuario o el navegador "
-"cerró la conexión."
 
 #: lib/wfu_constants.php:130
 msgid "Upload failed! Unknown error."
-msgstr "Fallo en la carga! Error desconocido."
+msgstr ""
 
 #: lib/wfu_constants.php:131
 msgid "Please contact the administrator."
-msgstr "Por favor contacte al administrador."
+msgstr ""
 
 #: lib/wfu_constants.php:132
 msgid "No result from remote server!"
-msgstr "Sin resultados desde el servidor remoto!"
+msgstr ""
 
 #: lib/wfu_constants.php:133
 msgid " but with warnings"
-msgstr "pero con errores"
+msgstr ""
 
 #: lib/wfu_constants.php:134 lib/wfu_constants.php:136
 msgid "Warning: JSON parse error."
-msgstr "Advertencia: Error al procesar JSON."
+msgstr ""
 
 #: lib/wfu_constants.php:135
 msgid ""
 "Upload parameters of this file, passed as JSON string to the handler, could "
 "not be parsed."
 msgstr ""
-"Los parámetros de carga de este archivo, enviados como cadena JSON, no "
-"pudieron ser procesados."
 
 #: lib/wfu_constants.php:137
 msgid ""
 "UploadStates, passed as JSON string to the handler, could not be parsed."
-msgstr "UploadStates, enviados como cadena JSON, no pudieron ser procesados."
+msgstr ""
 
 #: lib/wfu_constants.php:138
 msgid ""
 "Redirection to classic form functionality occurred due to unknown error."
 msgstr ""
-"Ocurrió una redirección a la funcionalidad clásica del formulario, debido a "
-"un error desconocido."
 
 #: lib/wfu_constants.php:139
 msgid ""
 "Redirection to classic form functionality occurred because AJAX is not "
 "supported."
 msgstr ""
-"Ocurrió una redirección a la funcionalidad clásica del formulario, porque "
-"AJAX no está soportado."
 
 #: lib/wfu_constants.php:140
 msgid ""
 "Redirection to classic form functionality occurred because HTML5 is not "
 "supported."
 msgstr ""
-"Ocurrió una redirección a la funcionalidad clásica del formulario, porque no "
-"se soporta HTML5."
 
 #: lib/wfu_constants.php:141
 msgid ""
 "Redirection to classic form functionality occurred due to JSON parse error."
 msgstr ""
-"Ocurrió una redirección a la funcionalidad clásica del formulario debido a "
-"un error de procesamiento JSON."
 
 #: lib/wfu_constants.php:142
 msgid "Please enable popup windows from the browser's settings!"
 msgstr ""
-"Por favor activar las ventanas emergentes desde las opciones del navegador!"
 
 #: lib/wfu_constants.php:143
 msgid "cannot be empty!"
-msgstr "no puede estar vacío!"
+msgstr ""
 
 #: lib/wfu_constants.php:144
 msgid "number not valid!"
-msgstr "número no válido!"
+msgstr ""
 
 #: lib/wfu_constants.php:145
 msgid "email not valid!"
-msgstr "email no válido!"
+msgstr ""
 
 #: lib/wfu_constants.php:146
 msgid "emails do not match!"
-msgstr "los emails no coinciden!"
+msgstr ""
 
 #: lib/wfu_constants.php:147
 msgid "no base email field in group!"
-msgstr "sin campo base de email en el grupo!"
+msgstr ""
 
 #: lib/wfu_constants.php:148
 msgid "passwords do not match!"
-msgstr "las contraseñas no coinciden!"
+msgstr ""
 
 #: lib/wfu_constants.php:149
 msgid "no base password field in group!"
-msgstr "sin campo base de contraseña en el grupo!"
+msgstr ""
 
 #: lib/wfu_constants.php:150
 msgid "checkbox unchecked!"
-msgstr "opción desmarcada!"
+msgstr ""
 
 #: lib/wfu_constants.php:151
 msgid "no option selected!"
-msgstr "no se seleccionó opción!"
+msgstr ""
 
 #: lib/wfu_constants.php:152
 msgid "no item selected!"
-msgstr "ningún item seleccionado!"
+msgstr ""
 
 #: lib/wfu_constants.php:153
-#, fuzzy
-#| msgid "No file was deleted!"
 msgid "No subfolder selected!"
-msgstr "Ningún archivo fue eliminado!"
+msgstr ""
 
 #: lib/wfu_constants.php:154
 msgid ""
 "There are more than one instances of the plugin in this page with the same "
 "id. Please change it."
 msgstr ""
-"Hay más de una instancia del complemento con el mismo id en esta página. Por "
-"favor cambiarlo."
 
 #: lib/wfu_constants.php:155
 msgid ""
 "Cannot edit the shortcode because the page has been modified. Please reload "
 "the page."
 msgstr ""
-"No se puede editar el shortcode porque la página fue modificada. Por favor "
-"recargar la página."
 
 #: lib/wfu_constants.php:156
 msgid "Your browser does not support webcam capture!"
-msgstr "Su navegador no soporta captura desde webcam!"
+msgstr ""
 
 #: lib/wfu_constants.php:157
 msgid "Your browser does not support video recording from the webcam!"
-msgstr "Su navegador no soporta la grabación de video desde webcam!"
+msgstr ""
 
 #: lib/wfu_constants.php:158
 msgid "No video was recorded!"
-msgstr "Video no grabado."
+msgstr ""
 
 #: lib/wfu_constants.php:159
 msgid ""
 "ERROR: Captcha not supported! You have an old PHP version. Upgrade your PHP "
 "or use RecaptchaV2 (no account)."
 msgstr ""
-"ERROR: Captcha no soportado! La versión de PHP es muy antigua. Actualizar "
-"PHP o utilizar RecaptchaV2 (sin cuenta)."
 
 #: lib/wfu_constants.php:160
 msgid ""
 "ERROR: Only one instance of RecaptchaV1 can exist on the same page. Please "
 "notify administrator."
 msgstr ""
-"ERROR. Sólo una instancia de RecaptchaV1 puede existir en la misma página. "
-"Por favor notificar al administrador."
 
 #: lib/wfu_constants.php:161
 msgid ""
 "ERROR: Only one instance of RecaptchaV1 can exist on the same page. Please "
 "use RecaptchaV1 (no account)."
 msgstr ""
-"ERROR: Sólo una instancia de RecaptchaV1 puede existir en la misma página. "
-"Por favor utilizar RecaptchaV1 (sin cuenta)."
 
 #: lib/wfu_constants.php:162
 msgid "ERROR: No site key. Please contact administrator!"
-msgstr "ERROR: Sin key para el sitio. Por favor contactar al administrador!"
+msgstr ""
 
 #: lib/wfu_constants.php:163
 msgid ""
 "ERROR: No site key defined! Please go to the plugin settings in Dashboard to "
 "define Google Recaptcha keys."
 msgstr ""
-"ERROR: La site key no fue definida! Por favor entrar a las opciones del "
-"complemento en el Escritorio para definir las keys de Google Recaptcha."
 
 #: lib/wfu_constants.php:164
 msgid "Bad captcha image!"
-msgstr "Mala imagen de captcha!"
+msgstr ""
 
 #: lib/wfu_constants.php:165
 msgid "No input!"
-msgstr "Sin entrada!"
+msgstr ""
 
 #: lib/wfu_constants.php:166
 msgid "Captcha not completed!"
-msgstr "Captcha no completado!"
+msgstr ""
 
 #: lib/wfu_constants.php:167
 msgid "Wrong captcha!"
-msgstr "Mal captcha!"
+msgstr ""
 
 #: lib/wfu_constants.php:168
 msgid "Error refreshing captcha!"
-msgstr "Error recargando captcha!"
+msgstr ""
 
 #: lib/wfu_constants.php:169
 msgid "Unknown captcha error!"
-msgstr "Error de captcha desconocido!"
+msgstr ""
 
 #: lib/wfu_constants.php:170
 msgid "Captcha not supported by your browser!"
-msgstr "Captcha no soportado por su navegador!"
+msgstr ""
 
 #: lib/wfu_constants.php:171
 msgid "the secret parameter is missing"
-msgstr "falta el parámetro secreto"
+msgstr ""
 
 #: lib/wfu_constants.php:172
 msgid "the secret parameter is invalid or malformed"
-msgstr "el parámetro secreto es inválido o está malformado"
+msgstr ""
 
 #: lib/wfu_constants.php:173
 msgid "the response parameter is missing"
-msgstr "falta el parámetro response"
+msgstr ""
 
 #: lib/wfu_constants.php:174
 msgid "the response parameter is invalid or malformed"
-msgstr "el parámetro response es inválido o está malformado"
+msgstr ""
 
 #: lib/wfu_constants.php:175
 msgid "Please do not use drag drop due to an internal problem."
-msgstr "Por favor no arrastre y suelte debido a un problema interno."
+msgstr ""
 
 #: lib/wfu_constants.php:176
 #, php-format
 msgid "Error during chunked upload. Unique ID empty in chunk %d"
-msgstr "Error durante carga por partes. ID único en blanco en parte %d"
+msgstr ""
 
 #: lib/wfu_constants.php:177
 msgid "Chunked upload is not allowed!"
-msgstr "No se admite carga por partes!"
+msgstr ""
 
 #: lib/wfu_constants.php:178
 msgid "Chunked upload aborted due to error in previous chunk!"
-msgstr "La carga por partes se abortó debido a un error en la parte anterior!"
+msgstr ""
 
 #: lib/wfu_constants.php:179
 msgid "Chunked upload failed, final file could not be created!"
-msgstr "Falló la carga por partes. el archivo final no pudo ser creado!"
+msgstr ""
 
 #: lib/wfu_constants.php:180
 #, php-format
 msgid "Could not write file chuck to destination on chunk %d"
-msgstr "No se puede escribir esta parte al destino en parte %d"
+msgstr ""
 
 #: lib/wfu_constants.php:181
 #, php-format
 msgid "Could not enlarge destination file on chunk %d"
-msgstr "No se puede agrandar el archivo de destino en parte %d"
+msgstr ""
 
 #: lib/wfu_constants.php:182
 #, php-format
 msgid "Could not open file handles on chunk %d"
-msgstr "No se pudieron abrir los identificadores de archivo en parte %d"
+msgstr ""
 
 #: lib/wfu_constants.php:183
 msgid "You are not allowed to download this file!"
-msgstr "¡No se puede descargar este archivo!"
+msgstr ""
 
 #: lib/wfu_constants.php:186
 msgid "You are not allowed to delete this file!"
-msgstr "Sin permiso para eliminar este archivo!"
+msgstr ""
 
 #: lib/wfu_constants.php:187
 msgid "File was not deleted!"
-msgstr "El archivo no fue eliminado!"
+msgstr ""
 
 #: lib/wfu_constants.php:188
 msgid "No file was deleted!"
-msgstr "Ningún archivo fue eliminado!"
+msgstr ""
 
 #: lib/wfu_constants.php:189
 msgid "Some files were not deleted!"
-msgstr "Algunos archivos no fueron eliminados!"
+msgstr ""
 
 #: lib/wfu_constants.php:191
 msgid "Upload skipped! File already exists."
-msgstr "Carga omitida! El archivo ya existe."
+msgstr ""
 
 #: lib/wfu_constants.php:192
 msgid "The extension of the file does not match its contents."
-msgstr "La extensión del archivo no coincide con su conenido."
+msgstr ""
 
 #: lib/wfu_constants.php:193
 msgid ""
 "Upload succeeded but the file is suspicious because its contents do not "
 "match its extension. Its proper filename is: "
 msgstr ""
-"La carga fue satisfactoria pero el archivo es sospechoso porque su contenido "
-"no coincide con la extensión. El nombre de archivo adecuado es:"
 
 #: lib/wfu_constants.php:194
 msgid "No files have been selected!"
-msgstr "Ningún archivo seleccionado!"
+msgstr ""
 
 #: lib/wfu_constants.php:195
 msgid "Please complete the consent question before continuing the upload!"
@@ -8214,48 +7725,37 @@ msgstr ""
 #: lib/wfu_constants.php:196
 msgid "WPFilebase Plugin not updated because there were no files uploaded."
 msgstr ""
-"El complemento WPFilebase no fue actualizado porque ningún archivo fue "
-"cargado."
 
 #: lib/wfu_constants.php:197
 msgid "Notification email was not sent because there were no files uploaded."
-msgstr "No se envió email de notificación porque ningún archivo fue cargado."
+msgstr ""
 
 #: lib/wfu_constants.php:198
 msgid ""
 "Notification email was not sent because no recipients were defined. Please "
 "check notifyrecipients attribute in the shortcode."
 msgstr ""
-"No se envió email de notificación porque no se definieron destinatarios. Por "
-"favor verificar el atributo notifyrecipients del shortcode."
 
 #: lib/wfu_constants.php:199
 msgid ""
 "Notification email was not sent due to an error. Please check "
 "notifyrecipients, notifysubject and notifymessage attributes for errors."
 msgstr ""
-"No se envió email de notificación debido a un error. Por favor verificar que "
-"no haya errores en los atributos notifyrecipients, notifysubject y "
-"notifymessage."
 
 #: lib/wfu_constants.php:200
 msgid ""
 "Redirection not executed because redirection link is empty. Please check "
 "redirectlink attribute."
 msgstr ""
-"La redirección no fue ejecutada porque el enlace de redirección está vacío. "
-"Por favor verificar el atributo redirectlink."
 
 #: lib/wfu_constants.php:201
 msgid ""
 "Redirection not executed because not all files were successfully uploaded."
 msgstr ""
-"La redirección no fue ejecutada porque no todos los archivos se cargaron "
-"satisfactoriamente."
 
 #: lib/wfu_constants.php:202
 msgid "Potential Denial-Of-Service Attack on {SITE}"
-msgstr "Potencial ataque de Denegación-De-Servicio en {SITE}"
+msgstr ""
 
 #: lib/wfu_constants.php:203
 msgid ""
@@ -8276,23 +7776,6 @@ msgid ""
 "\n"
 "Thanks"
 msgstr ""
-"Hola admin\n"
-"\n"
-"Este es un mensaje del complemento Iptanus File Upload para notificarle que "
-"un potencial ataque de Denegación-De-Servicio fue detectado en {SITE}.\n"
-"\n"
-"El complemento detectó más de {FILENUM} cargas en el intervalo de {INTERVAL} "
-"segundos.\n"
-"\n"
-"Todas las cargas que excedan este límite son rechazadas para proteger el "
-"sitio de sobrecargas.\n"
-"\n"
-"Por favor verifique el historial de carga en la página del plugin por "
-"comportamientos sospechosos.\n"
-"\n"
-"Se enviará un nuevo mensaje si la situación persistem.\n"
-"\n"
-"Gracias"
 
 #: lib/wfu_constants.php:204
 msgid ""
@@ -8311,324 +7794,260 @@ msgid ""
 "Failed to add the shortcode to the page/post. Please try again. If the "
 "message persists, contact administrator."
 msgstr ""
-"Fallo al agregar el shortcode a la página/entrada. Por favor intente "
-"nuevamente. Si el mensaje persiste, contacte al administrador."
 
 #: lib/wfu_constants.php:208
 msgid ""
 "Failed to edit the shortcode because the contents of the page changed. Try "
 "again to edit the shortcode."
 msgstr ""
-"Fallo al editar el shortcode porque el contenido de la página cambió. "
-"Intente editar el shortcode nuevamente."
 
 #: lib/wfu_constants.php:209
 msgid ""
 "Failed to delete the shortcode because the contents of the page changed. Try "
 "again to delete it."
 msgstr ""
-"Fallo al eliminar el shortcode porque el contenido de la página cambió. "
-"Intente eliminarlo nuevamente."
 
 #: lib/wfu_constants.php:210
 msgid ""
 "The page containing the shortcode has been modified and it is no longer "
 "valid. Please go back to reload the shortcode."
 msgstr ""
-"La página que contiene el shortcode fue modificada y ya no es válida. Por "
-"favor vuelva a cargar el shortcode."
 
 #: lib/wfu_constants.php:211
 msgid ""
 "Failed to update the shortcode because the contents of the page changed. Go "
 "back to reload the shortcode."
 msgstr ""
-"Fallo al actualizar el shortcode porque el contenido de la página cambió. "
-"Vuelva a cargar el shortcode."
 
 #: lib/wfu_constants.php:212
 msgid ""
 "Failed to update the shortcode. Please try again. If the problem persists, "
 "go back and reload the shortcode."
 msgstr ""
-"Fallo al actualizar el shortcode. Por favor intente nuevamente. Si el "
-"problema persiste, vuelva a cargar el shortcode."
 
 #: lib/wfu_constants.php:214
 msgid "This is a test message"
-msgstr "Este es un mensaje de prueba"
+msgstr ""
 
 #: lib/wfu_constants.php:215
 msgid "This is a test administrator message"
-msgstr "Este es un mensaje de prueba del administrador"
+msgstr ""
 
 #: lib/wfu_constants.php:216
 msgid "File testfile 1 under test"
-msgstr "Archivo testfile 1 en prueba"
+msgstr ""
 
 #: lib/wfu_constants.php:217
 msgid "File testfile 1 message"
-msgstr "Archivo testfile 1 mensaje"
+msgstr ""
 
 #: lib/wfu_constants.php:218
 msgid "File testfile 1 administrator message"
-msgstr "Archivo testfile 1 mensaje de administrador"
+msgstr ""
 
 #: lib/wfu_constants.php:219
 msgid "File testfile 2 under test"
-msgstr "Archivo testfile 2 en prueba"
+msgstr ""
 
 #: lib/wfu_constants.php:220
 msgid "File testfile 2 message"
-msgstr "Archivo testfile 2 mensaje"
+msgstr ""
 
 #: lib/wfu_constants.php:221
 msgid "File testfile 2 administrator message"
-msgstr "Archivo testfile 2 mensaje de administrador"
+msgstr ""
 
 #: lib/wfu_constants.php:223
-#, fuzzy, php-format
-#| msgid ""
-#| "Insert variable %userid% inside text. It will be replaced by the id of "
-#| "the current user."
+#, php-format
 msgid ""
 "Insert variable %%userid%% inside text. It will be replaced by the id of the "
 "current user."
 msgstr ""
-"Insertar la variable %userid% dentro del texto. Será reemplazada por el id "
-"del usuario actual."
 
 #: lib/wfu_constants.php:224
-#, fuzzy, php-format
-#| msgid ""
-#| "Insert variable %username% inside text. It will be replaced by the "
-#| "username of the current user."
+#, php-format
 msgid ""
 "Insert variable %%username%% inside text. It will be replaced by the "
 "username of the current user."
 msgstr ""
-"Insertar la variable %username% dentro del texto. Será reemplazada por el "
-"nombre del usuario actual."
 
 #: lib/wfu_constants.php:225
-#, fuzzy, php-format
-#| msgid ""
-#| "Insert variable %useremail% inside text. It will be replaced by the email "
-#| "of the current user."
+#, php-format
 msgid ""
 "Insert variable %%useremail%% inside text. It will be replaced by the email "
 "of the current user."
 msgstr ""
-"Insertar la variable %useremail% dentro del texto. Será reemplazada por el "
-"email del usuario actual."
 
 #: lib/wfu_constants.php:226
-#, fuzzy, php-format
-#| msgid ""
-#| "Insert variable %filename% inside text. It will be replaced by the "
-#| "filename of the uploaded file."
+#, php-format
 msgid ""
 "Insert variable %%filename%% inside text. It will be replaced by the "
 "filename of the uploaded file."
 msgstr ""
-"Insertar la variable %filename% dentro del texto. Será reemplazada por el "
-"nombre del archivo cargado."
 
 #: lib/wfu_constants.php:227
-#, fuzzy, php-format
-#| msgid ""
-#| "Insert variable %filepath% inside text. It will be replaced by the full "
-#| "filepath of the uploaded file."
+#, php-format
 msgid ""
 "Insert variable %%filepath%% inside text. It will be replaced by the full "
 "filepath of the uploaded file."
 msgstr ""
-"Insertar la variable %filepath% dentro del texto. Será reemplazada por la "
-"ruta completa al archivo cargado."
 
 #: lib/wfu_constants.php:228
-#, fuzzy, php-format
-#| msgid ""
-#| "Insert variable %blogid% inside text. It will be replaced by the blog id "
-#| "of the website."
+#, php-format
 msgid ""
 "Insert variable %%blogid%% inside text. It will be replaced by the blog id "
 "of the website."
 msgstr ""
-"Insertar la variable %blogid% dentro del texto. Será reemplazada por la blog "
-"id del sitio web."
 
 #: lib/wfu_constants.php:229
-#, fuzzy, php-format
-#| msgid ""
-#| "Insert variable %pageid% inside text. It will be replaced by the id of "
-#| "the current page."
+#, php-format
 msgid ""
 "Insert variable %%pageid%% inside text. It will be replaced by the id of the "
 "current page."
 msgstr ""
-"Insertar la variable %pageid% dentro del texto. Será reemplazada por el id "
-"de la página actual."
 
 #: lib/wfu_constants.php:230
-#, fuzzy, php-format
-#| msgid ""
-#| "Insert variable %pagetitle% inside text. It will be replaced by the title "
-#| "of the current page."
+#, php-format
 msgid ""
 "Insert variable %%pagetitle%% inside text. It will be replaced by the title "
 "of the current page."
 msgstr ""
-"Insertar variable %pagetitle% dentro del texto. Será reemplazada por el "
-"título de la página actual."
 
 #: lib/wfu_constants.php:231
-#, fuzzy, php-format
-#| msgid ""
-#| "Insert variable %userdataXXX% inside text. Select the user field from the "
-#| "drop-down list. It will be replaced by the value that the user entered in "
-#| "this field."
+#, php-format
 msgid ""
 "Insert variable %%userdataXXX%% inside text. Select the user field from the "
 "drop-down list. It will be replaced by the value that the user entered in "
 "this field."
 msgstr ""
-"Insertar la variable %userdataXXX% dentro del texto. Seleccionar el campo de "
-"usuario de la lista desplegable. Será reemplazada por el valor que el "
-"usuario ingresó en este campo."
 
 #: lib/wfu_constants.php:232
-#, fuzzy, php-format
-#| msgid "Insert variable %n% inside text to denote a line change."
+#, php-format
 msgid "Insert variable %%n%% inside text to denote a line change."
 msgstr ""
-"Insertar la variable %n% dentro del texto para denotar un cambio de línea."
 
 #: lib/wfu_constants.php:234
-#, fuzzy, php-format
+#, php-format
 msgid "File %%filename%% uploaded successfully but not saved"
-msgstr "Archivo %filename% uploaded satisfactoriamente pero con advertencias"
+msgstr ""
 
 #: lib/wfu_constants.php:236
 msgid "select dir..."
-msgstr "elegir carpeta..."
+msgstr ""
 
 #: lib/wfu_constants.php:237
 msgid "type dir"
-msgstr "ingresar carpeta"
+msgstr ""
 
 #: lib/wfu_constants.php:238
-#, fuzzy, php-format
-#| msgid "Upload path: %filepath%"
+#, php-format
 msgid "Upload path: %%filepath%%"
-msgstr "Ruta de carga: %filepath%"
+msgstr ""
 
 #: lib/wfu_constants.php:239
-#, fuzzy, php-format
-#| msgid "Failed upload path: %filepath%"
+#, php-format
 msgid "Failed upload path: %%filepath%%"
-msgstr "Falló la ruta de carga: %filepath%"
+msgstr ""
 
 #: lib/wfu_constants.php:240
 msgid " (required)"
-msgstr "(requerido)"
+msgstr ""
 
 #: lib/wfu_constants.php:241
 msgid "Files are being uploaded. Are you sure you want to exit the page?"
-msgstr "Los archivos están siendo cargados. ¿Desea salir de la página?"
+msgstr ""
 
 #: lib/wfu_constants.php:242
 msgid "checking captcha..."
-msgstr "verificando captcha..."
+msgstr ""
 
 #: lib/wfu_constants.php:243
 msgid "refreshing..."
-msgstr "recargando..."
+msgstr ""
 
 #: lib/wfu_constants.php:244
 msgid "correct captcha"
-msgstr "captcha correcto"
+msgstr ""
 
 #: lib/wfu_constants.php:245
 msgid "click to continue the upload"
-msgstr "click para continuar la carga"
+msgstr ""
 
 #: lib/wfu_constants.php:246
 msgid "Are you sure you want to delete this file?"
-msgstr "¿Desea eliminar este archivo?"
+msgstr ""
 
 #: lib/wfu_constants.php:247
 msgid "Are you sure you want to delete these files?"
-msgstr "¿Desea eliminar estos archivos?"
+msgstr ""
 
 #: lib/wfu_constants.php:251
 msgid "of "
-msgstr "de "
+msgstr ""
 
 #: lib/wfu_constants.php:252
 msgid "Are you sure that you want to cancel the upload?"
-msgstr "¿Desea cancelar la carga?"
+msgstr ""
 
 #: lib/wfu_constants.php:253
 msgid "cancel upload of this file"
-msgstr "cancelar carga de este archivo"
+msgstr ""
 
 #: lib/wfu_constants.php:254
 msgid "Upload in progress"
-msgstr "Carga en progreso"
+msgstr ""
 
 #: lib/wfu_constants.php:255
 msgid "Upload in progress with warnings!"
-msgstr "Carga en progreso con advertencias!"
+msgstr ""
 
 #: lib/wfu_constants.php:256
 msgid "Upload in progress but some files already failed!"
-msgstr "Carga en progreso pero algunos archivos ya fallaron!"
+msgstr ""
 
 #: lib/wfu_constants.php:257
 msgid "Upload in progress but no files uploaded so far!"
-msgstr "Carga en progreso pero ningún archivo fue cargado aún!"
+msgstr ""
 
 #: lib/wfu_constants.php:258
 msgid "All files uploaded successfully"
-msgstr "Todos los archivos fueron cargados satisfactoriamente"
+msgstr ""
 
 #: lib/wfu_constants.php:259
 msgid "All files uploaded successfully but there are warnings!"
 msgstr ""
-"Todos los archivos fueron cargados satisfactoriamente pero hay advertencias!"
 
 #: lib/wfu_constants.php:260
 msgid "File uploaded successfully but there are warnings!"
-msgstr "El archivo fue cargado satisfactoriamente pero hubo advertencias!"
+msgstr ""
 
 #: lib/wfu_constants.php:261
 msgid "Some files failed to upload!"
-msgstr "Falló la carga de algunos archivos!"
+msgstr ""
 
 #: lib/wfu_constants.php:262
 msgid "All files failed to upload"
-msgstr "Falló la carga de todos los archivos"
+msgstr ""
 
 #: lib/wfu_constants.php:263
 msgid "File failed to upload"
-msgstr "Falló la carga del archivo"
+msgstr ""
 
 #: lib/wfu_constants.php:264
 msgid "There are no files to upload!"
-msgstr "No hay archivos para cargar!"
+msgstr ""
 
 #: lib/wfu_constants.php:265
 msgid "Test upload message"
-msgstr "Mensaje de prueba de carga."
+msgstr ""
 
 #: lib/wfu_constants.php:266
 msgid "JSON parse warning!"
-msgstr "Advertencia de procesamiento JSON!"
+msgstr ""
 
 #: lib/wfu_constants.php:267
 msgid "please wait while redirecting..."
-msgstr "por favor espere mientras se redirecciona..."
+msgstr ""
 
 #: lib/wfu_constants.php:269
 msgid "Submitting data"
@@ -8660,31 +8079,31 @@ msgstr ""
 
 #: lib/wfu_constants.php:277
 msgid "Open visual shortcode editor in new window"
-msgstr "Abrir el editor visual de shortcode en una nueva ventana"
+msgstr ""
 
 #: lib/wfu_constants.php:278
 msgid "loading visual editor"
-msgstr "cargando editor visual"
+msgstr ""
 
 #: lib/wfu_constants.php:279
 msgid "Clear file list?"
-msgstr "Limpiar lista de archivos?"
+msgstr ""
 
 #: lib/wfu_constants.php:280
 msgid "DROP HERE"
-msgstr "SOLTAR AQUÍ"
+msgstr ""
 
 #: lib/wfu_constants.php:282
 msgid "record video"
-msgstr "grabar video"
+msgstr ""
 
 #: lib/wfu_constants.php:283
 msgid "take a picture"
-msgstr "tomar fotografía"
+msgstr ""
 
 #: lib/wfu_constants.php:284
 msgid "turn webcam on/off"
-msgstr "encender/apagar webcam"
+msgstr ""
 
 #: lib/wfu_constants.php:285
 msgid "switch camera"
@@ -8692,39 +8111,39 @@ msgstr ""
 
 #: lib/wfu_constants.php:286
 msgid "go live again"
-msgstr "salir en vivo otra vez"
+msgstr ""
 
 #: lib/wfu_constants.php:287
 msgid "end recording"
-msgstr "finalizar grabación"
+msgstr ""
 
 #: lib/wfu_constants.php:288
 msgid "play"
-msgstr "reproducir"
+msgstr ""
 
 #: lib/wfu_constants.php:289
 msgid "pause"
-msgstr "pausa"
+msgstr ""
 
 #: lib/wfu_constants.php:290
 msgid "go to the beginning"
-msgstr "ir al principio"
+msgstr ""
 
 #: lib/wfu_constants.php:291
 msgid "go to the end"
-msgstr "ir al final"
+msgstr ""
 
 #: lib/wfu_constants.php:293
 msgid "Iptanus File Upload Form"
-msgstr "Formulario Iptanus File Upload"
+msgstr ""
 
 #: lib/wfu_constants.php:294
 msgid "Iptanus File Upload plugin uploader for sidebars"
-msgstr "Cargador de complemento Iptanus File Uploader para sidebars"
+msgstr ""
 
 #: lib/wfu_constants.php:295
 msgid "Upload Files"
-msgstr "Cargar Archivos"
+msgstr ""
 
 #: lib/wfu_constants.php:315
 msgid "Default Upload ID"
@@ -8747,10 +8166,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_constants.php:317
-#, fuzzy
-#| msgid "Upload File"
 msgid "Default Upload Role"
-msgstr "Cargar archivo"
+msgstr ""
 
 #: lib/wfu_constants.php:317
 msgid ""
@@ -9179,10 +8596,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_constants.php:368
-#, fuzzy
-#| msgid "User Fields"
 msgid "Default User Fields State"
-msgstr "Campos de Usuario"
+msgstr ""
 
 #: lib/wfu_constants.php:368
 msgid ""
@@ -9365,10 +8780,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_constants.php:387
-#, fuzzy
-#| msgid "Iptanus File Upload Consent Status"
 msgid "Default Reject Upload on Consent Denial State"
-msgstr "Formulario Iptanus File Upload"
+msgstr ""
 
 #: lib/wfu_constants.php:387
 msgid ""
@@ -9563,10 +8976,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_constants.php:426
-#, fuzzy
-#| msgid "Bulk Actions"
 msgid "Default Bulk Actions State"
-msgstr "Acciones en conjunto"
+msgstr ""
 
 #: lib/wfu_constants.php:426
 msgid ""
@@ -9694,10 +9105,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_constants.php:440
-#, fuzzy
-#| msgid "Iptanus File Upload Form"
 msgid "Default Upload Form IDs"
-msgstr "Formulario Iptanus File Upload"
+msgstr ""
 
 #: lib/wfu_constants.php:440
 msgid ""
@@ -9829,10 +9238,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_constants.php:474
-#, fuzzy
-#| msgid "Upload in progress"
 msgid "Upload Progress Mode"
-msgstr "Carga en progreso"
+msgstr ""
 
 #: lib/wfu_constants.php:474
 msgid ""
@@ -9851,10 +9258,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_constants.php:476
-#, fuzzy
-#| msgid "Potential Denial-Of-Service Attack on {SITE}"
 msgid "Check for Denial-Of-Service Attacks"
-msgstr "Potencial ataque de Denegación-De-Servicio en {SITE}"
+msgstr ""
 
 #: lib/wfu_constants.php:476
 msgid ""
@@ -10016,10 +9421,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_constants.php:493
-#, fuzzy
-#| msgid "File Upload Notification"
 msgid "Force Email Notifications"
-msgstr "Notificación de carga"
+msgstr ""
 
 #: lib/wfu_constants.php:493
 msgid ""
@@ -10313,10 +9716,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_constants.php:524
-#, fuzzy
-#| msgid "Upload Files"
 msgid "Uploaded Files Menu State"
-msgstr "Cargar Archivos"
+msgstr ""
 
 #: lib/wfu_constants.php:524
 msgid ""
@@ -10336,10 +9737,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_constants.php:526
-#, fuzzy
-#| msgid "Upload Files"
 msgid "Uploaded Files Columns"
-msgstr "Cargar Archivos"
+msgstr ""
 
 #: lib/wfu_constants.php:526
 msgid ""
@@ -10349,10 +9748,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_constants.php:527
-#, fuzzy
-#| msgid "Upload Files"
 msgid "Uploaded Files Actions"
-msgstr "Cargar Archivos"
+msgstr ""
 
 #: lib/wfu_constants.php:527
 msgid ""
@@ -10362,10 +9759,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_constants.php:528
-#, fuzzy
-#| msgid "Upload Files"
 msgid "Hide Invalid Uploaded Files"
-msgstr "Cargar Archivos"
+msgstr ""
 
 #: lib/wfu_constants.php:528
 msgid ""
@@ -10375,10 +9770,8 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_constants.php:529
-#, fuzzy
-#| msgid "Upload Files"
 msgid "Uploaded Files Reset Time"
-msgstr "Cargar Archivos"
+msgstr ""
 
 #: lib/wfu_constants.php:529
 msgid ""
@@ -11417,7 +10810,7 @@ msgstr ""
 
 #: lib/wfu_functions.php:8955
 msgid "Iptanus File Upload Consent Status"
-msgstr "Formulario Iptanus File Upload"
+msgstr ""
 
 #: lib/wfu_functions.php:8958
 msgid "Consent Status"
@@ -11432,10 +10825,8 @@ msgid "You have denied to store personal data."
 msgstr ""
 
 #: lib/wfu_functions.php:8960
-#, fuzzy
-#| msgid "You are not allowed to download this file!"
 msgid "You have not answered to consent yet."
-msgstr "¡No se puede descargar este archivo!"
+msgstr ""
 
 #: lib/wfu_functions.php:8966
 msgid "Change status to"
@@ -11462,10 +10853,8 @@ msgid "I agree to allow the plugin to use my personal data"
 msgstr ""
 
 #: lib/wfu_personaldata.php:67
-#, fuzzy
-#| msgid "Select File"
 msgid "Select User"
-msgstr "Seleccionar archivo"
+msgstr ""
 
 #: lib/wfu_personaldata.php:72
 msgid "Type user in text box"
@@ -11504,21 +10893,3 @@ msgstr ""
 #: lib/wfu_widget.php:71
 msgid "Shortcode Attributes:"
 msgstr ""
-
-#~ msgid ""
-#~ "Error. The upload size limit of PHP directive upload_max_filesize is "
-#~ "preventing the upload of big files.\n"
-#~ "PHP directive upload_max_filesize limit is: "
-#~ msgstr ""
-#~ "Error. El límite de tamaño en  la directiva PHP upload_max_filesize "
-#~ "impide la carga de archivos grandes.\n"
-#~ "El tamaño actual en la directiva PHP upload_max_filesize es:"
-
-#~ msgid ""
-#~ "The upload time limit of PHP directive max_input_time is preventing the "
-#~ "upload of big files.\n"
-#~ "PHP directive max_input_time limit is: "
-#~ msgstr ""
-#~ "El límite de tiempo de carga en la directiva PHP max_input_time impide la "
-#~ "carga de archivos grandes.\n"
-#~ "El límite actual en la directiva PHP max_input_time es:"

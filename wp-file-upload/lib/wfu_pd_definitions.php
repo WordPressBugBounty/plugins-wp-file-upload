@@ -7,10 +7,12 @@
  *
  * @link /lib/wfu_pd_definitions.php
  *
- * @package WordPress File Upload Plugin
+ * @package Iptanus File Upload Plugin
  * @subpackage Core Components
  * @since 4.5.0
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
  * Define Personal Data Types.

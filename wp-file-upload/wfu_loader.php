@@ -9,10 +9,12 @@
  *
  * @link /wfu_loader.php
  *
- * @package WordPress File Upload Plugin
+ * @package Iptanus File Upload Plugin
  * @subpackage Core Components
  * @since 4.9.1
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
  
 if ( !defined("WPFILEUPLOAD_PLUGINFILE") ) return;
 
@@ -41,7 +43,7 @@ add_shortcode("wfu_block_inline_js", "wordpress_file_upload_block_inline_js_hand
 //activation-deactivation hooks
 register_activation_hook(WPFILEUPLOAD_PLUGINFILE,'wordpress_file_upload_install');
 register_deactivation_hook(WPFILEUPLOAD_PLUGINFILE,'wordpress_file_upload_uninstall');
-add_action('plugins_loaded', 'wordpress_file_upload_initialize');
+//add_action('plugins_loaded', 'wordpress_file_upload_initialize');
 add_action('plugins_loaded', 'wordpress_file_upload_update_db_check');
 // initialize text domain; we use a priority of 0 so that init hook runs before
 // widgets_init hook
@@ -151,6 +153,8 @@ function wordpress_file_upload_textdomain() {
 	// load text domain and initialize plugin strings
 	$loaded = load_plugin_textdomain('wp-file-upload', false, dirname(plugin_basename (WPFILEUPLOAD_PLUGINFILE)).'/languages');
 	wfu_initialize_i18n_strings();
+	wordpress_file_upload_initialize();
+	wordpress_file_upload_update_db_check();
 }
 
 /**
@@ -484,7 +488,7 @@ function wordpress_file_upload_function($incomingfromhandler) {
 	$init_params["shortcode_id"] = $sid;
 	$init_params["shortcode_tag"] = $shortcode_tag;
 	$init_params["container_id"] = $shortcode_tag.'_block_'.$sid;
-	$init_params["session"] = WFU_USVAR($token_sid);
+	$init_params["session"] = wfu_sanitize_base64dotted(WFU_USVAR($token_sid));
 	$init_params["testmode"] = ( $params["testmode"] == "true" );
 	$init_params["widgetid"] = $params["widgetid"];
 	$init_params["require_consent"] = $additional_params["require_consent"];
@@ -768,9 +772,10 @@ function wordpress_file_upload_function($incomingfromhandler) {
 	$wordpress_file_upload_output .= $wordpress_file_upload_output_inner;
 	$wordpress_file_upload_output .= '</div>';
 
-//	The plugin uses sessions in order to detect if the page was loaded due to file upload or
-//	because the user pressed the Refresh button (or F5) of the page.
-//	In the second case we do not want to perform any file upload, so we abort the rest of the script.
+	// The plugin uses sessions in order to detect if the page was loaded due to
+	// file upload or because the user pressed the Refresh button (or F5) of the
+	// page. In the second case we do not want to perform any file upload, so we
+	// abort the rest of the script.
 	$check_refresh_sid = 'wfu_check_refresh_'.$sid;
 	if ( !WFU_USVAR_exists($check_refresh_sid) || WFU_USVAR($check_refresh_sid) != "form button pressed" ) {
 		WFU_USVAR_store($check_refresh_sid, 'do not process');
@@ -790,14 +795,21 @@ function wordpress_file_upload_function($incomingfromhandler) {
 		return $wordpress_file_upload_output."\n";
 	}
 	WFU_USVAR_store($check_refresh_sid, 'do not process');
-	$params["upload_start_time"] = WFU_USVAR('wfu_start_time_'.$sid);
+	$params["upload_start_time"] = sanitize_text_field(WFU_USVAR('wfu_start_time_'.$sid));
 
-//	The plugin uses two ways to upload the file:
-//		- The first one uses classic functionality of an HTML form (highest compatibility with browsers but few capabilities).
-//		- The second uses ajax (HTML5) functionality (medium compatibility with browsers but many capabilities, like no page refresh and progress bar).
-//	The plugin loads using ajax functionality by default, however if it detects that ajax functionality is not supported, it will automatically switch to classic functionality. 
-//	The next line checks to see if the form was submitted using ajax or classic functionality.
-//	If the uploaded file variable stored in $_FILES ends with "_redirected", then it means that ajax functionality is not supported and the plugin must switch to classic functionality. 
+	// The plugin uses two ways to upload the file:
+	//  - The first one uses classic functionality of an HTML form (highest
+	//    compatibility with browsers but few capabilities).
+	//  - The second uses ajax (HTML5) functionality (medium compatibility with
+	//    browsers but many capabilities, like no page refresh and progress
+	//    bar).
+	// The plugin loads using ajax functionality by default, however if it
+	// detects that ajax functionality is not supported, it will automatically
+	// switch to classic functionality. 
+	// The next line checks to see if the form was submitted using ajax or
+	// classic functionality. If the uploaded file variable stored in $_FILES
+	// ends with "_redirected", then it means that ajax functionality is not
+	// supported and the plugin must switch to classic functionality. 
 	if ( isset($_FILES[$uploadedfile.'_redirected']) ) $params['forceclassic'] = "true";
 
 	if ( $params['forceclassic'] != "true" ) {
@@ -807,32 +819,42 @@ function wordpress_file_upload_function($incomingfromhandler) {
 		return $wordpress_file_upload_output."\n";
 	}
 
-//  The following code is executed in case of non-ajax uploads to process the files.
-//  Consecutive checks are performed in order to verify and approve the upload of files
+	// The following code is executed in case of non-ajax uploads to process
+	// the files. Consecutive checks are performed in order to verify and
+	// approve the upload of files
 	$_REQUEST = stripslashes_deep($_REQUEST);
 	$_POST = stripslashes_deep($_POST);
 	$wfu_checkpass = true;
 	
-//  First we test that WP nonce passes the check
-	$wfu_checkpass = ( $wfu_checkpass && isset($_REQUEST["wfu_uploader_nonce"]) && wp_verify_nonce( $_REQUEST["wfu_uploader_nonce"], "wfu-uploader-nonce" ) !== false );
+	// Test that $_POST and $_FILES are populated. If not, maybe the file was
+	// too large the the server rejected the request.
+	if ( $_SERVER['REQUEST_METHOD'] == 'POST' && 
+		empty($_POST) && 
+		empty($_FILES) && 
+		$_SERVER['CONTENT_LENGTH'] > 0 ) {
+		$wfu_checkpass = false;
+	}
+	
+	// First we test that WP nonce passes the check
+	$wfu_checkpass = ( $wfu_checkpass && isset($_REQUEST["wfu_uploader_nonce"]) && wp_verify_nonce( sanitize_text_field( wp_unslash ( $_REQUEST["wfu_uploader_nonce"] ) ), "wfu-uploader-nonce" ) !== false );
 
 	$unique_id = ( isset($_POST['uniqueuploadid_'.$sid]) ? sanitize_text_field($_POST['uniqueuploadid_'.$sid]) : "" );
-//  Check that upload_id is valid
+	//  Check that upload_id is valid
 	$wfu_checkpass = ( $wfu_checkpass && strlen($unique_id) == 10 );
 
-	//check if honeypot userdata fields have been added to the form and if they
-	//contain any data; if wfu_check_remove_honeypot_fields returns true this
-	//means that at least one honeypot field has beed filled with a value and
-	//the upload must be aborted because it was not done by a human; files will
-	//not be saved but a success result will be shown, pretending that they have
-	//been saved
+	// Check if honeypot userdata fields have been added to the form and if they
+	// contain any data. If wfu_check_remove_honeypot_fields returns true this
+	// means that at least one honeypot field has beed filled with a value and
+	// the upload must be aborted because it was not done by a human. Files will
+	// not be saved but a success result will be shown, pretending that they
+	// have been saved.
 	$abort_with_success = ( $params["userdata"] == "true" && wfu_check_remove_honeypot_fields($params["userdata_fields"], 'hiddeninput_'.$sid.'_userdata_') );
 	
 
 	if ( $wfu_checkpass ) {
-		//process any error messages due to redirection to non-ajax upload
+		// process any error messages due to redirection to non-ajax upload
 		if ( isset( $_POST[$adminerrorcodes] ) ) {
-			$code = $_POST[$adminerrorcodes];
+			$code = sanitize_text_field($_POST[$adminerrorcodes]);
 			if ( $code == "" ) $params['adminerrors'] = "";
 			elseif ( $code == "1" || $code == "2" || $code == "3" ) $params['adminerrors'] = constant('WFU_ERROR_REDIRECTION_ERRORCODE'.$code);
 			else $params['adminerrors'] = WFU_ERROR_REDIRECTION_ERRORCODE0;
@@ -841,24 +863,24 @@ function wordpress_file_upload_function($incomingfromhandler) {
 		$params['subdir_selection_index'] = -1;
 		if ( isset( $_POST[$hiddeninput] ) ) $params['subdir_selection_index'] = sanitize_text_field($_POST[$hiddeninput]);
 		
-		//in case that that the upload has been cancelled then proceed
-		//accordingly to notify the user
+		// in case that that the upload has been cancelled then proceed
+		// accordingly to notify the user
 		$uploadstatus_id = "wfu_uploadstatus_".$unique_id;
 		if ( WFU_USVAR_exists($uploadstatus_id) && WFU_USVAR($uploadstatus_id) == 0 ) {
 			$safe_output = "17;".WFU_VAR("WFU_DEFAULTMESSAGECOLORS").";0";
 			$wfu_process_file_array_str = " ";
 			$js_script_enc = "";
 		}
-		//in case that the upload was performed by a bot, then files are not
-		//processed and not saved, however state 18 is returned pretending that
-		//the upload was successful
+		// in case that the upload was performed by a bot, then files are not
+		// processed and not saved, however state 18 is returned pretending that
+		// the upload was successful
 		elseif ( $abort_with_success ) {
 			$safe_output = "18;".WFU_VAR("WFU_DEFAULTMESSAGECOLORS").";0";
 			$wfu_process_file_array_str = " ";
 			$js_script_enc = "";
 		}
 		else {
-			//update consent status of user
+			// update consent status of user
 			$params["consent_result"] = wfu_check_user_consent($user);
 			if ( $additional_params["require_consent"] ) {
 				if ( !isset($_POST['consentresult_'.$sid]) ) die();
@@ -869,10 +891,11 @@ function wordpress_file_upload_function($incomingfromhandler) {
 			$wfu_process_file_array = wfu_process_files($params, 'no_ajax');
 			$safe_output = $wfu_process_file_array["general"]['safe_output'];
 			unset($wfu_process_file_array["general"]['safe_output']);
-			//javascript code generated from individual wfu_after_upload_filters is not executed in non-ajax uploads
+			// javascript code generated from individual
+			// wfu_after_upload_filters is not executed in non-ajax uploads
 			unset($wfu_process_file_array["general"]['js_script']);
 			$js_script_enc = "";
-			//execute after upload filters
+			// execute after upload filters
 			$ret = wfu_execute_after_upload_filters($sid, $unique_id, $params);
 			if ( $ret["js_script"] != "" ) $js_script_enc = wfu_plugin_encode_string($ret["js_script"]);
 			$wfu_process_file_array_str = wfu_encode_array_to_string($wfu_process_file_array);
@@ -1076,6 +1099,9 @@ function wfu_preprocess_attributes($shortcode_attrs) {
  * @return array The processed $ret array
  */
 function wfu_classic_before_upload_handler($ret, $attr) {
+	// check referrer using Wordpress nonces and server sessions to avoid CSRF
+	// attacks
+	check_ajax_referer( 'wfu-uploader-nonce', 'wfu_uploader_nonce' );
 	//run only if start_time exists in $_REQUEST parameters
 	if ( !isset($_REQUEST['start_time']) ) return $ret;
 	if ( $ret["status"] == "die" ) return $ret;
@@ -1110,6 +1136,9 @@ function wfu_classic_before_upload_handler($ret, $attr) {
  * @return array The processed $changable_data array
  */
 function wfu_consent_ask_server_handler($changable_data, $attr) {
+	// check referrer using Wordpress nonces and server sessions to avoid CSRF
+	// attacks
+	check_ajax_referer( 'wfu-uploader-nonce', 'wfu_uploader_nonce' );
 	//run only if consent_check and consent rejection message exist in
 	//$_REQUEST parameters
 	if ( !isset($_REQUEST['consent_check']) || !isset($_REQUEST['consent_rejection_message']) ) return $changable_data;

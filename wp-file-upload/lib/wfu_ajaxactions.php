@@ -7,10 +7,12 @@
  *
  * @link /lib/wfu_ajaxactions.php
  *
- * @package WordPress File Upload Plugin
+ * @package Iptanus File Upload Plugin
  * @subpackage Core Components
  * @since 2.1.2
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
  * Execute Email Notification Dispatching
@@ -20,14 +22,16 @@
  * @since 2.1.2
  */
 function wfu_ajax_action_send_email_notification() {
-	$_POST = stripslashes_deep($_POST);
+	check_ajax_referer( 'wfu-uploader-nonce', 'nonce' );
 
+	$_POST = stripslashes_deep($_POST);
+	
 	$user = wp_get_current_user();
 	if ( 0 == $user->ID ) $is_admin = false;
 	else $is_admin = current_user_can('manage_options');
 
-	$params_index = sanitize_text_field($_POST['params_index']);
-	$session_token = sanitize_text_field($_POST['session_token']);
+	$params_index = ( isset($_POST['params_index']) ? sanitize_text_field($_POST['params_index']) : '' );
+	$session_token = ( isset($_POST['session_token']) ? sanitize_text_field($_POST['session_token']) : '' );
 
 	$arr = wfu_get_params_fields_from_index($params_index, $session_token);
 	//check referer using server sessions to avoid CSRF attacks
@@ -74,8 +78,8 @@ function wfu_ajax_action_send_email_notification() {
 	if ( WFU_USVAR_exists("filedata_".$uniqueid) && is_array(WFU_USVAR("filedata_".$uniqueid)) ) {
 		$all_files_count = count(WFU_USVAR("filedata_".$uniqueid));
 		foreach ( WFU_USVAR("filedata_".$uniqueid) as $file ) {
-			if ( $file["upload_result"] == "success" || $file["upload_result"] == "warning" )
-				array_push($target_path_list, $file["filepath"]);
+			if ( isset($file["upload_result"]) && ( $file["upload_result"] == "success" || $file["upload_result"] == "warning" ) )
+				array_push($target_path_list, strip_tags($file["filepath"]));
 		}
 	}
 	$uploaded_files_count = count($target_path_list);
@@ -119,10 +123,12 @@ function wfu_ajax_action_send_email_notification() {
 	//then retrieve userdata from session if files exist
 	if ( $all_files_count > 0 && WFU_USVAR_exists("filedata_".$uniqueid) && is_array(WFU_USVAR("filedata_".$uniqueid)) ) {
 		foreach ( WFU_USVAR("filedata_".$uniqueid) as $file ) {
-			if ( isset($file["user_data"]) ) {
+			if ( isset($file["user_data"]) && is_array($file["user_data"]) ) {
 				$userdata_fields = array();
-				foreach ( $file["user_data"] as $userdata_key => $userdata_field )
-					$userdata_fields[$userdata_key] = array( "label" => $userdata_field["label"], "value" => $userdata_field["value"] );
+				foreach ( $file["user_data"] as $userdata_key => $userdata_field ) {
+					$userdata_key = strip_tags($userdata_key);
+					$userdata_fields[$userdata_key] = array( "label" => strip_tags($userdata_field["label"]), "value" => strip_tags($userdata_field["value"]) );
+				}
 				break;
 			}
 		}
@@ -165,7 +171,7 @@ function wfu_ajax_action_send_email_notification() {
 	 */
 	$echo_str = apply_filters('_wfu_ajax_action_send_email_notification', $echo_str);
 	
-	die($echo_str); 
+	die(esc_html($echo_str)); 
 }
 
 /**
@@ -179,29 +185,31 @@ function wfu_ajax_action_send_email_notification() {
 function wfu_ajax_action_ask_server() {
 	if ( !isset($_REQUEST['session_token']) || !isset($_REQUEST['sid']) || !isset($_REQUEST['unique_id']) ) die();
 
+	// check referrer using Wordpress nonces and server sessions to avoid CSRF
+	// attacks
+	check_ajax_referer( 'wfu-uploader-nonce', 'wfu_uploader_nonce' );
+
 	$_REQUEST = stripslashes_deep($_REQUEST);
 
 	$session_token = sanitize_text_field( $_REQUEST["session_token"] );
 	$sid = sanitize_text_field( $_REQUEST["sid"] );
 	$unique_id = wfu_sanitize_code($_REQUEST['unique_id']);
 	if ( $session_token == "" ) die();
-	//check referrer using Wordpress nonces and server sessions to avoid CSRF attacks
-	check_ajax_referer( 'wfu-uploader-nonce', 'wfu_uploader_nonce' );
 	if ( WFU_USVAR("wfu_token_".$sid) != $session_token ) die();
 	
 	//prepare parameters for before-upload filters
 	$ret = array( "status" => "", "echo" => "" );
 	//retrieve file names, sizes and userdata from request parameters
-	$filenames_raw = ( isset($_REQUEST['filenames']) ? $_REQUEST['filenames'] : "" );
+	$filenames_raw = ( isset($_REQUEST['filenames']) ? sanitize_text_field($_REQUEST['filenames']) : "" );
 	$filenames = array();
 	if ( trim($filenames_raw) != "" ) $filenames = explode(";", $filenames_raw);
 	//use wfu_basename() function in order to avoid directory traversal attacks
 	foreach ( $filenames as $ind => $filename ) $filenames[$ind] = wfu_basename(esc_attr(wfu_plugin_decode_string(trim($filename))));
-	$filesizes_raw = ( isset($_REQUEST['filesizes']) ? $_REQUEST['filesizes'] : "" );
+	$filesizes_raw = ( isset($_REQUEST['filesizes']) ? sanitize_text_field($_REQUEST['filesizes']) : "" );
 	$filesizes = array();
 	if ( trim($filesizes_raw) != "" ) $filesizes = explode(";", $filesizes_raw);
 	foreach ( $filesizes as $ind => $filesize ) $filesizes[$ind] = wfu_sanitize_int($filesize);
-	$userdata_raw = ( isset($_REQUEST['userdata']) ? $_REQUEST['userdata'] : "" );
+	$userdata_raw = ( isset($_REQUEST['userdata']) ? sanitize_textarea_field($_REQUEST['userdata']) : "" );
 	$userdata = array();
 	if ( trim($userdata_raw) != "" ) $userdata = explode(";", $userdata_raw);
 	// we remove from each item the underscore character
@@ -305,7 +313,7 @@ function wfu_ajax_action_ask_server() {
 	else WFU_USVAR_store("wfu_uploadstatus_".$attr["unique_id"], 0);
 	
 	if ( $ret["status"] == "success" || $ret["status"] == "error" )
-		echo "wfu_askserver_".$ret["status"].":".$echo_str;
+		echo "wfu_askserver_".esc_attr($ret["status"]).":".esc_html($echo_str);
 	
 	die();
 }
@@ -320,20 +328,62 @@ function wfu_ajax_action_ask_server() {
  * @since 4.0.0
  */
 function wfu_ajax_action_cancel_upload() {
-	if ( !isset($_REQUEST['session_token']) || !isset($_REQUEST['sid']) || !isset($_REQUEST['unique_id']) ) die();
+	if ( !isset($_REQUEST['session_token']) || !isset($_REQUEST['sid']) || !isset($_REQUEST['unique_id']) || !isset($_REQUEST['index']) || !isset($_REQUEST['mode']) ) die();
+
+	//check referrer using Wordpress nonces and server sessions to avoid CSRF attacks
+	check_ajax_referer( 'wfu-uploader-nonce', 'wfu_uploader_nonce' );
 
 	$_REQUEST = stripslashes_deep($_REQUEST);
 
 	$session_token = sanitize_text_field( $_REQUEST["session_token"] );
 	$sid = sanitize_text_field( $_REQUEST["sid"] );
 	$unique_id = wfu_sanitize_code($_REQUEST['unique_id']);
-	if ( $session_token == "" ) die();
-	//check referrer using Wordpress nonces and server sessions to avoid CSRF attacks
-	check_ajax_referer( 'wfu-uploader-nonce', 'wfu_uploader_nonce' );
+	$index = intval(wfu_sanitize_int($_REQUEST['index']));
+	$mode = ( $_REQUEST['mode'] === "ajax" || $_REQUEST['mode'] === "no-ajax" ? $_REQUEST['mode'] : "" );
+	if ( $session_token == "" || $mode == "" ) die();
 	if ( WFU_USVAR("wfu_token_".$sid) != $session_token ) die();
 	
-	//setting status to 0 denotes cancelling of the upload
-	WFU_USVAR_store("wfu_uploadstatus_".$unique_id, 0);
+	if ( $mode === "no-ajax" ) {
+		// Setting status to 0 denotes cancelling of the upload. There is no
+		// need to unreserve the uploaded files because wfu_process_files() is
+		// not called.
+		WFU_USVAR_store("wfu_uploadstatus_".$unique_id, 0);
+	}
+	else {
+		// Unreserve any uploaded files that have been reserved and were
+		// cancelled before their upload was completed.
+		// First, find the indices of the uploaded files. If only one file was
+		// cancelled then use its index. If all were cancelled then find their
+		// indices from the User State.
+		$filedata = array();
+		if ( $index >= 0 ) {
+			$filedata[$index] = array();
+		}
+		else {
+			$filedata_id = "filedata_".$unique_id;
+			if ( WFU_USVAR_exists($filedata_id) ) {
+				$filedata = WFU_USVAR($filedata_id);
+			}
+		}
+		// Iterate the found indices and find the filename of each cancelled
+		// file from the User State.
+		$for_unreserve = array();
+		foreach ( $filedata as $index => $fileinfo ) {
+			$file_map = "filedata_".$unique_id."_".$index;
+			if ( WFU_USVAR_exists($file_map) ) {
+				$file_map_arr = WFU_USVAR($file_map);
+				// Only add the file to the unreserve list if its filename is
+				// final. A filename is final when it has passed all duplicate
+				// filename checks.
+				if ( array_key_exists( "filepath_final", $file_map_arr ) && $file_map_arr["filepath_final"] == true && isset($file_map_arr["filepath"]) ) {
+					array_push( $for_unreserve, $file_map_arr["filepath"] );
+				}
+			}
+		}
+		if ( count($for_unreserve) > 0 ) {
+			wfu_unreserve_files($for_unreserve);
+		}
+	}
 	
 	die("success");
 }
@@ -352,6 +402,9 @@ function wfu_ajax_action_cancel_upload() {
  */
 function wfu_ajax_action_callback() {
 	global $wfu_user_state_handler;
+
+	check_ajax_referer( 'wfu-uploader-nonce', 'wfu_uploader_nonce' );
+
 	if ( !isset($_REQUEST['session_token']) ) die();
 
 	$_REQUEST = stripslashes_deep($_REQUEST);
@@ -359,7 +412,6 @@ function wfu_ajax_action_callback() {
 	
 	$session_token = sanitize_text_field( $_REQUEST["session_token"] );
 	if ( $session_token == "" ) die();
-	check_ajax_referer( 'wfu-uploader-nonce', 'wfu_uploader_nonce' );
 
 	if ( !isset($_REQUEST['params_index']) ) die();
 	
@@ -372,10 +424,10 @@ function wfu_ajax_action_callback() {
 	$sid = $arr['shortcode_id'];
 	//check referrer using server sessions to avoid CSRF attacks
 	if ( WFU_USVAR("wfu_token_".$sid) != $session_token ) {
-		$echo_str = "Session failed!<br/><br/>Session Data:<br/>";
-		$echo_str .= print_r(wfu_sanitize(WFU_USALL()), true);
-		$echo_str .= "<br/><br/>Post Data:<br/>";
-		$echo_str .= print_r(wfu_sanitize($_REQUEST), true);
+		$echo_str = __('Session failed!', 'wp-file-upload')."<br/><br/>".__('Session Data:', 'wp-file-upload')."<br/>";
+		$echo_str .= esc_html(print_r(wfu_sanitize(WFU_USALL()), true));
+		$echo_str .= "<br/><br/>".__('Post Data:', 'wp-file-upload')."<br/>";
+		$echo_str .= esc_html(print_r(wfu_sanitize($_REQUEST), true));
 		$echo_str .= 'force_errorabort_code';
 		/**
 		 * Customise Output on Session Error.
@@ -385,7 +437,7 @@ function wfu_ajax_action_callback() {
 		 *
 		 * @since 3.11.0
 		 *
-		 * @param string $echo_str The output in case of session error.
+		 * @param string $echo_str The escaped output in case of session error.
 		 */
 		$echo_str = apply_filters('_wfu_upload_session_failed', $echo_str);
 		die($echo_str);
@@ -394,12 +446,12 @@ function wfu_ajax_action_callback() {
 	if ( $user->user_login != $arr['user_login'] ) {
 		$arr = wfu_get_params_fields_from_index($params_index.'[|][|]'.$arr['page_id'].'[|][|]'.$sid.'[|][|]'.$arr['user_login'], $session_token);
 		if ( $user->user_login != $arr['user_login'] ) {
-			$echo_str = "User failed!<br/><br/>User Data:<br/>";
-			$echo_str .= print_r(wfu_sanitize($user), true);
-			$echo_str .= "<br/><br/>Post Data:<br/>";
-			$echo_str .= print_r(wfu_sanitize($_REQUEST), true);
-			$echo_str .= "<br/><br/>Params Data:<br/>";
-			$echo_str .= print_r(wfu_sanitize($arr), true);
+			$echo_str = __('User failed!', 'wp-file-upload')."<br/><br/>".__('User Data:', 'wp-file-upload')."<br/>";
+			$echo_str .= esc_html(print_r(wfu_sanitize($user), true));
+			$echo_str .= "<br/><br/>".__('Post Data:', 'wp-file-upload')."<br/>";
+			$echo_str .= esc_html(print_r(wfu_sanitize($_REQUEST), true));
+			$echo_str .= "<br/><br/>".__('Params Data:', 'wp-file-upload')."<br/>";
+			$echo_str .= esc_html(print_r(wfu_sanitize($arr), true));
 			$echo_str .= 'force_errorabort_code';
 			/**
 			 * Customise Output on User Error.
@@ -409,7 +461,7 @@ function wfu_ajax_action_callback() {
 			 *
 			 * @since 3.11.0
 			 *
-			 * @param string $echo_str The output in case of user error.
+			 * @param string $echo_str The escaped output in case of user error.
 			 */
 			$echo_str = apply_filters('_wfu_upload_user_failed', $echo_str);
 			die($echo_str);
@@ -431,7 +483,7 @@ function wfu_ajax_action_callback() {
 		 * @param string $echo_str The return in case of forced connection
 		 *        close.
 		 */
-		die(apply_filters('_wfu_upload_force_connection_close', 'success'));
+		die(esc_html(apply_filters('_wfu_upload_force_connection_close', 'success')));
 	}
 	
 	//get the unique id of the upload
@@ -447,7 +499,7 @@ function wfu_ajax_action_callback() {
 		 *
 		 * @param string $echo_str The return in case of unique ID fail.
 		 */
-		die(apply_filters('_wfu_upload_uniqueid_failed', 'force_errorabort_code'));
+		die(esc_html(apply_filters('_wfu_upload_uniqueid_failed', 'force_errorabort_code')));
 	}
 	
 	//if before upload actions have been executed and they have rejected the 
@@ -469,7 +521,7 @@ function wfu_ajax_action_callback() {
 		//execute after upload filters
 		$ret = wfu_execute_after_upload_filters($sid, $unique_id, $params);
 		if ( $ret["js_script"] != "" ) $echo_str = "CBUVJS[".wfu_plugin_encode_string($ret["js_script"])."]";
-		die($echo_str);
+		die(esc_html($echo_str));
 	}
 	
 	//check if honeypot userdata fields have been added to the form and if they
@@ -505,7 +557,7 @@ function wfu_ajax_action_callback() {
 	 *     @type array $params The shortcode parameters of the upload form.
 	 */
 	$ret = apply_filters("_wfu_pre_upload_check", $ret, $attr);
-	if ( $ret["status"] == "die" ) die($ret["echo"]);
+	if ( $ret["status"] == "die" ) die(esc_html($ret["echo"]));
 
 	//if this is the first pass of an upload attempt then perform pre-upload actions
 	if ( !WFU_USVAR_exists('wfu_upload_first_pass_'.$unique_id) || WFU_USVAR('wfu_upload_first_pass_'.$unique_id) != 'true' ) {
@@ -560,7 +612,7 @@ function wfu_ajax_action_callback() {
 	 * @param string $echo_str The return in case of successful AJAX upload.
 	 */
 	$echo_str = apply_filters('_wfu_upload_callback_success', $echo_str);
-	die($echo_str); 
+	die(esc_html($echo_str)); 
 }
 
 /**
@@ -656,7 +708,7 @@ function wfu_ajax_action_save_shortcode_after_user_check() {
 	 * @param string $echo_str The return of the function.
 	 */
 	$echo_str = apply_filters('_wfu_ajax_action_save_shortcode', $echo_str);
-	die($echo_str);
+	die(esc_html($echo_str));
 }
 
 /**
@@ -668,6 +720,8 @@ function wfu_ajax_action_save_shortcode_after_user_check() {
  * @since 2.6.0
  */
 function wfu_ajax_action_check_page_contents() {
+	check_ajax_referer( 'wfu-shortcode-editor-nonce', 'nonce' );
+
 	if ( !current_user_can( 'manage_options' ) ) die();
 	if ( !isset($_POST['post_id']) || !isset($_POST['post_hash']) ) die();
 	if ( $_POST['post_id'] == "" ) die();
@@ -690,7 +744,7 @@ function wfu_ajax_action_check_page_contents() {
 	 * @param string $echo_str The return of the function.
 	 */
 	$echo_str = apply_filters('_wfu_ajax_action_check_page_contents', $echo_str);
-	die($echo_str);
+	die(esc_html($echo_str));
 }
 
 /**
@@ -705,6 +759,8 @@ function wfu_ajax_action_check_page_contents() {
 function wfu_ajax_action_edit_shortcode() {
 	global $wp_registered_widgets;
 	global $wp_registered_sidebars;
+	
+	check_ajax_referer( 'wfu-shortcode-editor-nonce', 'nonce' );
 	
 	$is_admin = current_user_can( 'manage_options' );
 	$can_open_composer = ( WFU_VAR("WFU_SHORTCODECOMPOSER_NOADMIN") == "true" && ( current_user_can( 'edit_pages' ) || current_user_can( 'edit_posts' ) ) );
@@ -767,10 +823,10 @@ function wfu_ajax_action_edit_shortcode() {
 			$data['sidebar'] = $widget_sidebar;
 			$data_enc = wfu_safe_store_shortcode_data(wfu_encode_array_to_string($data));
 		}
-		if( $is_admin ) $url = site_url().'/wp-admin/options-general.php?page=wordpress_file_upload&tag='.$shortcode_tag.'&action=edit_shortcode&data='.$data_enc;
+		if( $is_admin ) $url = site_url().'/wp-admin/options-general.php?page=wordpress_file_upload&tag='.$shortcode_tag.'&action=edit_shortcode&data='.$data_enc.'&c='.wp_create_nonce('wfu_admin_nonce');
 		//conditional that will open the shortcode composer for non-admin users
 		//who can edit posts or pages
-		else $url = site_url().'/wp-admin/admin.php?page=wordpress_file_upload&tag='.$shortcode_tag.'&action=edit_shortcode&data='.$data_enc;
+		else $url = site_url().'/wp-admin/admin.php?page=wordpress_file_upload&tag='.$shortcode_tag.'&action=edit_shortcode&data='.$data_enc.'&c='.wp_create_nonce('wfu_admin_nonce');
 		$echo_str = "wfu_edit_shortcode:success:".wfu_plugin_encode_string($url);
 	}
 	else $echo_str = "wfu_edit_shortcode:check_page_obsolete:".WFU_ERROR_PAGE_OBSOLETE;
@@ -786,7 +842,7 @@ function wfu_ajax_action_edit_shortcode() {
 	 * @param string $echo_str The return of the function.
 	 */
 	$echo_str = apply_filters('_wfu_ajax_action_edit_shortcode', $echo_str);
-	die($echo_str);
+	die(esc_html($echo_str));
 }
 
 /**
@@ -799,10 +855,13 @@ function wfu_ajax_action_edit_shortcode() {
  * @since 4.11.0
  */
 function wfu_ajax_action_gutedit_shortcode() {
+	//security check to avoid CSRF attacks
+	check_ajax_referer( 'wfu-gutedit-shortcode', 'nonce' );
+
 	$is_admin = current_user_can( 'manage_options' );
 	$can_open_composer = ( WFU_VAR("WFU_SHORTCODECOMPOSER_NOADMIN") == "true" && ( current_user_can( 'edit_pages' ) || current_user_can( 'edit_posts' ) ) );
 	if ( !$is_admin && !$can_open_composer ) die();
-	if ( !isset($_POST['shortcode']) || !isset($_POST['post_id']) || !isset($_POST['shortcode_tag']) ) die();
+	if ( !isset($_POST['shortcode']) || !isset($_POST['post_id']) || !isset($_POST['shortcode_tag']) || !isset($_POST['nonce']) ) die();
 
 	$_POST = stripslashes_deep($_POST);
 	
@@ -814,16 +873,18 @@ function wfu_ajax_action_gutedit_shortcode() {
 	$shortcode = wfu_sanitize_shortcode(wfu_plugin_decode_string($shortcode), $shortcode_tag);
 	
 	if ( $post_id == "" ) die();
+	
+	$admin_nonce = wp_create_nonce('wfu_admin_nonce');
 
 	$data['shortcode'] = '['.$shortcode_tag.' '.$shortcode.']';
 	$data['post_id'] = $post_id;
 	$data['post_hash'] = '';
 	$data['position'] = 0;
 	$data_enc = wfu_safe_store_shortcode_data(wfu_encode_array_to_string($data));
-	if ( $is_admin ) $url = site_url().'/wp-admin/options-general.php?page=wordpress_file_upload&tag='.$shortcode_tag.'&action=edit_shortcode&data='.$data_enc.'&referer=guteditor';
+	if ( $is_admin ) $url = site_url().'/wp-admin/options-general.php?page=wordpress_file_upload&tag='.$shortcode_tag.'&action=edit_shortcode&data='.$data_enc.'&referer=guteditor&c='.$admin_nonce;
 	//conditional that will open the shortcode composer for non-admin users who
 	//can edit posts or pages
-	else $url = site_url().'/wp-admin/admin.php?page=wordpress_file_upload&tag='.$shortcode_tag.'&action=edit_shortcode&data='.$data_enc.'&referer=guteditor';
+	else $url = site_url().'/wp-admin/admin.php?page=wordpress_file_upload&tag='.$shortcode_tag.'&action=edit_shortcode&data='.$data_enc.'&referer=guteditor&c='.$admin_nonce;
 
 	$echo_str = "wfu_gutedit_shortcode:success:".wfu_plugin_encode_string($url);
 	/**
@@ -837,7 +898,7 @@ function wfu_ajax_action_gutedit_shortcode() {
 	 * @param string $echo_str The return of the function.
 	 */
 	$echo_str = apply_filters('_wfu_ajax_action_gutedit_shortcode', $echo_str);
-	die($echo_str);
+	die(esc_html($echo_str));
 }
 
 /**
@@ -879,7 +940,7 @@ function wfu_ajax_action_read_subfolders() {
 		 *
 		 * @param string $echo_str The return of the function.
 		 */
-		die(apply_filters('_wfu_ajax_action_read_subfolders', 'wfu_read_subfolders:error:Parent folder is not valid! Cannot retrieve subfolder list.'));
+		die(esc_html(apply_filters('_wfu_ajax_action_read_subfolders', 'wfu_read_subfolders:error:'.__('Parent folder is not valid! Cannot retrieve subfolder list.', 'wp-file-upload'))));
 	}
 
 	$path2 = $folder2;
@@ -915,7 +976,7 @@ function wfu_ajax_action_read_subfolders() {
 	}
 
 	/** This filter is documnted above. */
-	die(apply_filters('_wfu_ajax_action_read_subfolders', "wfu_read_subfolders:success:".wfu_plugin_encode_string($dirlist)));
+	die(esc_html(apply_filters('_wfu_ajax_action_read_subfolders', "wfu_read_subfolders:success:".wfu_plugin_encode_string($dirlist))));
 }
 
 /**
@@ -932,17 +993,16 @@ function wfu_ajax_action_read_subfolders() {
  */
 function wfu_ajax_action_download_file_invoker() {
 	global $wfu_user_state_handler;
+	
+	//security check to avoid CSRF attacks
+	check_ajax_referer( 'wfu_download_file_invoker', 'nonce' );
 
 	$_POST = stripslashes_deep($_POST);
 	$_GET = stripslashes_deep($_GET);
 	
-	$file_code = (isset($_POST['file']) ? $_POST['file'] : (isset($_GET['file']) ? $_GET['file'] : ''));
-	$nonce = (isset($_POST['nonce']) ? $_POST['nonce'] : (isset($_GET['nonce']) ? $_GET['nonce'] : ''));
-	if ( $file_code == '' || $nonce == '' ) die();
+	$file_code = (isset($_POST['file']) ? sanitize_text_field($_POST['file']) : (isset($_GET['file']) ? sanitize_text_field($_GET['file']) : ''));
+	if ( $file_code == '' ) die();
 
-	//security check to avoid CSRF attacks
-	if ( !wp_verify_nonce($nonce, 'wfu_download_file_invoker') ) die();
-	
 	//check if user is allowed to download files
 	if ( !current_user_can( 'manage_options' ) ) {
 			die();
@@ -950,7 +1010,6 @@ function wfu_ajax_action_download_file_invoker() {
 	
 	$cookies = array();
 	$use_cookies = ( $wfu_user_state_handler == "dboption" && WFU_VAR("WFU_US_DBOPTION_BASE") == "cookies" );
-	$file_code = sanitize_text_field($file_code);
 	$filepath = "";
 	$filetype = "normal";
 	// if file_code is exportdata, then export of data has been requested and
@@ -993,7 +1052,7 @@ function wfu_ajax_action_download_file_invoker() {
 			 *
 			 * @param string $echo_str The return of the function.
 			 */
-			die(apply_filters('_wfu_ajax_action_download_file_invoker', 'wfu_ajax_action_download_file_invoker:not_allowed:'.( isset($_POST['browser']) ? WFU_BROWSER_DOWNLOADFILE_NOTALLOWED : 'You are not allowed to download this file!' )));
+			die(esc_html(apply_filters('_wfu_ajax_action_download_file_invoker', 'wfu_ajax_action_download_file_invoker:not_allowed:'.( isset($_POST['browser']) ? WFU_BROWSER_DOWNLOADFILE_NOTALLOWED : 'You are not allowed to download this file!' ))));
 		}
 		//for front-end browser apply wfu_browser_check_file_action filter to
 		//allow or restrict the download
@@ -1038,7 +1097,7 @@ function wfu_ajax_action_download_file_invoker() {
 			$changable_data = apply_filters("wfu_browser_check_file_action", $changable_data, $additional_data);
 			if ( $changable_data["error_message"] != "" )
 				/** This filter is documented above. */
-				die(apply_filters('_wfu_ajax_action_download_file_invoker', 'wfu_ajax_action_download_file_invoker:not_allowed:'.$changable_data["error_message"]));
+				die(esc_html(apply_filters('_wfu_ajax_action_download_file_invoker', 'wfu_ajax_action_download_file_invoker:not_allowed:'.$changable_data["error_message"])));
 		}
 		//for back-end browser check if user is allowed to perform this action
 		//on this file
@@ -1077,8 +1136,11 @@ function wfu_ajax_action_download_file_invoker() {
 		//store ABSPATH
 		'wfu_ABSPATH' => wfu_abspath(),
 		//store translatable strings
-		'wfu_browser_downloadfile_notexist' => ( isset($_POST['browser']) ? WFU_BROWSER_DOWNLOADFILE_NOTEXIST : 'File does not exist!' ),
-		'wfu_browser_downloadfile_failed' => ( isset($_POST['browser']) ? WFU_BROWSER_DOWNLOADFILE_FAILED : 'Could not download file!' ),
+		'wfu_browser_downloadfile_notexist' => ( isset($_POST['browser']) ? WFU_BROWSER_DOWNLOADFILE_NOTEXIST : __('File does not exist!', 'wp-file-upload') ),
+		'wfu_browser_downloadfile_failed' => ( isset($_POST['browser']) ? WFU_BROWSER_DOWNLOADFILE_FAILED : __('Could not download file!', 'wp-file-upload') ),
+		//store sFTP/FTPS settings
+		'sftp_settings' => '',
+		'ftps_settings' => 'use_pasv='.( WFU_VAR("WFU_FTPS_USEPASSIVE") === "true" ? '1' : '0' ).'|use_pasvaddr='.( WFU_VAR("WFU_FTPS_USEPASVADDRESS") === "true" ? '1' : '0' ),
 	);
 	//store downloader data to a temporary file
 	$tmpfile = wfu_store_downloader_data($downloader_data);
@@ -1099,7 +1161,7 @@ function wfu_ajax_action_download_file_invoker() {
 	$response = wfu_encode_array_to_string($response);
 
 	/** This filter is documented above. */
-	die(apply_filters('_wfu_ajax_action_download_file_invoker', 'wfu_ajax_action_download_file_invoker:wfu_download_id;'.$download_id.':'.$response));
+	die(esc_html(apply_filters('_wfu_ajax_action_download_file_invoker', 'wfu_ajax_action_download_file_invoker:wfu_download_id;'.$download_id.':'.$response)));
 }
 
 /**
@@ -1111,17 +1173,19 @@ function wfu_ajax_action_download_file_invoker() {
  * @since 2.6.0
  */
 function wfu_ajax_action_download_file_monitor() {
+	//security check to avoid CSRF attacks
+	check_ajax_referer( 'wfu_download_file_invoker', 'nonce' );
+	
 	$_POST = stripslashes_deep($_POST);
 	$_GET = stripslashes_deep($_GET);
 
-	$file_code = (isset($_POST['file']) ? $_POST['file'] : (isset($_GET['file']) ? $_GET['file'] : ''));
-	$id = (isset($_POST['id']) ? $_POST['id'] : (isset($_GET['id']) ? $_GET['id'] : ''));
+	$file_code = (isset($_POST['file']) ? wfu_sanitize_code($_POST['file']) : (isset($_GET['file']) ? wfu_sanitize_code($_GET['file']) : ''));
+	$id = (isset($_POST['id']) ? wfu_sanitize_code($_POST['id']) : (isset($_GET['id']) ? wfu_sanitize_code($_GET['id']) : ''));
 	if ( $file_code == '' || $id == '' ) die();
-	$id = wfu_sanitize_code($id);
 	
 	//ensure that this is not a CSRF attack by checking validity of a security
 	//ticket
-	if ( !WFU_USVAR_exists('wfu_download_monitor_ticket_'.$id) || time() > WFU_USVAR('wfu_download_monitor_ticket_'.$id) ) {
+	if ( !WFU_USVAR_exists('wfu_download_monitor_ticket_'.$id) || time() > intval(WFU_USVAR('wfu_download_monitor_ticket_'.$id)) ) {
 		WFU_USVAR_unset('wfu_download_monitor_ticket_'.$id);
 		WFU_USVAR_unset('wfu_download_status_'.$id);
 		die();
@@ -1137,14 +1201,19 @@ function wfu_ajax_action_download_file_monitor() {
 	//and wait for another 30secs is dispatched
 	$end_time = time() + 30;
 	$upload_ended = false;
+	$download_status = "";
 	while ( time() < $end_time ) {
-		$upload_ended = ( WFU_USVAR_exists('wfu_download_status_'.$id) ? ( WFU_USVAR('wfu_download_status_'.$id) == 'downloaded' || WFU_USVAR('wfu_download_status_'.$id) == 'failed' ? true : false ) : false );
+		$upload_ended = false;
+		if ( WFU_USVAR_exists('wfu_download_status_'.$id) ) {
+			$download_status = WFU_USVAR('wfu_download_status_'.$id);
+			$upload_ended = ( $download_status == 'downloaded' || $download_status == 'failed' ? true : false );
+		}
 		if ( $upload_ended ) break;
 		usleep(100);
 	}
 	
 	if ( $upload_ended ) {
-		$upload_result = WFU_USVAR('wfu_download_status_'.$id);
+		$upload_result = ( $download_status == 'downloaded' || $download_status == 'failed' ? $download_status : "" );
 		WFU_USVAR_unset('wfu_download_status_'.$id);
 		$user = wp_get_current_user();
 //		$filepath = wfu_plugin_decode_string($file_code);
@@ -1162,13 +1231,13 @@ function wfu_ajax_action_download_file_monitor() {
 		 *
 		 * @param string $echo_str The return of the function.
 		 */
-		die(apply_filters('_wfu_ajax_action_download_file_monitor', 'wfu_ajax_action_download_file_monitor:'.$upload_result.':'));
+		die(esc_html(apply_filters('_wfu_ajax_action_download_file_monitor', 'wfu_ajax_action_download_file_monitor:'.$upload_result.':')));
 	}
 	else {
 		//regenerate monitor ticket
 		WFU_USVAR_store('wfu_download_monitor_ticket_'.$id, time() + 30);
 		/** This filter is documented above. */
-		die(apply_filters('_wfu_ajax_action_download_file_monitor', 'wfu_ajax_action_download_file_monitor:repeat:'.$id));
+		die(esc_html(apply_filters('_wfu_ajax_action_download_file_monitor', 'wfu_ajax_action_download_file_monitor:repeat:'.$id)));
 	}
 }
 
@@ -1201,7 +1270,7 @@ function wfu_ajax_action_get_historylog_page() {
 	 *
 	 * @param string $echo_str The return of the function.
 	 */
-	die(apply_filters('_wfu_ajax_action_get_historylog_page', 'wfu_historylog_page_success:'.wfu_plugin_encode_string($rows)));
+	die(esc_html(apply_filters('_wfu_ajax_action_get_historylog_page', 'wfu_historylog_page_success:'.wfu_plugin_encode_string($rows))));
 }
 
 /**
@@ -1233,7 +1302,7 @@ function wfu_ajax_action_get_uploadedfiles_page() {
 	 *
 	 * @param string $echo_str The return of the function.
 	 */
-	die(apply_filters('_wfu_ajax_action_get_uploadedfiles_page', 'wfu_uploadedfiles_page_success:'.wfu_plugin_encode_string($rows)));
+	die(esc_html(apply_filters('_wfu_ajax_action_get_uploadedfiles_page', 'wfu_uploadedfiles_page_success:'.wfu_plugin_encode_string($rows))));
 }
 
 /**
@@ -1268,7 +1337,7 @@ function wfu_ajax_action_get_adminbrowser_page() {
 	 *
 	 * @param string $echo_str The return of the function.
 	 */
-	die(apply_filters('_wfu_ajax_action_get_adminbrowser_page', 'wfu_adminbrowser_page_success:'.wfu_plugin_encode_string($rows)));
+	die(esc_html(apply_filters('_wfu_ajax_action_get_adminbrowser_page', 'wfu_adminbrowser_page_success:'.wfu_plugin_encode_string($rows))));
 }
 
 /**
@@ -1279,16 +1348,16 @@ function wfu_ajax_action_get_adminbrowser_page() {
  * @since 3.8.2
  */
 function wfu_ajax_action_include_file() {
+	//security check to avoid CSRF attacks
+	check_ajax_referer( 'wfu_include_file', 'nonce' );
+	
 	$_POST = stripslashes_deep($_POST);
 	$_GET = stripslashes_deep($_GET);
 
-	$file_code = (isset($_POST['file']) ? $_POST['file'] : (isset($_GET['file']) ? $_GET['file'] : ''));
-	$nonce = (isset($_POST['nonce']) ? $_POST['nonce'] : (isset($_GET['nonce']) ? $_GET['nonce'] : ''));
-	if ( $file_code == '' || $nonce == '' ) die();
+	$file_code = (isset($_POST['file']) ? sanitize_text_field($_POST['file']) : (isset($_GET['file']) ? sanitize_text_field($_GET['file']) : ''));
+	if ( $file_code == '' ) die();
 
 	if ( !current_user_can( 'manage_options' ) ) die();
-	//security check to avoid CSRF attacks
-	if ( !wp_verify_nonce($nonce, 'wfu_include_file') ) die();
 	
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
 	if ( $plugin_options['includeotherfiles'] != "1" ) die();
@@ -1311,10 +1380,10 @@ function wfu_ajax_action_include_file() {
 		 *
 		 * @param string $echo_str The return of the function.
 		 */
-		die(apply_filters('_wfu_ajax_action_include_file', "wfu_include_file:success:".$fileid));
+		die(esc_html(apply_filters('_wfu_ajax_action_include_file', "wfu_include_file:success:".$fileid)));
 	}
 	/** This filter is documented above. */
-	else die(apply_filters('_wfu_ajax_action_include_file', 'wfu_include_file:fail:'));
+	else die(esc_html(apply_filters('_wfu_ajax_action_include_file', 'wfu_include_file:fail:')));
 }
 
 /**
@@ -1326,15 +1395,14 @@ function wfu_ajax_action_include_file() {
  * @since 2.4.1
  */
 function wfu_ajax_action_notify_wpfilebase() {
+	check_ajax_referer( 'wfu-uploader-nonce', 'nonce' );
+	
 	$_POST = stripslashes_deep($_POST);
 	$_GET = stripslashes_deep($_GET);
 
-	$params_index = (isset($_POST['params_index']) ? $_POST['params_index'] : (isset($_GET['params_index']) ? $_GET['params_index'] : ''));
-	$session_token = (isset($_POST['session_token']) ? $_POST['session_token'] : (isset($_GET['session_token']) ? $_GET['session_token'] : ''));
+	$params_index = (isset($_POST['params_index']) ? sanitize_text_field($_POST['params_index']) : (isset($_GET['params_index']) ? sanitize_text_field($_GET['params_index']) : ''));
+	$session_token = (isset($_POST['session_token']) ? sanitize_text_field($_POST['session_token']) : (isset($_GET['session_token']) ? sanitize_text_field($_GET['session_token']) : ''));
 	if ( $params_index == '' || $session_token == '' ) die();
-
-	$params_index = sanitize_text_field($params_index);
-	$session_token = sanitize_text_field($session_token);
 
 	$arr = wfu_get_params_fields_from_index($params_index, $session_token);
 	//check referer using server sessions to avoid CSRF attacks
@@ -1356,18 +1424,18 @@ function wfu_ajax_action_notify_wpfilebase() {
  * @since 4.5.0
  */
 function wfu_ajax_action_pdusers_get_users() {
+	//security check to avoid CSRF attacks
+	$nonce = ( isset($_POST['nonce']) ? sanitize_text_field( wp_unslash ( $_POST['nonce'] ) ) : '' );
+	if ( !wp_verify_nonce($nonce, 'wfu_edit_policy') ) die();
+
 	$_POST = stripslashes_deep($_POST);
 	$_GET = stripslashes_deep($_GET);
 
-	$nonce = (isset($_POST['nonce']) ? $_POST['nonce'] : (isset($_GET['nonce']) ? $_GET['nonce'] : ''));
-	$query = (isset($_POST['query']) ? $_POST['query'] : (isset($_GET['query']) ? $_GET['query'] : ''));
-	if ( $nonce == '' || $query == '' ) die();
+	$query = (isset($_POST['query']) ? sanitize_text_field($_POST['query']) : (isset($_GET['query']) ? sanitize_text_field($_GET['query']) : ''));
+	if ( $query == '' ) die();
 
 	if ( !current_user_can( 'manage_options' ) ) die();
-	//security check to avoid CSRF attacks
-	if ( !wp_verify_nonce($nonce, 'wfu_edit_policy') ) die();
 
-	$query = sanitize_text_field($query);
 	$args = array(
 		'search'         => $query,
 		'search_columns' => array( 'user_login', 'display_name' ),
@@ -1378,6 +1446,6 @@ function wfu_ajax_action_pdusers_get_users() {
 	$args = apply_filters("_wfu_get_users", $args, "manage_pdusers");
 	$users = get_users($args);
 	
-	die("pdusers_get_users:".wfu_encode_array_to_string($users));
+	die(esc_html("pdusers_get_users:".wfu_encode_array_to_string($users)));
 }
 

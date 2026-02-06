@@ -8,10 +8,12 @@
  *
  * @link /lib/wfu_admin_maintenance.php
  *
- * @package WordPress File Upload Plugin
+ * @package Iptanus File Upload Plugin
  * @subpackage Core Components
  * @since 3.7.1
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
  * Display the Maintenance Actions Page.
@@ -30,6 +32,7 @@ function wfu_maintenance_actions($message = '') {
 	if ( !current_user_can( 'manage_options' ) ) return wfu_manage_mainmenu();
 
 	$siteurl = site_url();
+	$admin_nonce = wp_create_nonce('wfu_admin_nonce');
 	
 	$maintenance_options = get_option( "wfu_maintenance_options", array() );
 	
@@ -37,82 +40,82 @@ function wfu_maintenance_actions($message = '') {
 	$echo_str .= wfu_generate_dashboard_menu_title("\n\t");
 	if ( $message != '' ) {
 		$echo_str .= "\n\t".'<div class="updated">';
-		$echo_str .= "\n\t\t".'<p>'.$message.'</p>';
+		$echo_str .= "\n\t\t".'<p>'.wfu_sanitize_simple_html($message).'</p>';
 		$echo_str .= "\n\t".'</div>';
 	}
 	$echo_str .= "\n\t".'<div style="margin-top:20px;">';
 	$echo_str .= wfu_generate_dashboard_menu("\n\t\t", "Maintenance Actions");
 	//maintenance actions
-	$echo_str .= "\n\t\t".'<h3 style="margin-bottom: 10px;">Database Actions</h3>';
+	$echo_str .= "\n\t\t".'<h3 style="margin-bottom: 10px;">'.esc_html__('Database Actions', 'wp-file-upload').'</h3>';
 	$echo_str .= "\n\t\t".'<table class="form-table">';
 	$echo_str .= "\n\t\t\t".'<tbody>';
 	$echo_str .= "\n\t\t\t\t".'<tr>';
 	$echo_str .= "\n\t\t\t\t\t".'<th scope="row">';
 	$wfu_maintenance_nonce = wp_create_nonce("wfu_maintenance_actions");
 	$wfu_downloadfile_nonce = wp_create_nonce('wfu_download_file_invoker');
-	$echo_str .= "\n\t\t\t\t\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=sync_db&amp;nonce='.$wfu_maintenance_nonce.'" class="button" title="Update database to reflect current status of files">Sync Database</a>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=sync_db&amp;nonce='.$wfu_maintenance_nonce.'&amp;c='.$admin_nonce).'" class="button" title="'.esc_html__('Update database to reflect current status of files', 'wp-file-upload').'">'.esc_html__('Sync Database', 'wp-file-upload').'</a>';
 	$echo_str .= "\n\t\t\t\t\t".'</th>';
 	$echo_str .= "\n\t\t\t\t\t".'<td>';
-	$echo_str .= "\n\t\t\t\t\t\t".'<label>Update database to reflect current status of files.</label>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<label>'.esc_html__('Update database to reflect current status of files.', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t\t\t\t".'</td>';
 	$echo_str .= "\n\t\t\t\t".'</tr>';
 	$echo_str .= "\n\t\t\t\t".'<tr>';
 	$echo_str .= "\n\t\t\t\t\t".'<th scope="row">';
-	$echo_str .= "\n\t\t\t\t\t\t".'<a href="" class="button" title="Clean database log" onclick="wfu_cleanlog_selector_toggle(true); return false;">Clean Log</a>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<a href="" class="button" title="'.esc_html__('Clean database log', 'wp-file-upload').'" onclick="wfu_cleanlog_selector_toggle(true); return false;">'.esc_html__('Clean Log', 'wp-file-upload').'</a>';
 	$echo_str .= "\n\t\t\t\t\t".'</th>';
 	$echo_str .= "\n\t\t\t\t\t".'<td>';
-	$echo_str .= "\n\t\t\t\t\t\t".'<label>Clean-up database log, either all or of specific period, including file information, user data and optionally the files.</label>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<label>'.esc_html__('Clean-up database log, either all or of specific period, including file information, user data and optionally the files.', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t\t\t\t".'</td>';
 	$echo_str .= "\n\t\t\t\t".'</tr>';
 	$echo_str .= "\n\t\t\t\t".'<tr class="wfu_cleanlog_tr">';
 	$echo_str .= "\n\t\t\t\t\t".'<th scope="row"></th>';
 	$echo_str .= "\n\t\t\t\t\t".'<td>';
 	$echo_str .= "\n\t\t\t\t\t\t".'<div>';
-	$echo_str .= "\n\t\t\t\t\t\t\t".'<label>Select Clean-Up Period</label>';
+	$echo_str .= "\n\t\t\t\t\t\t\t".'<label>'.esc_html__('Select Clean-Up Period', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t\t\t\t\t\t".'<select id="wfu_cleanlog_period" onchange="wfu_cleanlog_period_changed();">';
-	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<option value="older_than_date">Clean-up log older than date</option>';
-	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<option value="older_than_period">Clean-up log older than period</option>';
-	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<option value="between_dates">Clean-up log between dates</option>';
-	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<option value="all">Clean-up all log</option>';
+	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<option value="older_than_date">'.esc_html__('Clean-up log older than date', 'wp-file-upload').'</option>';
+	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<option value="older_than_period">'.esc_html__('Clean-up log older than period', 'wp-file-upload').'</option>';
+	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<option value="between_dates">'.esc_html__('Clean-up log between dates', 'wp-file-upload').'</option>';
+	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<option value="all">'.esc_html__('Clean-up all log', 'wp-file-upload').'</option>';
 	$echo_str .= "\n\t\t\t\t\t\t\t".'</select>';
 	$echo_str .= "\n\t\t\t\t\t\t\t".'<div class="wfu_selectdate_container">';
-	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<label>Select date</label>';
+	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<label>'.esc_html__('Select date', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<input id="wfu_cleanlog_dateold" type="text" />';
 	$echo_str .= "\n\t\t\t\t\t\t\t".'</div>';
 	$echo_str .= "\n\t\t\t\t\t\t\t".'<div class="wfu_selectperiod_container">';
-	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<label>Select period</label>';
+	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<label>'.esc_html__('Select period', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<input id="wfu_cleanlog_periodold" type="number" min="1" />';
 	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<select id="wfu_cleanlog_periodtype">';
-	$echo_str .= "\n\t\t\t\t\t\t\t\t\t".'<option value="days">days</option>';
-	$echo_str .= "\n\t\t\t\t\t\t\t\t\t".'<option value="months">months</option>';
-	$echo_str .= "\n\t\t\t\t\t\t\t\t\t".'<option value="years">years</option>';
+	$echo_str .= "\n\t\t\t\t\t\t\t\t\t".'<option value="days">'.esc_html__('days', 'wp-file-upload').'</option>';
+	$echo_str .= "\n\t\t\t\t\t\t\t\t\t".'<option value="months">'.esc_html__('months', 'wp-file-upload').'</option>';
+	$echo_str .= "\n\t\t\t\t\t\t\t\t\t".'<option value="years">'.esc_html__('years', 'wp-file-upload').'</option>';
 	$echo_str .= "\n\t\t\t\t\t\t\t\t".'</select>';
 	$echo_str .= "\n\t\t\t\t\t\t\t".'</div>';
 	$echo_str .= "\n\t\t\t\t\t\t\t".'<div class="wfu_selectdates_container">';
-	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<label>Select period from</label>';
+	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<label>'.esc_html__('Select period from', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<input id="wfu_cleanlog_datefrom" type="text" />';
-	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<label>back to</label>';
+	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<label>'.esc_html__('back to', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<input id="wfu_cleanlog_dateto" type="text" />';
 	$echo_str .= "\n\t\t\t\t\t\t\t".'</div>';
 	$echo_str .= "\n\t\t\t\t\t\t\t".'<div class="wfu_includefiles_container">';
-	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<label for="wfu_includefiles">Clean-up also affected files</label>';
+	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<label for="wfu_includefiles">'.esc_html__('Clean-up also affected files', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<input id="wfu_includefiles" type="checkbox" />';
 	$echo_str .= "\n\t\t\t\t\t\t\t".'</div>';
 	$echo_str .= "\n\t\t\t\t\t\t\t".'<div class="wfu_buttons_container">';
-	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<a href="" class="button" title="Close" onclick="wfu_cleanlog_selector_toggle(false); return false;">Close</a>';
-	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<a href="" class="button wfu_cleanlog_proceed" title="Proceed to log clean-up" onclick="if (wfu_cleanlog_selector_checkproceed()) return true; else return false; ">Proceed</a>';
-	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<span class="wfu_cleanlog_error hidden">Error</span>';
-	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<input id="wfu_cleanlog_href" type="hidden" value="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=clean_log_ask&amp;nonce='.$wfu_maintenance_nonce.'" />';
+	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<a href="" class="button" title="'.esc_html__('Close', 'wp-file-upload').'" onclick="wfu_cleanlog_selector_toggle(false); return false;">'.esc_html__('Close', 'wp-file-upload').'</a>';
+	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<a href="" class="button wfu_cleanlog_proceed" title="'.esc_html__('Proceed to log clean-up', 'wp-file-upload').'" onclick="if (wfu_cleanlog_selector_checkproceed()) return true; else return false; ">'.esc_html__('Proceed', 'wp-file-upload').'</a>';
+	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<span class="wfu_cleanlog_error hidden">'.esc_html__('Error', 'wp-file-upload').'</span>';
+	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<input id="wfu_cleanlog_href" type="hidden" value="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=clean_log_ask&amp;nonce='.$wfu_maintenance_nonce.'&amp;c='.$admin_nonce).'" />';
 	$echo_str .= "\n\t\t\t\t\t\t\t".'</div>';
 	$echo_str .= "\n\t\t\t\t\t\t".'</div>';
 	$echo_str .= "\n\t\t\t\t\t".'</td>';
 	$echo_str .= "\n\t\t\t\t".'</tr>';
 	$echo_str .= "\n\t\t\t\t".'<tr>';
 	$echo_str .= "\n\t\t\t\t\t".'<th scope="row">';
-	$echo_str .= "\n\t\t\t\t\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=purge_data_ask&amp;nonce='.$wfu_maintenance_nonce.'" class="button" title="Remove all plugin data from website" style="color:red;">Purge All Data</a>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=purge_data_ask&amp;nonce='.$wfu_maintenance_nonce.'&amp;c='.$admin_nonce).'" class="button" title="'.esc_html__('Remove all plugin data from website', 'wp-file-upload').'" style="color:red;">'.esc_html__('Purge All Data', 'wp-file-upload').'</a>';
 	$echo_str .= "\n\t\t\t\t\t".'</th>';
 	$echo_str .= "\n\t\t\t\t\t".'<td>';
-	$echo_str .= "\n\t\t\t\t\t\t".'<label>Purge all plugin options and tables from database, as well as any session data. The plugin will be deactivated after this action.</label>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<label>'.esc_html__('Purge all plugin options and tables from database, as well as any session data. The plugin will be deactivated after this action.', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t\t\t\t".'</td>';
 	$echo_str .= "\n\t\t\t\t".'</tr>';
 	$echo_str .= "\n\t\t\t".'</tbody>';
@@ -120,16 +123,16 @@ function wfu_maintenance_actions($message = '') {
 	$echo_str .= "\n\t".'</div>';
 	//export actions
 	$echo_str .= "\n\t".'<div style="margin-top:20px;">';
-	$echo_str .= "\n\t\t".'<h3 style="margin-bottom: 10px;">Export Actions</h3>';
+	$echo_str .= "\n\t\t".'<h3 style="margin-bottom: 10px;">'.esc_html__('Export Actions', 'wp-file-upload').'</h3>';
 	$echo_str .= "\n\t\t".'<table class="form-table">';
 	$echo_str .= "\n\t\t\t".'<tbody>';
 	$echo_str .= "\n\t\t\t\t".'<tr>';
 	$echo_str .= "\n\t\t\t\t\t".'<th scope="row">';
-	$echo_str .= "\n\t\t\t\t\t\t".'<a href="javascript:wfu_download_file(\'exportdata\', 1);" class="button" title="Export uploaded file data">Export Uploaded File Data</a>';
-	$echo_str .= "\n\t\t\t\t\t\t".'<input id="wfu_download_file_nonce" type="hidden" value="'.$wfu_downloadfile_nonce.'" />';
+	$echo_str .= "\n\t\t\t\t\t\t".'<a href="javascript:wfu_download_file(\'exportdata\', 1);" class="button" title="'.esc_html__('Export uploaded file data', 'wp-file-upload').'">'.esc_html__('Export Uploaded File Data', 'wp-file-upload').'</a>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<input id="wfu_download_file_nonce" type="hidden" value="'.esc_attr($wfu_downloadfile_nonce).'" />';
 	$echo_str .= "\n\t\t\t\t\t".'</th>';
 	$echo_str .= "\n\t\t\t\t\t".'<td>';
-	$echo_str .= "\n\t\t\t\t\t\t".'<label>Export uploaded valid file data, together with any userdata fields, to a comma-separated text file.</label>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<label>'.esc_html__('Export uploaded valid file data, together with any userdata fields, to a comma-separated text file.', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t\t\t\t\t".'<div id="wfu_file_download_container_1" style="display: none;"></div>';
 	$echo_str .= "\n\t\t\t\t\t".'</td>';
 	$echo_str .= "\n\t\t\t\t".'</tr>';
@@ -138,36 +141,36 @@ function wfu_maintenance_actions($message = '') {
 	//debugging actions
 	$debug_logging = ( isset($maintenance_options["debug_logging"]) ? $maintenance_options["debug_logging"] === true : false );
 	$echo_str .= "\n\t".'<div style="margin-top:20px;">';
-	$echo_str .= "\n\t\t".'<h3 style="margin-bottom: 10px;">Debugging</h3>';
+	$echo_str .= "\n\t\t".'<h3 style="margin-bottom: 10px;">'.esc_html__('Debugging', 'wp-file-upload').'</h3>';
 	$echo_str .= "\n\t\t".'<table class="form-table">';
 	$echo_str .= "\n\t\t\t".'<tbody>';
 	$echo_str .= "\n\t\t\t\t".'<tr>';
 	$echo_str .= "\n\t\t\t\t\t".'<th scope="row">';
-	$echo_str .= "\n\t\t\t\t\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action='.( $debug_logging ? 'debuglogging_off': 'debuglogging_on' ).'&amp;nonce='.$wfu_maintenance_nonce.'" class="button" title="'.( $debug_logging ? 'Deactivate': 'Activate' ).' debug logging">'.( $debug_logging ? 'Deactivate': 'Activate' ).' Debug Logging</a>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action='.( $debug_logging ? 'debuglogging_off': 'debuglogging_on' ).'&amp;nonce='.$wfu_maintenance_nonce.'&amp;c='.$admin_nonce).'" class="button" title="'.( $debug_logging ? esc_html__('Deactivate debug logging', 'wp-file-upload'): esc_html__('Activate debug logging', 'wp-file-upload') ).'">'.( $debug_logging ? esc_html__('Deactivate Debug Logging', 'wp-file-upload'): esc_html__('Activate Debug Logging', 'wp-file-upload') ).'</a>';
 	$echo_str .= "\n\t\t\t\t\t".'</th>';
 	$echo_str .= "\n\t\t\t\t\t".'<td>';
 	if ( $debug_logging )
-		$echo_str .= "\n\t\t\t\t\t\t".'<label>Debug logging is active. Debug data are logged.</label>';
+		$echo_str .= "\n\t\t\t\t\t\t".'<label>'.esc_html__('Debug logging is active. Debug data are logged.', 'wp-file-upload').'</label>';
 	else
-		$echo_str .= "\n\t\t\t\t\t\t".'<label>Debug logging is not active. Activate it, so that debug data are logged.</label>';
+		$echo_str .= "\n\t\t\t\t\t\t".'<label>'.esc_html__('Debug logging is not active. Activate it, so that debug data are logged.', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t\t\t\t".'</td>';
 	$debuglog_exists = file_exists(wfu_debug_log_filepath());
 	$debuglog_size = ( $debuglog_exists ? filesize(wfu_debug_log_filepath()) : 0 );
 	$echo_str .= "\n\t\t\t\t".'</tr>';
 	$echo_str .= "\n\t\t\t\t".'<tr>';
 	$echo_str .= "\n\t\t\t\t\t".'<th scope="row">';
-	$echo_str .= "\n\t\t\t\t\t\t".'<a href="javascript:wfu_download_file(\'debuglog\', 1);" class="button'.( $debuglog_exists ? '' : ' disabled' ).'" title="Download debug log data">Download Debug Log Data</a>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<a href="javascript:wfu_download_file(\'debuglog\', 1);" class="button'.( $debuglog_exists ? '' : ' disabled' ).'" title="'.esc_html__('Download debug log data', 'wp-file-upload').'">'.esc_html__('Download Debug Log Data', 'wp-file-upload').'</a>';
 	$echo_str .= "\n\t\t\t\t\t".'</th>';
 	$echo_str .= "\n\t\t\t\t\t".'<td>';
-	$echo_str .= "\n\t\t\t\t\t\t".'<label>Download the file containing the debug logging data.</label>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<label>'.esc_html__('Download the file containing the debug logging data.', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t\t\t\t".'</td>';
 	$echo_str .= "\n\t\t\t\t".'</tr>';
 	$echo_str .= "\n\t\t\t\t".'<tr>';
 	$echo_str .= "\n\t\t\t\t\t".'<th scope="row">';
-	$echo_str .= "\n\t\t\t\t\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=reset_debuglog&amp;nonce='.$wfu_maintenance_nonce.'" class="button'.( $debuglog_exists ? '' : ' disabled' ).'" title="Reset debug log data">Reset Debug Log Data</a>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=reset_debuglog&amp;nonce='.$wfu_maintenance_nonce.'&amp;c='.$admin_nonce).'" class="button'.( $debuglog_exists ? '' : ' disabled' ).'" title="'.esc_html__('Reset debug log data', 'wp-file-upload').'">'.esc_html__('Reset Debug Log Data', 'wp-file-upload').'</a>';
 	$echo_str .= "\n\t\t\t\t\t".'</th>';
 	$echo_str .= "\n\t\t\t\t\t".'<td>';
-	$echo_str .= "\n\t\t\t\t\t\t".'<label>Clear the debug log file data. The file currently has '.wfu_human_filesize($debuglog_size).'.</label>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<label>'.esc_html(sprintf(__('Clear the debug log file data. The file currently has %s.', 'wp-file-upload'), wfu_human_filesize($debuglog_size))).'</label>';
 	$echo_str .= "\n\t\t\t\t\t".'</td>';
 	$echo_str .= "\n\t\t\t\t".'</tr>';
 	$echo_str .= "\n\t\t\t".'</tbody>';
@@ -177,7 +180,7 @@ function wfu_maintenance_actions($message = '') {
 	$echo_str .= "\n\t".'<script type="text/javascript">if(window.addEventListener) { window.addEventListener("load", '.$handler.', false); } else if(window.attachEvent) { window.attachEvent("onload", '.$handler.'); } else { window["onload"] = '.$handler.'; }</script>';
 	$echo_str .= "\n".'</div>';
 	
-	echo $echo_str;
+	return $echo_str;
 }
 
 /**
@@ -195,6 +198,7 @@ function wfu_maintenance_actions($message = '') {
  */
 function wfu_sync_database_controller($nonce) {
 	if ( !current_user_can( 'manage_options' ) ) return -1;
+	$nonce = sanitize_text_field( wp_unslash ( $nonce ) );
 	if ( !wp_verify_nonce($nonce, 'wfu_maintenance_actions') ) return -1;
 	
 	return wfu_sync_database();
@@ -214,7 +218,6 @@ function wfu_sync_database_controller($nonce) {
  */
 function wfu_clean_log_parse_data($data) {
 	$ret = array( "result" => true );
-	$data = sanitize_text_field($data);
 	$data_array = explode(":", $data);
 	if ( count($data_array) == 0 ) $ret["result"] = false;
 	elseif ( $data_array[0] == "00" || $data_array[0] == "01" ) {
@@ -303,68 +306,71 @@ function wfu_clean_log_prompt($nonce, $data_enc) {
 	$table_name1 = $wpdb->prefix . "wfu_log";
 	$siteurl = site_url();
 
+	$nonce = sanitize_text_field( wp_unslash ( $nonce ) );
 	if ( !current_user_can( 'manage_options' ) || !wp_verify_nonce($nonce, 'wfu_maintenance_actions') ) return wfu_maintenance_actions();
 	//parse data
-	$data = wfu_clean_log_parse_data($data_enc);
+	$admin_nonce = wp_create_nonce('wfu_admin_nonce');
+	$data = wfu_clean_log_parse_data(sanitize_text_field($data_enc));
 	if ( $data["result"] == false ) return wfu_maintenance_actions();
 
 	$echo_str = "\n".'<div class="wrap">';
 	$echo_str .= "\n\t".'<div style="margin-top:20px;">';
-	$echo_str .= "\n\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=maintenance_actions" class="button" title="go back">Go back</a>';
+	$echo_str .= "\n\t\t".'<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=maintenance_actions&amp;c='.$admin_nonce).'" class="button" title="'.esc_html__('go back', 'wp-file-upload').'">'.esc_html__('Go back', 'wp-file-upload').'</a>';
 	$echo_str .= "\n\t".'</div>';
-	$echo_str .= "\n\t".'<h2 style="margin-bottom: 10px;">Clean Database Log</h2>';
-	$echo_str .= "\n\t".'<form enctype="multipart/form-data" name="clean_log" id="clean_log" method="post" action="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload" class="validate">';
+	$echo_str .= "\n\t".'<h2 style="margin-bottom: 10px;">'.esc_html__('Clean Database Log', 'wp-file-upload').'</h2>';
+	$echo_str .= "\n\t".'<form enctype="multipart/form-data" name="clean_log" id="clean_log" method="post" action="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload').'" class="validate">';
 	$nonce = wp_nonce_field('wfu_clean_log', '_wpnonce', false, false);
 	$nonce_ref = wp_referer_field(false);
 	$echo_str .= "\n\t\t".$nonce;
 	$echo_str .= "\n\t\t".$nonce_ref;
+	$echo_str .= "\n\t\t".'<input type="hidden" name="c" value="'.$admin_nonce.'" />';
 	$echo_str .= "\n\t\t".'<input type="hidden" name="action" value="clean_log">';
-	$echo_str .= "\n\t\t".'<input type="hidden" name="data" value="'.$data_enc.'">';
+	$echo_str .= "\n\t\t".'<input type="hidden" name="data" value="'.esc_attr($data_enc).'">';
 	if ( $data["include_files"] ) {
 		if ( $data["code"] == "0" )
-			$echo_str .= "\n\t\t".'<label>This will erase all files uploaded <strong>before '.date("Y-m-d", $data["dateold"]).'</strong> together with associated records kept by the plugin in the database (like file metadata and userdata).</label><br/>';
+			$echo_str .= "\n\t\t".'<label>'.sprintf(wfu_sanitize_simple_html(__('This will erase all files uploaded <b>before %s</b> together with associated records kept by the plugin in the database (like file metadata and userdata).', 'wp-file-upload'), 'b'), date("Y-m-d", $data["dateold"])).'</label><br/>';
 		elseif ( $data["code"] == "1" )
-			$echo_str .= "\n\t\t".'<label>This will erase all files uploaded <strong>'.$data["periodold"].' '.$data["periodtype"].' ago or older</strong> together with associated records kept by the plugin in the database (like file metadata and userdata).</label><br/>';
+			$echo_str .= "\n\t\t".'<label>'.sprintf(wfu_sanitize_simple_html(__('This will erase all files uploaded <b>%s ago or older</b> together with associated records kept by the plugin in the database (like file metadata and userdata).', 'wp-file-upload'), 'b'), esc_html($data["periodold"].' '.$data["periodtype"])).'</label><br/>';
 		elseif ( $data["code"] == "2" )
-			$echo_str .= "\n\t\t".'<label>This will erase all files uploaded <strong>between '.date("Y-m-d", $data["datefrom"]).' and '.date("Y-m-d", $data["dateto"]).'</strong> together with associated records kept by the plugin in the database (like file metadata and userdata).</label><br/>';
+			$echo_str .= "\n\t\t".'<label>'.sprintf(wfu_sanitize_simple_html(__('This will erase all files uploaded <b>between %s and %s</b> together with associated records kept by the plugin in the database (like file metadata and userdata).', 'wp-file-upload'), 'b'), date("Y-m-d", $data["datefrom"]), date("Y-m-d", $data["dateto"])).'</label><br/>';
 		else
-			$echo_str .= "\n\t\t".'<label>This will erase <strong>ALL</strong> files and associated records kept by the plugin in the database (like file metadata and userdata).</label><br/>';
+			$echo_str .= "\n\t\t".'<label>'.wfu_sanitize_simple_html(__('This will erase <b>ALL</b> files and associated records kept by the plugin in the database (like file metadata and userdata).', 'wp-file-upload'), 'b').'</label><br/>';
 		$affected_recs = $wpdb->get_results("SELECT * FROM $table_name1".wfu_clean_log_where_query($data));
 		$affected_files = wfu_get_valid_affected_files($affected_recs);
 		$echo_str .= "\n\t\t".'<br/><div class="wfu_cleanlog_files">';
 		$echo_str .= "\n\t\t\t".'<div>';
-		$echo_str .= "\n\t\t\t\t".'<label style="vertical-align: middle;"><strong>'.count($affected_files).'</strong> files will be deleted</label>';
+		$echo_str .= "\n\t\t\t\t".'<label style="vertical-align: middle;">'.sprintf(wfu_sanitize_simple_html(__('<b>%s</b> files will be deleted', 'wp-file-upload'), 'b'), count($affected_files)).'</label>';
 		$echo_str .= "\n\t\t\t\t".'<button id="wfu_cleanlog_prompt_button" onclick="document.querySelector(\'.wfu_cleanlog_files\').classList.toggle(\'visible\');return false;" style="vertical-align: middle;"></button>';
 		$echo_str .= "\n\t\t\t".'</div>';
 		$echo_str .= "\n\t\t\t".'<div id="wfu_cleanlog_prompt_list" style="margin-top:10px;">';
 		$echo_str .= "\n\t\t\t\t".'<textarea readonly="readonly" style="width:250px; height:150px; overflow:scroll; white-space:pre; resize:both;">';
 		foreach ( $affected_files as $file ) {
-			$echo_str .= $file."\n";
+			$echo_str .= esc_html($file)."\n";
 		}
 		$echo_str .= "\n\t\t\t\t".'</textarea>';
 		$echo_str .= "\n\t\t\t".'</div>';
 		$echo_str .= "\n\t\t".'</div>';
-		$echo_str .= "\n\t\t".'<br/><label>Are you sure that you want to continue?</label><br/>';
+		$echo_str .= "\n\t\t".'<br/><label>'.esc_html__('Are you sure that you want to continue?', 'wp-file-upload').'</label><br/>';
 		$echo_str .= "\n\t\t".'<style>';
-		$echo_str .= "\n\t\t".'.wfu_cleanlog_files button:before { content: "Click to see affected files"; } ';
-		$echo_str .= "\n\t\t".'.wfu_cleanlog_files.visible button:before { content: "Close list"; } ';
+		$echo_str .= "\n\t\t".'.wfu_cleanlog_files button:before { content: "'.esc_html__('Click to see affected files', 'wp-file-upload').'"; } ';
+		$echo_str .= "\n\t\t".'.wfu_cleanlog_files.visible button:before { content: "'.esc_html__('Close list', 'wp-file-upload').'"; } ';
 		$echo_str .= "\n\t\t".'.wfu_cleanlog_files #wfu_cleanlog_prompt_list { display: none; } ';
 		$echo_str .= "\n\t\t".'.wfu_cleanlog_files.visible #wfu_cleanlog_prompt_list { display: block; } ';
 		$echo_str .= "\n\t\t".'</style>';
 	}
 	else {
 		if ( $data["code"] == "0" )
-			$echo_str .= "\n\t\t".'<label>This will erase all records <strong>before '.date("Y-m-d", $data["dateold"]).'</strong> kept by the plugin in the database (like file metadata and userdata, however files uploaded by the plugin will be maintained). Are you sure that you want to continue?</label><br/>';
+			$echo_str .= "\n\t\t".'<label>'.sprintf(wfu_sanitize_simple_html(__('This will erase all records <b>before %s</b> kept by the plugin in the database (like file metadata and userdata, however files uploaded by the plugin will be maintained). Are you sure that you want to continue?', 'wp-file-upload'), 'b'), date("Y-m-d", $data["dateold"])).'</label><br/>';
 		elseif ( $data["code"] == "1" )
-			$echo_str .= "\n\t\t".'<label>This will erase all records <strong>older than '.$data["periodold"].' '.$data["periodtype"].'</strong> kept by the plugin in the database (like file metadata and userdata, however files uploaded by the plugin will be maintained). Are you sure that you want to continue?</label><br/>';
+			$echo_str .= "\n\t\t".'<label>'.sprintf(wfu_sanitize_simple_html(__('This will erase all records <b>older than %s</b> kept by the plugin in the database (like file metadata and userdata, however files uploaded by the plugin will be maintained). Are you sure that you want to continue?', 'wp-file-upload'), 'b'), esc_html($data["periodold"].' '.$data["periodtype"])).'</label><br/>';
 		elseif ( $data["code"] == "2" )
-			$echo_str .= "\n\t\t".'<label>This will erase all records <strong>between '.date("Y-m-d", $data["datefrom"]).' and '.date("Y-m-d", $data["dateto"]).'</strong> kept by the plugin in the database (like file metadata and userdata, however files uploaded by the plugin will be maintained). Are you sure that you want to continue?</label><br/>';
+			$echo_str .= "\n\t\t".'<label>'.sprintf(wfu_sanitize_simple_html(__('This will erase all records <b>between %s and %s</b> kept by the plugin in the database (like file metadata and userdata, however files uploaded by the plugin will be maintained). Are you sure that you want to continue?', 'wp-file-upload'), 'b'), date("Y-m-d", $data["datefrom"]), date("Y-m-d", $data["dateto"])).'</label><br/>';
 		else
-			$echo_str .= "\n\t\t".'<label>This will erase <strong>ALL</strong> records kept by the plugin in the database (like file metadata and userdata, however files uploaded by the plugin will be maintained). Are you sure that you want to continue?</label><br/>';
+			$echo_str .= "\n\t\t".'<label>'.wfu_sanitize_simple_html(__('This will erase <b>ALL</b> records kept by the plugin in the database (like file metadata and userdata, however files uploaded by the plugin will be maintained). Are you sure that you want to continue?', 'wp-file-upload'), 'b').'</label><br/>';
 	}
 	$echo_str .= "\n\t\t".'<p class="submit">';
-	$echo_str .= "\n\t\t\t".'<input type="submit" class="button-primary" name="submit" value="Yes">';
-	$echo_str .= "\n\t\t\t".'<input type="submit" class="button-primary" name="submit" value="Cancel">';
+	$echo_str .= "\n\t\t\t".'<button class="button-primary" name="submit" value="Yes">'.esc_html__('Yes', 'wp-file-upload').'</button>';
+	$echo_str .= "\n\t\t\t".'<button class="button-primary" name="submit" value="Cancel">'.esc_html__('Cancel', 'wp-file-upload').'</button>';
 	$echo_str .= "\n\t\t".'</p>';
 	$echo_str .= "\n\t".'</form>';
 	$echo_str .= "\n".'</div>';
@@ -392,8 +398,9 @@ function wfu_clean_log() {
 	if ( !check_admin_referer('wfu_clean_log') ) return array( "recs_count" => -1, "files_count" => -1 );
 	
 	$recs_count = 0;
+	$files_count = 0;
 	if ( isset($_POST['data']) && isset($_POST['submit']) && $_POST['submit'] == "Yes" ) {
-		$data = wfu_clean_log_parse_data($_POST['data']);
+		$data = wfu_clean_log_parse_data(sanitize_text_field($_POST['data']));
 		if ( $data["result"] ) {
 			$table_name1 = $wpdb->prefix . "wfu_log";
 			$table_name2 = $wpdb->prefix . "wfu_userdata";
@@ -425,7 +432,6 @@ function wfu_clean_log() {
 			//$recs_count += $wpdb->query($query3);
 			
 			//delete affected files
-			$files_count = 0;
 			foreach( $affected_files as $file ) {
 				wfu_unlink($file, "wfu_clean_log");
 				if ( !wfu_file_exists($file, "wfu_clean_log") ) $files_count ++;
@@ -454,24 +460,28 @@ function wfu_clean_log() {
 function wfu_purge_data_prompt($nonce) {
 	$siteurl = site_url();
 
+	$nonce = sanitize_text_field( wp_unslash ( $nonce ) );
 	if ( !current_user_can( 'manage_options' ) || !wp_verify_nonce($nonce, 'wfu_maintenance_actions') ) return wfu_maintenance_actions();
+	
+	$admin_nonce = wp_create_nonce('wfu_admin_nonce');
 
 	$echo_str = "\n".'<div class="wrap">';
 	$echo_str .= "\n\t".'<div style="margin-top:20px;">';
-	$echo_str .= "\n\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=maintenance_actions" class="button" title="go back">Go back</a>';
+	$echo_str .= "\n\t\t".'<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=maintenance_actions&amp;c='.$admin_nonce).'" class="button" title="'.esc_html__('go back', 'wp-file-upload').'">'.esc_html__('Go back', 'wp-file-upload').'</a>';
 	$echo_str .= "\n\t".'</div>';
-	$echo_str .= "\n\t".'<h2 style="margin-bottom: 10px;">Purge All Data</h2>';
-	$echo_str .= "\n\t".'<form enctype="multipart/form-data" name="purge_data" id="purge_data" method="post" action="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload" class="validate">';
+	$echo_str .= "\n\t".'<h2 style="margin-bottom: 10px;">'.esc_html__('Purge All Data', 'wp-file-upload').'</h2>';
+	$echo_str .= "\n\t".'<form enctype="multipart/form-data" name="purge_data" id="purge_data" method="post" action="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload').'" class="validate">';
 	$nonce = wp_nonce_field('wfu_purge_data', '_wpnonce', false, false);
 	$nonce_ref = wp_referer_field(false);
 	$echo_str .= "\n\t\t".$nonce;
 	$echo_str .= "\n\t\t".$nonce_ref;
+	$echo_str .= "\n\t\t".'<input type="hidden" name="c" value="'.$admin_nonce.'" />';
 	$echo_str .= "\n\t\t".'<input type="hidden" name="action" value="purge_data">';
-	$echo_str .= "\n\t\t".'<label>This action will remove all plugin options and records from database, data stored in session and will dectivate the plugin. Use it only if you want to entirely remove the plugin from the website.</label><br/>';
-	$echo_str .= "\n\t\t".'<br/><label>Are you sure you want to continue?</label><br/>';
+	$echo_str .= "\n\t\t".'<label>'.esc_html__('This action will remove all plugin options and records from database, data stored in session and will dectivate the plugin. Use it only if you want to entirely remove the plugin from the website.', 'wp-file-upload').'</label><br/>';
+	$echo_str .= "\n\t\t".'<br/><label>'.esc_html__('Are you sure you want to continue?', 'wp-file-upload').'</label><br/>';
 	$echo_str .= "\n\t\t".'<p class="submit">';
-	$echo_str .= "\n\t\t\t".'<input type="submit" class="button-primary" name="submit" value="Yes">';
-	$echo_str .= "\n\t\t\t".'<input type="submit" class="button-primary" name="submit" value="Cancel">';
+	$echo_str .= "\n\t\t\t".'<button class="button-primary" name="submit" value="Yes">'.esc_html__('Yes', 'wp-file-upload').'</button>';
+	$echo_str .= "\n\t\t\t".'<button class="button-primary" name="submit" value="Cancel">'.esc_html__('Cancel', 'wp-file-upload').'</button>';
 	$echo_str .= "\n\t\t".'</p>';
 	$echo_str .= "\n\t".'</form>';
 	$echo_str .= "\n".'</div>';
@@ -577,6 +587,7 @@ function wfu_process_all_transfers($clearfiles = false) {
  */
 function wfu_reset_all_transfers_controller($nonce) {
 	if ( !current_user_can( 'manage_options' ) ) return false;
+	$nonce = sanitize_text_field( wp_unslash ( $nonce ) );
 	if ( !wp_verify_nonce($nonce, 'wfu_maintenance_actions') ) return false;
 	
 	wfu_process_all_transfers();
@@ -599,6 +610,7 @@ function wfu_reset_all_transfers_controller($nonce) {
  */
 function wfu_clear_all_transfers_controller($nonce) {
 	if ( !current_user_can( 'manage_options' ) ) return false;
+	$nonce = sanitize_text_field( wp_unslash ( $nonce ) );
 	if ( !wp_verify_nonce($nonce, 'wfu_maintenance_actions') ) return false;
 	
 	wfu_process_all_transfers(true);
@@ -619,6 +631,7 @@ function wfu_clear_all_transfers_controller($nonce) {
  */
 function wfu_toggle_debug_logging($status, $nonce) {
 	if ( !current_user_can( 'manage_options' ) ) return false;
+	$nonce = sanitize_text_field( wp_unslash ( $nonce ) );
 	if ( !wp_verify_nonce($nonce, 'wfu_maintenance_actions') ) return false;
 
 	$maintenance_options = get_option( "wfu_maintenance_options", array() );
@@ -642,6 +655,7 @@ function wfu_toggle_debug_logging($status, $nonce) {
  */
 function wfu_reset_debuglog_data($nonce) {
 	if ( !current_user_can( 'manage_options' ) ) return false;
+	$nonce = sanitize_text_field( wp_unslash ( $nonce ) );
 	if ( !wp_verify_nonce($nonce, 'wfu_maintenance_actions') ) return false;
 
 	$logfile = wfu_debug_log_filepath();
@@ -664,8 +678,8 @@ function wfu_remove_waste_items_from_options() {
 	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$waste = wfu_update_waste_options();
 	$affected = wfu_process_waste($waste);
-	$message = ( $affected === 1 ? '1 item' : ( $affected === 0 ? 'No' : $affected ).' items' ).' affected.';
-	wfu_add_admin_notification('Completed cleaning database periodic action. '.$message, 'info', 'db_cleaning', 'Plugin maintenance.', null, true);
+	$message = ( $affected <= 0 ? __('No items affected', 'wp-file-upload') : sprintf(_n('%s item affected', '%s items affected', $affected, 'wp-file-upload'), $affected) );
+	wfu_add_admin_notification(__('Completed cleaning database periodic action.', 'wp-file-upload').' '.$message, 'info', 'db_cleaning', __('Plugin maintenance.', 'wp-file-upload'), null, true);
 }
 
 /**

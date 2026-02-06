@@ -1,5 +1,19 @@
 <?php
 
+/**
+ * Frontend Template File 
+ *
+ * This file contains the class that renders the file upload form of the plugin.
+ *
+ * @link /lib/wfu_template.php
+ *
+ * @package Iptanus File Upload Plugin
+ * @subpackage Core Components
+ * @since 4.0.0
+ */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
+
 class WFU_Original_Template {
 	
 private static $instance = array();
@@ -111,13 +125,13 @@ function wfu_row_container_template($data) {?>
 ****************************************************************************/ ?>
 <?php if ( $responsive ): ?>
 <?php foreach ( $item_props as $p ): ?>
-	<div id="<?php echo $p["title"]; ?>" class="file_div_clean_responsive" style="<?php echo esc_html($p["style"]); ?>">
+	<div id="<?php echo esc_html($p["title"]); ?>" class="file_div_clean_responsive" style="<?php echo esc_html($p["style"]); ?>">
 	<?php foreach ( $p["lines"] as $line ): ?>
 		<?php echo $line; ?>
 	<?php endforeach ?>
 		<div class="file_space_clean"></div>
 	<?php if ( isset($p["object"]) ): ?>
-		<script type="text/javascript">wfu_run_js("<?php echo $p["object"]; ?>", "init");</script>
+		<script type="text/javascript">wfu_run_js("<?php echo esc_html($p["object"]); ?>", "init");</script>
 	<?php endif ?>
 	</div>
 <?php endforeach ?>
@@ -129,13 +143,13 @@ function wfu_row_container_template($data) {?>
 				<tr>
 				<?php foreach ( $item_props as $p ): ?>
 					<td class="file_td_clean" style="<?php echo ( $p["is_last"] ? "" : "padding: 0 4px 0 0;" ); ?>">
-						<div id="<?php echo $p["title"]; ?>" class="file_div_clean" style="<?php echo esc_html($p["style"]); ?>">
+						<div id="<?php echo esc_html($p["title"]); ?>" class="file_div_clean" style="<?php echo esc_html($p["style"]); ?>">
 						<?php foreach ( $p["lines"] as $line ): ?>
 							<?php echo $line; ?>
 						<?php endforeach ?>
 							<div class="file_space_clean"></div>
 						<?php if ( isset($p["object"]) ): ?>
-							<script type="text/javascript">wfu_run_js("<?php echo $p["object"]; ?>", "init");</script>
+							<script type="text/javascript">wfu_run_js("<?php echo esc_html($p["object"]); ?>", "init");</script>
 						<?php endif ?>
 						</div>
 					</td>
@@ -249,7 +263,7 @@ div.wfu_overlay_container label {
 </style><?php /*****************************************************************
                the following lines contain Javascript code 
 *********************************************/ ?><script type="text/javascript">
-/* do not change this line */<?php echo $JS_Object; ?>.init = function() {
+/* do not change this line */<?php echo esc_html($JS_Object); ?>.init = function() {
 /***
  *  The following visual editor button params have been defined and can be used 
  *  in Javascript code:
@@ -306,11 +320,11 @@ this.update = function(status) {
 </script><?php /****************************************************************
                the following lines contain the HTML output 
 ****************************************************************************/ ?>
-	<div id="<?php echo $shortcode_tag; ?>_editor_$ID" class="wfu_overlay_editor">
-		<button class="wfu_overlay_editor_button" title="<?php echo WFU_PAGE_PLUGINEDITOR_BUTTONTITLE; ?>"><img src="<?php echo WFU_IMAGE_OVERLAY_EDITOR; ?>" class="wfu_overlay_editor_img" width="20px" height="20px" alt="overlay editor icon" /></button>
+	<div id="<?php echo esc_html($shortcode_tag); ?>_editor_$ID" class="wfu_overlay_editor">
+		<button class="wfu_overlay_editor_button" title="<?php echo esc_html(WFU_PAGE_PLUGINEDITOR_BUTTONTITLE); ?>"><img src="<?php echo esc_url(WFU_IMAGE_OVERLAY_EDITOR); ?>" class="wfu_overlay_editor_img" width="20px" height="20px" alt="overlay editor icon" /></button>
 	</div>
-	<div id="<?php echo $shortcode_tag; ?>_overlay_$ID" class="wfu_overlay_container">
-		<table class="wfu_overlay_table"><tbody><tr><td><img src="<?php echo WFU_IMAGE_OVERLAY_LOADING; ?>" alt="overlay loading icon" /><label><?php echo WFU_PAGE_PLUGINEDITOR_LOADING; ?></label></td></tr></tbody></table>
+	<div id="<?php echo esc_html($shortcode_tag); ?>_overlay_$ID" class="wfu_overlay_container">
+		<table class="wfu_overlay_table"><tbody><tr><td><img src="<?php echo esc_url(WFU_IMAGE_OVERLAY_LOADING); ?>" alt="overlay loading icon" /><label><?php echo esc_html(WFU_PAGE_PLUGINEDITOR_LOADING); ?></label></td></tr></tbody></table>
 		<div class="wfu_overlay_container_inner"></div>
 	</div>
 <?php /*************************************************************************
@@ -760,7 +774,7 @@ this.update = function(position) {
 	<div id="progressbar_$ID_outer" class="file_progress_bar" style="<?php echo esc_html($styles2); ?>">
 		<div id="progressbar_$ID_inner" class="file_progress_inner">
 			<span id="progressbar_$ID_animation" class="file_progress_noanimation">&nbsp;</span>
-			<img id="progressbar_$ID_imagesafe" class="file_progress_imagesafe" src="<?php echo WFU_IMAGE_SIMPLE_PROGBAR; ?>" style="display:none;" alt="progress bar image" />
+			<img id="progressbar_$ID_imagesafe" class="file_progress_imagesafe" src="<?php echo esc_url(WFU_IMAGE_SIMPLE_PROGBAR); ?>" style="display:none;" alt="progress bar image" />
 		</div>
 	</div>
 </div>
@@ -1294,16 +1308,16 @@ if (this._editbox) {
 <span class="file_item_clean subfolder_label" style="<?php echo esc_html($styles2); ?>"><?php echo esc_html($subfolders_title); ?> </span>
 <div class="file_item_clean subfolder_container" style="<?php echo esc_html($styles4); ?>">
 	<div class="file_item_clean_inner subfolder_autoplus_container" style="<?php echo ( $editable ? '' : 'display:none;' ); ?>">
-		<input type="text" id="selectsubdiredit_$ID" class="file_item_clean_empty subfolder_autoplus_empty" value="<?php echo WFU_SUBDIR_TYPEDIR; ?>" style="<?php echo ( $editable ? '' : 'display:none;' ); ?>" onchange="GlobalData.WFU[$ID].subfolders._editbox_changed();" onfocus="GlobalData.WFU[$ID].subfolders._editbox_enter();" onblur="GlobalData.WFU[$ID].subfolders._editbox_exit();" />
+		<input type="text" id="selectsubdiredit_$ID" class="file_item_clean_empty subfolder_autoplus_empty" value="<?php echo esc_html(WFU_SUBDIR_TYPEDIR); ?>" style="<?php echo ( $editable ? '' : 'display:none;' ); ?>" onchange="GlobalData.WFU[$ID].subfolders._editbox_changed();" onfocus="GlobalData.WFU[$ID].subfolders._editbox_enter();" onblur="GlobalData.WFU[$ID].subfolders._editbox_exit();" />
 	</div>
 	<?php if ( $editable ): ?>
 	<div class="subfolder_autoplus_select_container">
 	<?php endif ?>
 	<select class="<?php echo ( $editable ? 'subfolder_autoplus_dropdown' : 'file_item_clean subfolder_dropdown' ); ?>" style="<?php echo esc_html($styles3); ?>" id="selectsubdir_$ID" onchange="GlobalData.WFU[$ID].subfolders.check();">
 	<?php if ( $testmode ): ?>
-		<option><?php echo WFU_NOTIFY_TESTMODE; ?></option>
+		<option><?php echo esc_html(WFU_NOTIFY_TESTMODE); ?></option>
 	<?php else: ?>
-		<option style="<?php echo ( $editable || $default != -1 ? 'display:none;' : '' ); ?>"><?php echo WFU_SUBDIR_SELECTDIR; ?></option>
+		<option style="<?php echo ( $editable || $default != -1 ? 'display:none;' : '' ); ?>"><?php echo esc_html(WFU_SUBDIR_SELECTDIR); ?></option>
 	<?php endif ?>
 	<?php foreach( $subfolders['path'] as $ind => $subfolder ): ?>
 		<option<?php echo ( $subfolders['default'][$ind] ? ' selected="selected"' : '' ); ?>><?php echo str_repeat("&nbsp;&nbsp;&nbsp;", intval($subfolders['level'][$ind])).esc_html($subfolders['label'][$ind]); ?></option>
@@ -1313,7 +1327,7 @@ if (this._editbox) {
 	</div>
 	<?php endif ?>
 </div>
-<input id="selectsubdirdefault_$ID" type="hidden" value="<?php echo $default; ?>" />
+<input id="selectsubdirdefault_$ID" type="hidden" value="<?php echo esc_html($default); ?>" />
 <?php endif ?>
 <?php /*************************************************************************
                             end of HTML output 
@@ -1376,7 +1390,7 @@ input[type="button"].file_input_button
 	padding: 0px; /*relax*/
 	background-color: #EEEEEE; /*relax*/
 	color: #555555; /*relax*/
-	background-image: url("<?php echo WPFILEUPLOAD_DIR; ?>images/white-grad-active.png"); /*relax*/
+	background-image: url("<?php echo esc_url(WPFILEUPLOAD_DIR); ?>images/white-grad-active.png"); /*relax*/
 	background-position: left top; /*relax*/
 	background-repeat: repeat-x; /*relax*/
 	border-style: solid; /*relax*/
@@ -1398,7 +1412,7 @@ input[type="button"].file_input_button_hover
 	padding: 0px; /*relax*/
 	background-color: #EEEEEE; /*relax*/
 	color: #111111; /*relax*/
-	background-image: url("<?php echo WPFILEUPLOAD_DIR; ?>images/white-grad-active.png"); /*relax*/
+	background-image: url("<?php echo esc_url(WPFILEUPLOAD_DIR); ?>images/white-grad-active.png"); /*relax*/
 	background-position: left top; /*relax*/
 	background-repeat: repeat-x; /*relax*/
 	border-style: solid; /*relax*/
@@ -1421,7 +1435,7 @@ input[type="button"].file_input_button:disabled, input[type="button"].file_input
 	padding: 0px; /*relax*/
 	background-color: #EEEEEE; /*relax*/
 	color: silver; /*relax*/
-	background-image: url("<?php echo WPFILEUPLOAD_DIR; ?>images/white-grad-active.png"); /*relax*/
+	background-image: url("<?php echo esc_url(WPFILEUPLOAD_DIR); ?>images/white-grad-active.png"); /*relax*/
 	background-position: left top; /*relax*/
 	background-repeat: repeat-x; /*relax*/
 	border-style: solid; /*relax*/
@@ -1673,13 +1687,13 @@ this.files = function() {
 <form id="dummy_$ID" style="display:none;"></form>
 <form class="file_input_uploadform" id="uploadform_$ID" name="uploadform_$ID" method="post" enctype="multipart/form-data" style="<?php echo esc_html($styles_form); ?>">
 <?php if ( $testmode ): ?>
-	<input align="center" type="button" id="input_$ID" value="<?php echo esc_html($label); ?>" class="file_input_button" style="<?php echo esc_html($styles); ?>" onmouseout="javascript: document.getElementById('input_$ID').className = 'file_input_button';" onmouseover="javascript: document.getElementById('input_$ID').className = 'file_input_button_hover';" onclick="alert('<?php echo WFU_NOTIFY_TESTMODE; ?>');" />
+	<input align="center" type="button" id="input_$ID" value="<?php echo esc_html($label); ?>" class="file_input_button" style="<?php echo esc_html($styles); ?>" onmouseout="javascript: document.getElementById('input_$ID').className = 'file_input_button';" onmouseover="javascript: document.getElementById('input_$ID').className = 'file_input_button_hover';" onclick="alert('<?php echo esc_attr(WFU_NOTIFY_TESTMODE); ?>');" />
 <?php else: ?>
 	<input align="center" type="button" id="input_$ID" value="<?php echo esc_html($label); ?>" class="file_input_button" style="<?php echo esc_html($styles); ?>" />
 <?php endif ?>
-	<input type="file" class="file_input_hidden" name="<?php echo $filename; ?>" id="upfile_$ID" tabindex="1" onmouseout="javascript: document.getElementById('input_$ID').className = 'file_input_button';" onmouseover="javascript: document.getElementById('input_$ID').className = 'file_input_button_hover';"<?php echo ""; ?> />
+	<input type="file" class="file_input_hidden" name="<?php echo esc_html($filename); ?>" id="upfile_$ID" tabindex="1" onmouseout="javascript: document.getElementById('input_$ID').className = 'file_input_button';" onmouseover="javascript: document.getElementById('input_$ID').className = 'file_input_button_hover';"<?php echo ""; ?> />
 <?php foreach( $hidden_elements as $elem ): ?>
-	<input type="hidden" id="<?php echo $elem["id"]; ?>" name="<?php echo $elem["name"]; ?>" value="<?php echo $elem["value"]; ?>" />
+	<input type="hidden" id="<?php echo esc_attr($elem["id"]); ?>" name="<?php echo esc_attr($elem["name"]); ?>" value="<?php echo esc_html($elem["value"]); ?>" />
 <?php endforeach ?>
 </form>
 <?php /*************************************************************************
@@ -1725,7 +1739,7 @@ input[type="button"].file_input_submit
 	padding: 0px; /*relax*/
 	background-color: #EEEEEE; /*relax*/
 	color: #555555; /*relax*/
-	background-image: url("<?php echo WPFILEUPLOAD_DIR; ?>images/white-grad-active.png"); /*relax*/
+	background-image: url("<?php echo esc_url(WPFILEUPLOAD_DIR); ?>images/white-grad-active.png"); /*relax*/
 	background-position: left top; /*relax*/
 	background-repeat: repeat-x; /*relax*/
 	border-style: solid; /*relax*/
@@ -1746,7 +1760,7 @@ input[type="button"].file_input_submit:hover, input[type="button"].file_input_su
 	padding: 0px; /*relax*/
 	background-color: #EEEEEE; /*relax*/
 	color: #111111; /*relax*/
-	background-image: url("<?php echo WPFILEUPLOAD_DIR; ?>images/white-grad-active.png"); /*relax*/
+	background-image: url("<?php echo esc_url(WPFILEUPLOAD_DIR); ?>images/white-grad-active.png"); /*relax*/
 	background-position: left top; /*relax*/
 	background-repeat: repeat-x; /*relax*/
 	border-style: solid; /*relax*/
@@ -1767,7 +1781,7 @@ input[type="button"].file_input_submit:disabled
 	padding: 0px; /*relax*/
 	background-color: #EEEEEE; /*relax*/
 	color: silver; /*relax*/
-	background-image: url("<?php echo WPFILEUPLOAD_DIR; ?>images/white-grad-active.png"); /*relax*/
+	background-image: url("<?php echo esc_url(WPFILEUPLOAD_DIR); ?>images/white-grad-active.png"); /*relax*/
 	background-position: left top; /*relax*/
 	background-repeat: repeat-x; /*relax*/
 	border-style: solid; /*relax*/
@@ -1921,7 +1935,7 @@ div.wfu_file_webcam_wrapper {
 	justify-content: center;
 	width: 100%;
 	height: 100%;
-	background: <?php echo $params["webcambg"] ?>;
+	background: <?php echo esc_attr($params["webcambg"]) ?>;
 }
 
 div.wfu_file_webcam_image {
@@ -1933,7 +1947,7 @@ div.wfu_file_webcam_image {
 	height: 100%;
 	top: 0;
 	left: 0;
-	background: <?php echo $params["webcambg"] ?>;
+	background: <?php echo esc_attr($params["webcambg"]) ?>;
 }
 
 img.wfu_file_webcam_screenshot {
@@ -2679,34 +2693,34 @@ this.ended = function() {
 ****************************************************************************/ ?>
 <div id="webcam_$ID" class="wfu_file_webcam" style="<?php echo esc_html($styles); ?>">
 	<div id="webcam_$ID_inner" class="wfu_file_webcam_inner">
-		<label id="webcam_$ID_notsupported" class="wfu_webcam_notsupported_label" style="display:none;"><?php echo WFU_ERROR_WEBCAM_NOTSUPPORTED; ?></label>
-		<img id="webcam_$ID_btns" src="<?php echo WFU_IMAGE_MEDIA_BUTTONS; ?>" style="display:none;" alt="webcam buttons icon" />
+		<label id="webcam_$ID_notsupported" class="wfu_webcam_notsupported_label" style="display:none;"><?php echo esc_html(WFU_ERROR_WEBCAM_NOTSUPPORTED); ?></label>
+		<img id="webcam_$ID_btns" src="<?php echo esc_url(WFU_IMAGE_MEDIA_BUTTONS); ?>" style="display:none;" alt="webcam buttons icon" />
 <?php if ( $params["webcamswitch"] == "true" ): ?>
-		<svg viewBox="0 0 8 8" id="webcam_$ID_btn_switchcam" class="wfu_file_webcam_btn wfu_file_webcam_btn_switchcam" onclick="wfu_webcam_switch<?php echo ( WFU_VAR("WFU_WEBCAMSWITCHMODE") == "side" ? "" : "_devices" ) ?>($ID);" style="display:none;"><use xlink:href="#loop-circular"></use><rect width="8" height="8" fill="transparent"><title><?php echo WFU_WEBCAM_SWITCHCAM_BTN; ?></title></rect></svg>
+		<svg viewBox="0 0 8 8" id="webcam_$ID_btn_switchcam" class="wfu_file_webcam_btn wfu_file_webcam_btn_switchcam" onclick="wfu_webcam_switch<?php echo ( WFU_VAR("WFU_WEBCAMSWITCHMODE") == "side" ? "" : "_devices" ) ?>($ID);" style="display:none;"><use xlink:href="#loop-circular"></use><rect width="8" height="8" fill="transparent"><title><?php echo esc_html(WFU_WEBCAM_SWITCHCAM_BTN); ?></title></rect></svg>
 <?php endif ?>
-		<svg viewBox="0 0 8 8" id="webcam_$ID_btn_onoff" class="wfu_file_webcam_btn wfu_file_webcam_btn_onoff" onclick="wfu_webcam_onoff($ID);" style="display:none;"><use xlink:href="#power-standby"></use><rect width="8" height="8" fill="transparent"><title><?php echo WFU_WEBCAM_TURNONOFF_BTN; ?></title></rect></svg>
+		<svg viewBox="0 0 8 8" id="webcam_$ID_btn_onoff" class="wfu_file_webcam_btn wfu_file_webcam_btn_onoff" onclick="wfu_webcam_onoff($ID);" style="display:none;"><use xlink:href="#power-standby"></use><rect width="8" height="8" fill="transparent"><title><?php echo esc_html(WFU_WEBCAM_TURNONOFF_BTN); ?></title></rect></svg>
 		<div id="webcam_$ID_wrapper" class="wfu_file_webcam_wrapper">
 			<div id="webcam_$ID_image" class="wfu_file_webcam_image" style="display:none;">
 				<img id="webcam_$ID_screenshot" class="wfu_file_webcam_screenshot" onerror="wfu_webcam_screenshot_error($ID);" alt="take screenshot icon" />
 				<canvas id="webcam_$ID_canvas" style="display:none;"></canvas>
 			</div>
-			<video playsinline autoplay="true" id="webcam_$ID_box" class="wfu_file_webcam_box"><?php echo WFU_ERROR_WEBCAM_NOTSUPPORTED; ?></video>
+			<video playsinline autoplay="true" id="webcam_$ID_box" class="wfu_file_webcam_box"><?php echo esc_html(WFU_ERROR_WEBCAM_NOTSUPPORTED); ?></video>
 		</div>
 		<div class="wfu_file_webcam_nav_container">
 			<div id="webcam_$ID_nav" class="wfu_file_webcam_nav wfu_rec_ready" style="display:none;">
 				<input id="webcam_$ID_btns_converted" type="hidden" value="" />
-				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_video" class="wfu_file_webcam_btn wfu_file_webcam_btn_video" onclick="wfu_webcam_golive($ID);"><use xlink:href="#video"></use><rect width="8" height="8" fill="transparent"><title><?php echo WFU_WEBCAM_GOLIVE_BTN; ?></title></rect></svg>
-				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_record" class="wfu_file_webcam_btn wfu_file_webcam_btn_record" onclick="wfu_webcam_start_rec($ID);"><use xlink:href="#media-record"></use><rect width="8" height="8" fill="transparent"><title><?php echo WFU_WEBCAM_RECVIDEO_BTN; ?></title></rect></svg>
-				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_stop" class="wfu_file_webcam_btn wfu_file_webcam_btn_stop" onclick="wfu_webcam_stop_rec($ID);"><use xlink:href="#media-stop"></use><rect width="8" height="8" fill="transparent"><title><?php echo WFU_WEBCAM_STOPREC_BTN; ?></title></rect></svg>
-				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_play" class="wfu_file_webcam_btn wfu_file_webcam_btn_play" onclick="wfu_webcam_play($ID);"><use xlink:href="#media-play"></use><rect width="8" height="8" fill="transparent"><title><?php echo WFU_WEBCAM_PLAY_BTN; ?></title></rect></svg>
-				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_pause" class="wfu_file_webcam_btn wfu_file_webcam_btn_pause" onclick="wfu_webcam_pause($ID);"><use xlink:href="#media-pause"></use><rect width="8" height="8" fill="transparent"><title><?php echo WFU_WEBCAM_PAUSE_BTN; ?></title></rect></svg>
+				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_video" class="wfu_file_webcam_btn wfu_file_webcam_btn_video" onclick="wfu_webcam_golive($ID);"><use xlink:href="#video"></use><rect width="8" height="8" fill="transparent"><title><?php echo esc_html(WFU_WEBCAM_GOLIVE_BTN); ?></title></rect></svg>
+				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_record" class="wfu_file_webcam_btn wfu_file_webcam_btn_record" onclick="wfu_webcam_start_rec($ID);"><use xlink:href="#media-record"></use><rect width="8" height="8" fill="transparent"><title><?php echo esc_html(WFU_WEBCAM_RECVIDEO_BTN); ?></title></rect></svg>
+				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_stop" class="wfu_file_webcam_btn wfu_file_webcam_btn_stop" onclick="wfu_webcam_stop_rec($ID);"><use xlink:href="#media-stop"></use><rect width="8" height="8" fill="transparent"><title><?php echo esc_html(WFU_WEBCAM_STOPREC_BTN); ?></title></rect></svg>
+				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_play" class="wfu_file_webcam_btn wfu_file_webcam_btn_play" onclick="wfu_webcam_play($ID);"><use xlink:href="#media-play"></use><rect width="8" height="8" fill="transparent"><title><?php echo esc_html(WFU_WEBCAM_PLAY_BTN); ?></title></rect></svg>
+				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_pause" class="wfu_file_webcam_btn wfu_file_webcam_btn_pause" onclick="wfu_webcam_pause($ID);"><use xlink:href="#media-pause"></use><rect width="8" height="8" fill="transparent"><title><?php echo esc_html(WFU_WEBCAM_PAUSE_BTN); ?></title></rect></svg>
 				<div id="webcam_$ID_btn_pos" class="wfu_file_webcam_btn_pos">
 					<svg viewBox="0 0 8 8" class="wfu_file_webcam_btn_bar" preserveAspectRatio="none"><use xlink:href="#minus"></use></svg>
 					<svg viewBox="1 1 6 6" id="webcam_$ID_btn_pointer" class="wfu_file_webcam_btn_pointer" preserveAspectRatio="none"><use xlink:href="#media-stop" transform="rotate(0)"></use></svg>
 				</div>
-				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_back" class="wfu_file_webcam_btn wfu_file_webcam_btn_back" onclick="wfu_webcam_back($ID);"><use xlink:href="#media-skip-backward"></use><rect width="8" height="8" fill="transparent"><title><?php echo WFU_WEBCAM_GOBACK_BTN; ?></title></rect></svg>
-				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_fwd" class="wfu_file_webcam_btn wfu_file_webcam_btn_fwd" onclick="wfu_webcam_fwd($ID);"><use xlink:href="#media-skip-forward"></use><rect width="8" height="8" fill="transparent"><title><?php echo WFU_WEBCAM_GOFWD_BTN; ?></title></rect></svg>
-				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_picture" class="wfu_file_webcam_btn wfu_file_webcam_btn_picture" onclick="wfu_webcam_take_picture($ID);"><use xlink:href="#aperture"></use><rect width="8" height="8" fill="transparent"><title><?php echo WFU_WEBCAM_TAKEPIC_BTN; ?></title></rect></svg>
+				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_back" class="wfu_file_webcam_btn wfu_file_webcam_btn_back" onclick="wfu_webcam_back($ID);"><use xlink:href="#media-skip-backward"></use><rect width="8" height="8" fill="transparent"><title><?php echo esc_html(WFU_WEBCAM_GOBACK_BTN); ?></title></rect></svg>
+				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_fwd" class="wfu_file_webcam_btn wfu_file_webcam_btn_fwd" onclick="wfu_webcam_fwd($ID);"><use xlink:href="#media-skip-forward"></use><rect width="8" height="8" fill="transparent"><title><?php echo esc_html(WFU_WEBCAM_GOFWD_BTN); ?></title></rect></svg>
+				<svg viewBox="0 0 8 8" id="webcam_$ID_btn_picture" class="wfu_file_webcam_btn wfu_file_webcam_btn_picture" onclick="wfu_webcam_take_picture($ID);"><use xlink:href="#aperture"></use><rect width="8" height="8" fill="transparent"><title><?php echo esc_html(WFU_WEBCAM_TAKEPIC_BTN); ?></title></rect></svg>
 				<div id="webcam_$ID_btn_time" class="wfu_file_webcam_btn_time">
 					<table class="wfu_file_webcam_btn_time_tb">
 						<tbody>
@@ -3372,8 +3386,8 @@ this._filedetails_toggle = function(fileid) {
 		<tr id="wfu_messageblock_header_$ID" class="file_messageblock_header_tr" style="display:<?php echo ( $testmode ? "table-row" : "none" ); ?>;">
 			<td colspan="2" id="wfu_messageblock_header_$ID_container" class="file_messageblock_header_td">
 <?php if ( $testmode ): ?>
-				<div id="wfu_messageblock_header_$ID" class="file_messageblock_header" style="color:<?php echo $header_styles["State9"]["color"]; ?>; background-color:<?php echo $header_styles["State9"]["bgcolor"]; ?>; border:1px solid <?php echo $header_styles["State9"]["borcolor"]; ?>;">
-					<label id="wfu_messageblock_header_$ID_label" class="file_messageblock_header_label"><?php echo $header_styles["State9"]["message"]; ?></label>
+				<div id="wfu_messageblock_header_$ID" class="file_messageblock_header" style="color:<?php echo esc_attr($header_styles["State9"]["color"]); ?>; background-color:<?php echo esc_attr($header_styles["State9"]["bgcolor"]); ?>; border:1px solid <?php echo esc_attr($header_styles["State9"]["borcolor"]); ?>;">
+					<label id="wfu_messageblock_header_$ID_label" class="file_messageblock_header_label"><?php echo esc_html($header_styles["State9"]["message"]); ?></label>
 				</div>
 <?php endif ?>
 			</td>
@@ -3386,39 +3400,39 @@ this._filedetails_toggle = function(fileid) {
 		<tr id="wfu_messageblock_subheader_$ID" class="file_messageblock_subheader_tr" style="display:none;">
 			<td colspan="3" id="wfu_messageblock_subheader_$ID_td" class="file_messageblock_subheader_td">
 				<div id="wfu_messageblock_subheader_$ID_message" class="file_messageblock_subheader_message" style="display:<?php echo ( $testmode ? "block" : "none" ); ?>;">
-					<label id="wfu_messageblock_subheader_$ID_messagelabel" class="file_messageblock_subheader_messagelabel"><?php echo ( $testmode ? WFU_TESTMESSAGE_MESSAGE : "" ); ?></label>
+					<label id="wfu_messageblock_subheader_$ID_messagelabel" class="file_messageblock_subheader_messagelabel"><?php echo ( $testmode ? esc_html(WFU_TESTMESSAGE_MESSAGE) : "" ); ?></label>
 				</div>
 				<div id="wfu_messageblock_subheader_$ID_adminmessage" class="file_messageblock_subheader_adminmessage" style="display:<?php echo ( $testmode ? "block" : "none" ); ?>;">
-					<label id="wfu_messageblock_subheader_$ID_adminmessagelabel" class="file_messageblock_subheader_adminmessagelabel"><?php echo ( $testmode ? WFU_TESTMESSAGE_ADMINMESSAGE : "" ); ?></label>
+					<label id="wfu_messageblock_subheader_$ID_adminmessagelabel" class="file_messageblock_subheader_adminmessagelabel"><?php echo ( $testmode ? esc_html(WFU_TESTMESSAGE_ADMINMESSAGE) : "" ); ?></label>
 				</div>
 			</td>
 		</tr>
 <?php if ( $testmode ): ?>
 	<?php for ( $i = 1; $i <= 2; $i++ ): ?>
-		<tr id="wfu_messageblock_$ID_<?php echo $i; ?>" class="file_messageblock_fileheader_tr" style="display:none;">
-			<td id="wfu_messageblock_$ID_filenumber_<?php echo $i; ?>" class="file_messageblock_filenumber_td"><?php echo $i; ?></td>
-			<td id="wfu_messageblock_header_$ID_container_<?php echo $i; ?>" class="file_messageblock_fileheader_td">
-				<div id="wfu_messageblock_header_$ID_<?php echo $i; ?>" class="file_messageblock_fileheader" style="color:<?php echo $header_styles["State9"]["color"]; ?>; background-color:<?php echo $header_styles["State9"]["bgcolor"]; ?>; border:1px solid <?php echo $header_styles["State9"]["borcolor"]; ?>;">
-					<label id="wfu_messageblock_header_$ID_label_<?php echo $i; ?>" class="file_messageblock_fileheader_label"><?php echo constant("WFU_TESTMESSAGE_FILE{$i}_HEADER"); ?></label>
+		<tr id="wfu_messageblock_$ID_<?php echo esc_attr($i); ?>" class="file_messageblock_fileheader_tr" style="display:none;">
+			<td id="wfu_messageblock_$ID_filenumber_<?php echo esc_attr($i); ?>" class="file_messageblock_filenumber_td"><?php echo esc_attr($i); ?></td>
+			<td id="wfu_messageblock_header_$ID_container_<?php echo esc_attr($i); ?>" class="file_messageblock_fileheader_td">
+				<div id="wfu_messageblock_header_$ID_<?php echo esc_attr($i); ?>" class="file_messageblock_fileheader" style="color:<?php echo esc_attr($header_styles["State9"]["color"]); ?>; background-color:<?php echo esc_attr($header_styles["State9"]["bgcolor"]); ?>; border:1px solid <?php echo esc_attr($header_styles["State9"]["borcolor"]); ?>;">
+					<label id="wfu_messageblock_header_$ID_label_<?php echo esc_attr($i); ?>" class="file_messageblock_fileheader_label"><?php echo esc_html(constant("WFU_TESTMESSAGE_FILE{$i}_HEADER")); ?></label>
 					<!-- the following hidden input holds state of arrow (open or close) -->
-					<input id="wfu_messageblock_header_$ID_state_<?php echo $i; ?>" type="hidden" value="none" />
+					<input id="wfu_messageblock_header_$ID_state_<?php echo esc_attr($i); ?>" type="hidden" value="none" />
 				</div>
 			</td>
 			<!-- add a drop down arrow to the file header (file has always details to be shown) -->
-			<td id="wfu_messageblock_arrow_$ID_<?php echo $i; ?>" class="file_messageblock_filearrow_td" onclick="GlobalData.WFU[$ID].message._filedetails_toggle(<?php echo $i; ?>);">
-				<div id="wfu_messageblock_arrow_$ID_up_<?php echo $i; ?>" class="file_messageblock_file_arrow_up" style="display:none;"></div>
-				<div id="wfu_messageblock_arrow_$ID_down_<?php echo $i; ?>" class="file_messageblock_file_arrow_down"></div>
+			<td id="wfu_messageblock_arrow_$ID_<?php echo esc_attr($i); ?>" class="file_messageblock_filearrow_td" onclick="GlobalData.WFU[$ID].message._filedetails_toggle(<?php echo esc_attr($i); ?>);">
+				<div id="wfu_messageblock_arrow_$ID_up_<?php echo esc_attr($i); ?>" class="file_messageblock_file_arrow_up" style="display:none;"></div>
+				<div id="wfu_messageblock_arrow_$ID_down_<?php echo esc_attr($i); ?>" class="file_messageblock_file_arrow_down"></div>
 			</td>
 		</tr>
 		<!-- add the files subheader block HTML template -->
-		<tr id="wfu_messageblock_subheader_$ID_<?php echo $i; ?>" class="file_messageblock_filesubheader_tr" style="display:none;">
-			<td id="wfu_messageblock_subheader_$ID_fileempty_<?php echo $i; ?>" class="file_messageblock_filesubheaderempty_td"></td>
-			<td colspan="2" id="wfu_messageblock_subheader_$ID_container_<?php echo $i; ?>" class="file_messageblock_filesubheader_td">
-				<div id="wfu_messageblock_subheader_$ID_message_<?php echo $i; ?>" class="file_messageblock_filesubheader_message" style="display:block;">
-					<label id="wfu_messageblock_subheader_$ID_messagelabel_<?php echo $i; ?>" class="file_messageblock_filesubheader_messagelabel"><?php echo constant("WFU_TESTMESSAGE_FILE{$i}_MESSAGE"); ?></label>
+		<tr id="wfu_messageblock_subheader_$ID_<?php echo esc_attr($i); ?>" class="file_messageblock_filesubheader_tr" style="display:none;">
+			<td id="wfu_messageblock_subheader_$ID_fileempty_<?php echo esc_attr($i); ?>" class="file_messageblock_filesubheaderempty_td"></td>
+			<td colspan="2" id="wfu_messageblock_subheader_$ID_container_<?php echo esc_attr($i); ?>" class="file_messageblock_filesubheader_td">
+				<div id="wfu_messageblock_subheader_$ID_message_<?php echo esc_attr($i); ?>" class="file_messageblock_filesubheader_message" style="display:block;">
+					<label id="wfu_messageblock_subheader_$ID_messagelabel_<?php echo esc_attr($i); ?>" class="file_messageblock_filesubheader_messagelabel"><?php echo esc_html(constant("WFU_TESTMESSAGE_FILE{$i}_MESSAGE")); ?></label>
 				</div>
-				<div id="wfu_messageblock_subheader_$ID_adminmessage_<?php echo $i; ?>" class="file_messageblock_filesubheader_adminmessage" style="display:block;">
-					<label id="wfu_messageblock_subheader_$ID_adminmessagelabel_<?php echo $i; ?>" class="file_messageblock_filesubheader_adminmessagelabel"><?php echo constant("WFU_TESTMESSAGE_FILE{$i}_ADMINMESSAGE"); ?></label>
+				<div id="wfu_messageblock_subheader_$ID_adminmessage_<?php echo esc_attr($i); ?>" class="file_messageblock_filesubheader_adminmessage" style="display:block;">
+					<label id="wfu_messageblock_subheader_$ID_adminmessagelabel_<?php echo esc_attr($i); ?>" class="file_messageblock_filesubheader_adminmessagelabel"><?php echo esc_html(constant("WFU_TESTMESSAGE_FILE{$i}_ADMINMESSAGE")); ?></label>
 				</div>
 			</td>
 		</tr>
@@ -3428,8 +3442,8 @@ this._filedetails_toggle = function(fileid) {
 </table>
 <!-- State10 header for the case that JSON parse fails and upload results cannot be decoded -->
 <div id="wfu_messageblock_header_$ID_safecontainer" style="display:none;">
-				<div id="wfu_messageblock_header_$ID_safe" class="file_messageblock_header" style="color:<?php echo $header_styles["State10"]["color"]; ?>; background-color:<?php echo $header_styles["State10"]["bgcolor"]; ?>; border:1px solid <?php echo $header_styles["State10"]["borcolor"]; ?>;">
-					<label id="wfu_messageblock_header_$ID_label_safe" class="file_messageblock_header_label"><?php echo $header_styles["State10"]["message"]; ?></label>
+				<div id="wfu_messageblock_header_$ID_safe" class="file_messageblock_header" style="color:<?php echo esc_attr($header_styles["State10"]["color"]); ?>; background-color:<?php echo esc_attr($header_styles["State10"]["bgcolor"]); ?>; border:1px solid <?php echo esc_attr($header_styles["State10"]["borcolor"]); ?>;">
+					<label id="wfu_messageblock_header_$ID_label_safe" class="file_messageblock_header_label"><?php echo esc_html($header_styles["State10"]["message"]); ?></label>
 				</div>
 </div>
 <input id="wfu_messageblock_$ID_headertemplate" type="hidden" value="[header_template]" />
@@ -4048,7 +4062,7 @@ this.initField = function(props) {
 		}
 	}
 	else if (props.type == "countrylist") {
-		var items_json = `<?php echo json_encode($additional_props["countries"]); ?>`;
+		var items_json = `<?php echo wp_json_encode($additional_props["countries"]); ?>`;
 		var items = JSON.parse(items_json);
 		items.sort((a,b) => (a.label > b.label) ? 1 : ((b.label > a.label) ? -1 : 0));
 		// check if there are suggested entries and add them first in the list
@@ -4368,7 +4382,8 @@ this._focused = function(obj) {
 </script><?php /****************************************************************
                the following lines contain the HTML userdata templates 
 ****************************************************************************/ ?>
-<?php foreach ( $props as $p ): ?>
+<?php foreach ( $props as $p ):
+	$p["key"] = esc_html($p["key"]); ?>
 <userdata_<?php echo $p["key"]; ?>_template>
 	<div id="userdata_$ID_<?php echo $p["key"]; ?>" class="file_userdata_container" style="<?php echo esc_html($styles1); ?>">
 	<?php if ( $p["labelposition"] != "none" ): ?><style>#userdata_$ID_label_<?php echo $p["key"]; ?>:after { content: '<?php echo ( $p["required"] ? esc_html($params["requiredlabel"]) : "" ); ?>'; }</style><?php endif ?>
@@ -4630,24 +4645,24 @@ this.update = function(action) {
 <?php if ( !$testmode ): ?>
 	<?php if ( $format == "checkbox" ): ?>
 		<input type="checkbox" class="file_consent_box" />
-		<span class="file_consent_question"><?php echo $question; ?></span>
+		<span class="file_consent_question"><?php echo esc_html($question); ?></span>
 	<?php else: ?>
-		<span class="file_consent_question"><?php echo $question; ?></span><br />
+		<span class="file_consent_question"><?php echo esc_html($question); ?></span><br />
 		<input type="radio" class="file_consent_radio_yes" name="file_consent_radio_$ID" value="yes" />
-		<span class="file_consent_span_yes"><?php echo WFU_CONSENTYES; ?></span>
+		<span class="file_consent_span_yes"><?php echo esc_html(WFU_CONSENTYES); ?></span>
 		<input type="radio" class="file_consent_radio_no" name="file_consent_radio_$ID" value="no" />
-		<span class="file_consent_span_no"><?php echo WFU_CONSENTNO; ?></span>
+		<span class="file_consent_span_no"><?php echo esc_html(WFU_CONSENTNO); ?></span>
 	<?php endif ?>
 <?php else: ?>
 	<?php if ( $format == "checkbox" ): ?>
 		<input type="checkbox" class="file_consent_box" readonly="readonly" />
-		<span class="file_consent_question"><?php echo $question; ?></span>
+		<span class="file_consent_question"><?php echo esc_html($question); ?></span>
 	<?php else: ?>
-		<span class="file_consent_question"><?php echo $question; ?></span><br />
+		<span class="file_consent_question"><?php echo esc_html($question); ?></span><br />
 		<input type="radio" class="file_consent_radio_yes" name="file_consent_radio_$ID" value="yes" readonly="readonly" />
-		<span class="file_consent_span_yes"><?php echo WFU_CONSENTYES; ?></span>
+		<span class="file_consent_span_yes"><?php echo esc_html(WFU_CONSENTYES); ?></span>
 		<input type="radio" class="file_consent_radio_no" name="file_consent_radio_$ID" value="no" readonly="readonly" />
-		<span class="file_consent_span_no"><?php echo WFU_CONSENTNO; ?></span>
+		<span class="file_consent_span_no"><?php echo esc_html(WFU_CONSENTNO); ?></span>
 	<?php endif ?>
 <?php endif ?>
 </div>

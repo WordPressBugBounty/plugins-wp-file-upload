@@ -7,10 +7,12 @@
  *
  * @link /lib/wfu_functions.php
  *
- * @package WordPress File Upload Plugin
+ * @package Iptanus File Upload Plugin
  * @subpackage Core Components
  * @since 2.1.2
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 //********************* Debug Functions ****************************************
 
@@ -618,6 +620,22 @@ function wfu_sanitize_tag($code) {
 }
 
 /**
+ * Sanitize an Extended Tag.
+ *
+ * This function sanitizes ane extended tag or sort. It must only contain latin
+ * characters, numbersn an underscore (_) or dash (-) symbols.
+ *
+ * @since 5.1.1
+ *
+ * @param string $code The tag to sanitize.
+ *
+ * @return string The sanitized tag.
+ */
+function wfu_sanitize_xtag($code) {
+	return preg_replace("/[^A-Za-z0-9_\-]/", "", $code);
+}
+
+/**
  * Sanitize a Simple JSON Array.
  *
  * This function sanitizes a simple JSON array string. A JSON array string must
@@ -859,6 +877,26 @@ function wfu_sanitize_shortcode_array($attrs, $shortcode_tag) {
 }
 
 /**
+ * Sanitize Simple HTML.
+ *
+ * It sanitizes simple HTML by allowing only specific tags.
+ *
+ * @since 5.1.0
+ *
+ * @param string $html The HTML string to sanitize.
+ * @param string $allowed_tags Optional. A comma-separated list of allowed tags.
+ * @return string The sanitized HTML.
+ */
+function wfu_sanitize_simple_html($html, $allowed_tags = "br,em,strong") {
+	$allowed_tags_list = explode(",", $allowed_tags);
+	$allowed_tags_array = array();
+	foreach ( $allowed_tags_list as $item ) {
+		$allowed_tags_array[trim($item)] = array();
+	}
+	return wp_kses($html, $allowed_tags_array);
+}
+
+/**
  * Sanitize Posts.
  *
  * This function sanitizes a list of posts. For the moment, only the title is
@@ -875,6 +913,69 @@ function wfu_sanitize_posts($posts) {
 	foreach ( $posts as $ind => $post ) {
 		$posts[$ind]->post_title = sanitize_text_field($post->post_title);
 	}
+}
+
+/**
+ * Sanitize Userdata Fields.
+ *
+ * Performs sanitization of userdata fields array.
+ *
+ * @since 5.1.0
+ *
+ * @param array $userdata_fields The initial userdata fields.
+ * @return array The sanitized userdata fields.
+ */
+function wfu_sanitize_userdata_fields($userdata_fields) {
+	if ( !is_array($userdata_fields) ) $userdata_fields = array();
+	$userdata_fields_final = array();
+	foreach ( $userdata_fields as $userdata_key => $userdata_field ) {
+		$userdata_key = wfu_sanitize_int($userdata_key);
+		if ( $userdata_key !== "" && is_array($userdata_field) ) {
+			$userdata_field_final = array();
+			foreach ( $userdata_field as $field_key => $field_value ) {
+				$field_key = wfu_sanitize_code($field_key);
+				if ( $field_key !== "" ) $userdata_field_final[$field_key] = strip_tags($field_value);
+			}
+			$userdata_fields_final[$userdata_key] = $userdata_field_final;
+		}
+	}
+	return $userdata_fields_final;
+}
+
+/**
+ * Escape HTML Text Containing Link.
+ *
+ * Escape text that contains a link for HTML. The link text must be enclosed
+ * inside colons (:), e.g. :link text:
+ *
+ * @since 5.1.0
+ *
+ * @param string $text The text to be escaped.
+ * @param string $href The link URL.
+ * @param bool $open_in_new_tab Optional. Whether to open the link in a new tab
+ *        when clicked.
+ * @param string $title Optional. The hint when hovering over the link text.
+ * @param bool $escaped Optional. If true the $text parameter has already been
+ *        escaped for HTML, so do not escape it again.
+ * @return string The escaped text.
+ */
+function wfu_esc_html_a($text, $href, $open_in_new_tab = true, $title = "", $escaped = false) {
+	return preg_replace("/:(\w+):/", '<a target="'.( $open_in_new_tab ? '_blank' : '_self' ).'" href="'.esc_url($href).'"'.( $title !== "" ? ' title="'.esc_html($title).'"' : '' ).'>$1</a>', ( $escaped ? $text : esc_html($text) ));
+}
+
+/**
+ * Unescape Double Percent.
+ *
+ * Unescapes percent symbol by converting double percent (%%) to single (%). It
+ * usually comes from a translatable string.
+ *
+ * @since 5.1.0
+ *
+ * @param string $text The text that contains double percent symbols.
+ * @return string The unescaped text.
+ */
+function wfu_unesc_percent($text) {
+	return str_replace('%%', '%', $text);
 }
 
 /**
@@ -978,7 +1079,7 @@ function wfu_generate_user_short_token($timeout) {
  */
 function wfu_verify_user_short_token($token) {
 	if ( !WFU_USVAR_exists('wfu_ust_'.$token) ) return false;
-	$timeout = WFU_USVAR('wfu_ust_'.$token);
+	$timeout = intval(WFU_USVAR('wfu_ust_'.$token));
 	WFU_USVAR_unset('wfu_ust_'.$token);
 	return ( $timeout > time() );
 }
@@ -1102,15 +1203,19 @@ function wfu_array_remove_nulls(&$arr) {
  * @since 2.4.4
  *
  * @param mixed $var The variable to sanitize.
+ * @param bool $stricter Optional. If true a stricter sanitization for strings
+ *        will be used.
  *
  * @return mixed The sanitized variable.
  */
-function wfu_sanitize($var) {
+function wfu_sanitize($var, $stricter = false) {
 	$typ = gettype($var);
 	if ( $typ == "boolean" || $typ == "integer" || $typ == "double" || $typ == "resource" || $typ == "NULL" )
 		return $var;
-	elseif ( $typ == "string" )
-		return htmlspecialchars($var);
+	elseif ( $typ == "string" ) {
+		if ( $stricter ) return sanitize_textarea_field($var);
+		else return htmlspecialchars($var);
+	}
 	elseif ( $typ == "array" || $typ == "object" ) {
 		foreach ( $var as &$item ) $item = wfu_sanitize($item);
 		return $var;
@@ -1447,7 +1552,7 @@ function wfu_array_sort($array, $on, $order = SORT_ASC, $with_id0 = false) {
  */
 function wfu_echo_array($arr) {
 	if ( !is_array($arr) ) return;
-	echo '<pre>'.print_r($arr, true).'</pre>';
+	echo esc_html('<pre>'.print_r($arr, true).'</pre>');
 }
 
 /**
@@ -1487,7 +1592,12 @@ function wfu_minify_code($lang, $code) {
 			include_once $path.'vendor/minifier/path-converter/src/Converter.php';
 		}
 		$minifier = null;
-		eval('$minifier = new MatthiasMullie\Minify\\'.strtoupper($lang).'($code);');
+		if ( strtoupper($lang) === 'JS' ) {
+			$minifier = new MatthiasMullie\Minify\JS($code);
+		}
+		elseif ( strtoupper($lang) === 'CSS' ) {
+			$minifier = new MatthiasMullie\Minify\CSS($code);
+		}
 		if ( $minifier !== null ) {
 			$ret["result"] = true;
 			$ret["minified_code"] = $minifier->minify();
@@ -1726,7 +1836,7 @@ function wfu_get_server_environment() {
 function wfu_ajaxurl() {
 	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
-	return ( $plugin_options['admindomain'] == 'siteurl' || $plugin_options['admindomain'] == '' ? site_url("wp-admin/admin-ajax.php") : ( $plugin_options['admindomain'] == 'adminurl' ? admin_url("admin-ajax.php") : home_url("wp-admin/admin-ajax.php") ) );
+	return admin_url("admin-ajax.php");
 }
 
 /**
@@ -1858,6 +1968,7 @@ function wfu_compare_versions($current, $latest) {
  */
 function wfu_execute_daily_tasks() {
 	wfu_remove_waste_items_from_options();
+	wfu_cleanup_reserved_files();
 }
 
 //********************* File / Directory Functions *****************************
@@ -2051,6 +2162,7 @@ function wfu_delete_file_execute($filepath, $userid, $filerec = null) {
  *               @type string $ftpdomain The FTP domain.
  *               @type string $port The FTP port.
  *               @type bool $sftp Defines whether sFTP connection will be used.
+ *               @type bool $ftps Defines whether FTPS connection will be used.
  *         }
  * }
  */
@@ -2062,7 +2174,8 @@ function wfu_decode_ftpinfo($ftpdata) {
 			"password" => "",
 			"ftpdomain" => "",
 			"port" => "",
-			"sftp" => false
+			"sftp" => false,
+			"ftps" => false
 		)
 	);
 	$ftpdata_flat =  str_replace(array('\\:', '\\@'), array('\\_', '\\_'), $ftpdata);
@@ -2080,6 +2193,10 @@ function wfu_decode_ftpinfo($ftpdata) {
 			$ret["data"]["sftp"] = true;
 			$ftp_port = substr($ftp_port, 1);
 		}
+		elseif ( substr($ftp_port, -1) == "s" ) {
+			$ret["data"]["ftps"] = true;
+			$ftp_port = substr($ftp_port, 0, -1);
+		}
 		$ret["data"]["port"] = $ftp_port;
 	}
 	elseif ( $pos2 ) {
@@ -2092,6 +2209,10 @@ function wfu_decode_ftpinfo($ftpdata) {
 		if ( substr($ftp_port, 0, 1) == "s" ) {
 			$ret["data"]["sftp"] = true;
 			$ftp_port = substr($ftp_port, 1);
+		}
+		elseif ( substr($ftp_port, -1) == "s" ) {
+			$ret["data"]["ftps"] = true;
+			$ftp_port = substr($ftp_port, 0, -1);
 		}
 		$ret["data"]["port"] = $ftp_port;
 	}
@@ -2130,6 +2251,7 @@ function wfu_decode_ftpinfo($ftpdata) {
  *               @type string $ftpdomain The FTP domain.
  *               @type string $port The FTP port.
  *               @type bool $sftp Defines whether sFTP connection will be used.
+ *               @type bool $ftps Defines whether FTPS connection will be used.
  *               @type string $filepath The local path to the file.
  *         }
  * }
@@ -2143,15 +2265,17 @@ function wfu_decode_ftpurl($url) {
 			"ftpdomain" => "",
 			"port" => "",
 			"sftp" => false,
+			"ftps" => false,
 			"filepath" => ""
 		)
 	);	
-	if ( substr($url, 0, 6) != "ftp://" && substr($url, 0, 7) != "sftp://" ) return $ftpinfo;
+	if ( substr($url, 0, 6) != "ftp://" && substr($url, 0, 7) != "sftp://" && substr($url, 0, 7) != "ftps://" ) return $ftpinfo;
 	$issftp = ( substr($url, 0, 7) == "sftp://" );
-	$filepath = ( $issftp ? substr($url, 7) : substr($url, 6) );
+	$isftps = ( substr($url, 0, 7) == "ftps://" );
+	$filepath = ( $issftp || $isftps ? substr($url, 7) : substr($url, 6) );
 	$pos = strpos($filepath, '/');
 	if ( $pos === false ) return $ftpinfo;
-	//separate sftp info
+	//separate ftp info
 	$ftpdata = substr($filepath, 0, $pos);
 	$filepath = substr($filepath, $pos);
 	$ftpinfo = wfu_decode_ftpinfo($ftpdata);
@@ -2161,6 +2285,8 @@ function wfu_decode_ftpurl($url) {
 	$data["username"] = str_replace(array('%40', '%3A', '%2F'), array('@', ':', '/'), $data["username"]);
 	$data["password"] = str_replace(array('%40', '%3A', '%2F'), array('@', ':', '/'), $data["password"]);
 	$data["sftp"] = $issftp;
+	$data["ftps"] = $isftps;
+	// data port is allowed to be empty only for FTP or SFTP, not FTPS
 	if ( $data["port"] == "" ) $data["port"] = ( $issftp ? "22" : "80" );
 	$data["filepath"] = $filepath;
 	$ftpinfo["data"] = $data;
@@ -2179,7 +2305,7 @@ function wfu_decode_ftpurl($url) {
  * @return string The stripped URL.
  */
 function wfu_hide_credentials_from_ftpurl($url) {
-	return preg_replace("/^(ftp|sftp)(:\/\/)([^@]*@)(.*$)/", "$1$2$4", $url);
+	return preg_replace("/^(ftp|sftp|ftps)(:\/\/)([^@]*@)(.*$)/", "$1$2$4", $url);
 }
 
 /**
@@ -2208,7 +2334,7 @@ function wfu_upload_plugin_full_path( $params ) {
 			$ftp_host = $data["ftpdomain"].( $ftp_port != "" ? ":".$ftp_port : "" );
 			$ftp_username = str_replace(array('@', ':', '/'), array('%40', '%3A', '%2F'), $data["username"]);   //if username contains @, :, / characters then encode them
 			$ftp_password = str_replace(array('@', ':', '/'), array('%40', '%3A', '%2F'), $data["password"]);   //if username contains @, :, / characters then encode them
-			$start_folder = ( $data["sftp"] ? 's' : '' ).'ftp://'.$ftp_username.':'.$ftp_password."@".$ftp_host.'/';
+			$start_folder = ( $data["sftp"] ? 'sftp' : ( $data["ftps"] ? 'ftps' : 'ftp' ) ).'://'.$ftp_username.':'.$ftp_password."@".$ftp_host.'/';
 		}
 		else $start_folder = 'ftp://'.$params["ftpinfo"].'/';
 	}
@@ -2698,6 +2824,7 @@ function wfu_activate_debug_log() {
 function wfu_safe_store_filepath($path) {
 	$code = wfu_create_random_string(16);
 	$safe_storage = ( WFU_USVAR_exists('wfu_filepath_safe_storage') ? WFU_USVAR('wfu_filepath_safe_storage') : array() );
+	if ( !is_array($safe_storage) ) $safe_storage = array();
 	$safe_storage[$code] = $path;
 	WFU_USVAR_store('wfu_filepath_safe_storage', $safe_storage);
 	return $code;
@@ -2735,6 +2862,7 @@ function wfu_prepare_to_batch_safe_store_filepath($path) {
 function wfu_batch_safe_store_filepaths() {
 	if ( !isset($GLOBALS["WFU_BATCH_PATHS"]) ) return;
 	$safe_storage = ( WFU_USVAR_exists('wfu_filepath_safe_storage') ? WFU_USVAR('wfu_filepath_safe_storage') : array() );
+	if ( !is_array($safe_storage) ) $safe_storage = array();
 	foreach ( $GLOBALS["WFU_BATCH_PATHS"] as $code => $path ) $safe_storage[$code] = $path;
 	WFU_USVAR_store('wfu_filepath_safe_storage', $safe_storage);
 	unset($GLOBALS["WFU_BATCH_PATHS"]);
@@ -2759,7 +2887,7 @@ function wfu_get_filepath_from_safe($code) {
 	//return filepath from session variable, if exists
 	if ( !WFU_USVAR_exists('wfu_filepath_safe_storage') ) return false;
 	$safe_storage = WFU_USVAR('wfu_filepath_safe_storage');
-	if ( !isset($safe_storage[$code]) ) return false;
+	if ( !is_array($safe_storage) || !isset($safe_storage[$code]) ) return false;
 	return $safe_storage[$code];
 }
 
@@ -2893,8 +3021,8 @@ function wfu_file_exists_extended($path) {
  *
  * This function checks if a file exists. It is an extension to the original
  * PHP file_exists() function to take special actions in cases where the file
- * is stored in an sFTP location or perhaps in other external locations (cloud
- * services, WebDAV etc.).
+ * is stored in an sFTP/FTPS location or perhaps in other external locations
+ * (cloud services, WebDAV etc.).
  *
  * @since 3.9.3
  *
@@ -2907,7 +3035,7 @@ function wfu_file_exists_extended($path) {
  */
 function wfu_file_exists($path, $caller = null) {
 	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
-	//For FTP and SFTP paths this function will be executed only under certain
+	//For FTP/SFTP/FTPS paths this function will be executed only under certain
 	//conditions, because it may take a long time.
 	//For FTP paths, execution is determined by 2 variables:
 	// - WFU_FILEOPERATION_IGNOREFTP: This is a general flag to ignore
@@ -2916,7 +3044,7 @@ function wfu_file_exists($path, $caller = null) {
 	//                               previous flag is true.
 	//If WFU_FTPFILEEXISTS_DEFVALUE starts with an asterisk (*) then it
 	//preceeds over the general flag.
-	//For SFTP paths there are similar variables.
+	//For SFTP/FTPS paths there are similar variables.
 	if ( substr($path, 0, 6) == "ftp://" ) {
 		$ret = false;
 		$def = WFU_VAR("WFU_FTPFILEEXISTS_DEFVALUE");
@@ -2941,6 +3069,19 @@ function wfu_file_exists($path, $caller = null) {
 			}
 		}
 		else $ret = ( WFU_VAR("WFU_FILEOPERATION_IGNORESFTP") == "true" ? ( $def == "true" ) : wfu_file_exists_sftp($path) );
+		return $ret;
+	}
+	elseif ( substr($path, 0, 7) == "ftps://" ) {
+		$ret = false;
+		$def = WFU_VAR("WFU_FTPSFILEEXISTS_DEFVALUE");
+		if ( substr($def, 0, 1) == "*" ) {
+			switch ( $def ) {
+				case "*true": $ret = true; break;
+				case "*false": $ret = false; break;
+				case "*calc": $ret = wfu_file_exists_ftps($path); break;
+			}
+		}
+		else $ret = ( WFU_VAR("WFU_FILEOPERATION_IGNOREFTPS") == "true" ? ( $def == "true" ) : wfu_file_exists_ftps($path) );
 		return $ret;
 	}
 	elseif ( substr($path, 0, 7) == "remote:" ) {
@@ -2989,6 +3130,20 @@ function wfu_file_is_sftp($path) {
 }
 
 /**
+ * File Is FTPS.
+ *
+ * Check if this is an FTPS file.
+ *
+ * @since 5.1.5
+ *
+ * @param string $path The file path.
+ * @return bool True if it is FTPS, false otherwise.
+ */
+function wfu_file_is_ftps($path) {
+	return substr($path, 0, 7) == "ftps://";
+}
+
+/**
  * File Is Remote.
  *
  * Check if this is a remote file.
@@ -3013,7 +3168,7 @@ function wfu_file_is_remote($path) {
  * @return bool True if it is local, false otherwise.
  */
 function wfu_file_is_local($path) {
-	return ( !wfu_file_is_ftp($path) && !wfu_file_is_sftp($path) && !wfu_file_is_remote($path) );
+	return ( !wfu_file_is_ftp($path) && !wfu_file_is_sftp($path) && !wfu_file_is_ftps($path) && !wfu_file_is_remote($path) );
 }
 
 /**
@@ -3034,9 +3189,9 @@ function wfu_perms_str($perms) {
  * Get Info About File.
  *
  * This function gets file info. It is an extension to the original PHP stat()
- * function to take special actions in cases where the file is stored in an sFTP
- * location or perhaps in other external locations (cloud services, WebDAV
- * etc.).
+ * function to take special actions in cases where the file is stored in an
+ * sFTP/FTPS location or perhaps in other external locations (cloud services,
+ * WebDAV etc.).
  *
  * @since 4.15.0
  *
@@ -3063,6 +3218,13 @@ function wfu_stat($path, $caller = null) {
 			$ret = wfu_stat_sftp($path);
 		return $ret;
 	}
+	elseif ( substr($path, 0, 7) == "ftps://" ) {
+		$ret = array( "mtime" => 0, "size" => 0 );
+		$def = WFU_VAR("WFU_FTPSSTAT_DEFVALUE");
+		if ( $def == "*calc" || ( substr($def, 0, 1) != "*" && WFU_VAR("WFU_FILEOPERATION_IGNOREFTPS") != "true" ) )
+			$ret = wfu_stat_ftps($path);
+		return $ret;
+	}
 	elseif ( substr($path, 0, 7) == "remote:" ) {
 		$ret = array( "mtime" => 0, "size" => 0 );
 		$def = WFU_VAR("WFU_REMOTESTAT_DEFVALUE");
@@ -3078,8 +3240,8 @@ function wfu_stat($path, $caller = null) {
  *
  * This function gets file size. It is an extension to the original PHP
  * filesize() function to take special actions in cases where the file is stored
- * in an sFTP location or perhaps in other external locations (cloud services,
- * WebDAV etc.).
+ * in an sFTP/FTPS location or perhaps in other external locations (cloud
+ * services, WebDAV etc.).
  *
  * @since 4.15.0
  *
@@ -3106,6 +3268,13 @@ function wfu_filesize($path, $caller = null) {
 			$ret = wfu_filesize_sftp($path);
 		return $ret;
 	}
+	elseif ( substr($path, 0, 7) == "ftps://" ) {
+		$ret = false;
+		$def = WFU_VAR("WFU_FTPSFILESIZE_DEFVALUE");
+		if ( $def == "*calc" || ( substr($def, 0, 1) != "*" && WFU_VAR("WFU_FILEOPERATION_IGNOREFTPS") != "true" ) )
+			$ret = wfu_filesize_ftps($path);
+		return $ret;
+	}
 	elseif ( substr($path, 0, 7) == "remote:" ) {
 		$ret = false;
 		$def = WFU_VAR("WFU_REMOTEFILESIZE_DEFVALUE");
@@ -3121,7 +3290,7 @@ function wfu_filesize($path, $caller = null) {
  *
  * This function gets a file stream handle. It is an extension to the original
  * PHP fopen() function to take special actions in cases where the file is
- * stored in an sFTP location or perhaps in other external locations (cloud
+ * stored in an sFTP/FTPS location or perhaps in other external locations (cloud
  * services, WebDAV etc.).
  *
  * @since 4.15.0
@@ -3150,6 +3319,13 @@ function wfu_fopen($path, $mode, $caller = null) {
 			$ret = wfu_fopen_sftp($path, $mode);
 		return $ret;
 	}
+	elseif ( substr($path, 0, 7) == "ftps://" ) {
+		$ret = false;
+		$def = WFU_VAR("WFU_FTPSFOPEN_DEFVALUE");
+		if ( $def == "*calc" || ( substr($def, 0, 1) != "*" && WFU_VAR("WFU_FILEOPERATION_IGNOREFTPS") != "true" ) )
+			$ret = wfu_fopen_ftps($path, $mode);
+		return $ret;
+	}
 	elseif ( substr($path, 0, 7) == "remote:" ) {
 		$ret = false;
 		$def = WFU_VAR("WFU_REMOTEFOPEN_DEFVALUE");
@@ -3165,8 +3341,8 @@ function wfu_fopen($path, $mode, $caller = null) {
  *
  * This function gets the contents of a file. It is an extension to the original
  * PHP file_get_contents() function to take special actions in cases where the
- * file is stored in an sFTP location or perhaps in other external locations
- * (cloud services, WebDAV etc.).
+ * file is stored in an sFTP/FTPS location or perhaps in other external
+ * locations (cloud services, WebDAV etc.).
  *
  * @since 4.15.0
  *
@@ -3191,6 +3367,13 @@ function wfu_file_get_contents($path, $caller = null) {
 		$def = WFU_VAR("WFU_SFTPFILEGETCONTENTS_DEFVALUE");
 		if ( $def == "*calc" || ( substr($def, 0, 1) != "*" && WFU_VAR("WFU_FILEOPERATION_IGNORESFTP") != "true" ) )
 			$ret = wfu_file_get_contents_sftp($path);
+		return $ret;
+	}
+	elseif ( substr($path, 0, 7) == "ftps://" ) {
+		$ret = false;
+		$def = WFU_VAR("WFU_FTPSFILEGETCONTENTS_DEFVALUE");
+		if ( $def == "*calc" || ( substr($def, 0, 1) != "*" && WFU_VAR("WFU_FILEOPERATION_IGNOREFTPS") != "true" ) )
+			$ret = wfu_file_get_contents_ftps($path);
 		return $ret;
 	}
 	elseif ( substr($path, 0, 7) == "remote:" ) {
@@ -3319,8 +3502,8 @@ function wfu_scan_file_contents($path, $patterns, $overlap_size = 0) {
  *
  * This function gets the md5 signature of a file. It is an extension to the
  * original PHP md5_file() function to take special actions in cases where the
- * file is stored in an sFTP location or perhaps in other external locations
- * (cloud services, WebDAV etc.).
+ * file is stored in an sFTP/FTPS location or perhaps in other external
+ * locations (cloud services, WebDAV etc.).
  *
  * @since 4.15.0
  *
@@ -3347,6 +3530,13 @@ function wfu_md5_file($path, $caller = null) {
 			$ret = wfu_md5_file_sftp($path);
 		return $ret;
 	}
+	elseif ( substr($path, 0, 7) == "ftps://" ) {
+		$ret = false;
+		$def = WFU_VAR("WFU_FTPSMD5FILE_DEFVALUE");
+		if ( $def == "*calc" || ( substr($def, 0, 1) != "*" && WFU_VAR("WFU_FILEOPERATION_IGNOREFTPS") != "true" ) )
+			$ret = wfu_md5_file_ftps($path);
+		return $ret;
+	}
 	elseif ( substr($path, 0, 7) == "remote:" ) {
 		$ret = false;
 		$def = WFU_VAR("WFU_REMOTEMD5FILE_DEFVALUE");
@@ -3361,9 +3551,9 @@ function wfu_md5_file($path, $caller = null) {
  * Delete a File.
  *
  * This function deletes a file. It is an extension to the original PHP unlink()
- * function to take special actions in cases where the file is stored in an sFTP
- * location or perhaps in other external locations (cloud services, WebDAV
- * etc.).
+ * function to take special actions in cases where the file is stored in an
+ * sFTP/FTPS location or perhaps in other external locations (cloud services,
+ * WebDAV etc.).
  *
  * @since 4.15.0
  *
@@ -3388,6 +3578,13 @@ function wfu_unlink($path, $caller = null) {
 		$def = WFU_VAR("WFU_SFTPUNLINK_DEFVALUE");
 		if ( $def == "*calc" || ( substr($def, 0, 1) != "*" && WFU_VAR("WFU_FILEOPERATION_IGNORESFTP") != "true" ) )
 			$ret = wfu_unlink_sftp($path);
+		return $ret;
+	}
+	elseif ( substr($path, 0, 7) == "ftps://" ) {
+		$ret = false;
+		$def = WFU_VAR("WFU_FTPSUNLINK_DEFVALUE");
+		if ( $def == "*calc" || ( substr($def, 0, 1) != "*" && WFU_VAR("WFU_FILEOPERATION_IGNOREFTPS") != "true" ) )
+			$ret = wfu_unlink_ftps($path);
 		return $ret;
 	}
 	elseif ( substr($path, 0, 7) == "remote:" ) {
@@ -3507,7 +3704,7 @@ function wfu_mime_content_type($path) {
  * Custom Attempt to determine the real file type of a file.
  *
  * This is a wrapper function of Wordpress wp_check_filetype_and_ext(), which
- * also takes into account sftp:// filepaths.
+ * also takes into account sFTP/FTPS filepaths.
  *
  * @since 4.15.0
  *
@@ -3527,7 +3724,7 @@ function wfu_mime_content_type($path) {
  */
 function wfu_wp_check_filetype_and_ext( $file, $filename ) {
 	//ignore check for sftp files
-	if ( substr($file, 0, 7) == "sftp://" ) {
+	if ( substr($file, 0, 7) == "sftp://" || substr($file, 0, 7) == "ftps://" ) {
 		return array( "proper_filename" => false );
 	}
 	else return wp_check_filetype_and_ext( $file, $filename );
@@ -4612,6 +4809,117 @@ function wfu_make_rec_obsolete($filerec, $context = "") {
 		array( '%s', '%s' ),
 		array( '%d' )
 	);
+}
+
+/**
+ * Check Whether a File Path Is Reserved
+ *
+ * The plugin reserves the path of an uploaded file when an upload starts, so
+ * that it cannot be used again while the file is uploading. This way the plugin
+ * avoids File Overwrite Race Conditions (TOCTOU).
+ *
+ * @since 5.1.7
+ *
+ * @param string $filepath The uploaded file path.
+ * @return boolean True if the file is reserved, false otherwise.
+ */
+function wfu_is_file_reserved($filepath) {
+	// check if file reservation is active
+	if ( WFU_VAR("WFU_FILERESERVATION_STATUS") !== "true" ) return false;
+	// get the list of reserved files
+	$reserved_files = wfu_get_option( "wordpress_file_upload_reserved_files", array() );
+	if ( $reserved_files === null ) $reserved_files = array();
+	// check if file is included in file reservation
+	if ( !array_key_exists( $filepath, $reserved_files ) ) return false;
+	// check if reservation has expired
+	$expire_time = $reserved_files[$filepath];
+	// if reservation has expired then the file is not reserved anymore; remove
+	// it from the reservation list
+	if ( time() > $expire_time ) {
+		unset($reserved_files[$filepath]);
+		wfu_update_option( "wordpress_file_upload_reserved_files", $reserved_files, "array", false );
+		return false;
+	}
+	return true;
+}
+
+/**
+ * Reserve a File Path
+ *
+ * Reserve a file path so that it cannot be used again while the file is
+ * uploading.
+ *
+ * @since 5.1.7
+ *
+ * @param string $filepath The uploaded file path.
+ */
+function wfu_reserve_file($filepath) {
+	// check if file reservation is active
+	if ( WFU_VAR("WFU_FILERESERVATION_STATUS") !== "true" ) return;
+	// get reservation expiration time
+	$reservation_life = intval(WFU_VAR("WFU_FILERESERVATION_LIFE"));
+	if ( $reservation_life === 0 ) $reservation_life = 172800;
+	// get and update the list of reserved files
+	$reserved_files = wfu_get_option( "wordpress_file_upload_reserved_files", array() );
+	if ( $reserved_files === null ) $reserved_files = array();
+	$reserved_files[$filepath] = time() + $reservation_life;
+	wfu_update_option( "wordpress_file_upload_reserved_files", $reserved_files, "array", false );
+}
+
+/**
+ * Free Reserved File Paths
+ *
+ * Remove files' paths from the list of reserved file paths.
+ *
+ * @since 5.1.7
+ *
+ * @param string|array $filepaths The uploaded file paths.
+ */
+function wfu_unreserve_files($filepaths) {
+	// check if file reservation is active
+	if ( WFU_VAR("WFU_FILERESERVATION_STATUS") !== "true" ) return;
+	// adjust filepaths to always be an array
+	if ( is_string($filepaths) ) $filepaths = array( $filepaths );
+	// get the list of reserved files
+	$reserved_files = wfu_get_option( "wordpress_file_upload_reserved_files", array() );
+	if ( $reserved_files === null ) $reserved_files = array();
+	// remove the files from the reservation list
+	$needs_update = false;
+	foreach ( $filepaths as $filepath ) {
+		if ( array_key_exists( $filepath, $reserved_files ) ) {
+			unset($reserved_files[$filepath]);
+			$needs_update = true;
+		}
+	}
+	// update the reservation list if necessary
+	if ( $needs_update )
+		wfu_update_option( "wordpress_file_upload_reserved_files", $reserved_files, "array", false );
+}
+
+/**
+ * Cleanup Reserved File Paths
+ *
+ * Remove any expired entries from the list of reserved file paths.
+ *
+ * @since 5.1.7
+ */
+function wfu_cleanup_reserved_files() {
+	// check if file reservation is active
+	if ( WFU_VAR("WFU_FILERESERVATION_STATUS") !== "true" ) return;
+	// get the list of reserved files
+	$reserved_files = wfu_get_option( "wordpress_file_upload_reserved_files", array() );
+	if ( $reserved_files === null ) $reserved_files = array();
+	$cleaned = array();
+	$needs_update = false;
+	$now = time();
+	// iterate all reserved files and keep only those that have expired
+	foreach ( $reserved_files as $filepath => $expire_time ) {
+		if ( $now <= $expire_time ) 
+			$cleaned[$filepath] = $expire_time;
+		else $needs_update = true;
+	}
+	if ( $needs_update )
+		wfu_update_option( "wordpress_file_upload_reserved_files", $cleaned, "array", false );
 }
 
 /**
@@ -5799,6 +6107,7 @@ function wfu_get_params_fields_from_index($params_index, $session_token = "") {
 function wfu_safe_store_shortcode_data($data) {
 	$code = wfu_create_random_string(16);
 	$safe_storage = ( WFU_USVAR_exists('wfu_shortcode_data_safe_storage') ? WFU_USVAR('wfu_shortcode_data_safe_storage') : array() );
+	if ( !is_array($safe_storage) ) $safe_storage = array();
 	$safe_storage[$code] = $data;
 	WFU_USVAR_store('wfu_shortcode_data_safe_storage', $safe_storage);
 	return $code;
@@ -5823,7 +6132,7 @@ function wfu_get_shortcode_data_from_safe($code) {
 	//return shortcode data from session variable, if exists
 	if ( !WFU_USVAR_exists('wfu_shortcode_data_safe_storage') ) return '';
 	$safe_storage = WFU_USVAR('wfu_shortcode_data_safe_storage');
-	if ( !isset($safe_storage[$code]) ) return '';
+	if ( !is_array($safe_storage) || !isset($safe_storage[$code]) ) return '';
 	return $safe_storage[$code];
 }
 
@@ -5844,7 +6153,7 @@ function wfu_clear_shortcode_data_from_safe($code) {
 	//clear shortcode data from session variable, if exists
 	if ( !WFU_USVAR_exists('wfu_shortcode_data_safe_storage') ) return;
 	$safe_storage = WFU_USVAR('wfu_shortcode_data_safe_storage');
-	if ( !isset($safe_storage[$code]) ) return;
+	if ( !is_array($safe_storage) || !isset($safe_storage[$code]) ) return;
 	unset($safe_storage[$code]);
 	WFU_USVAR_store('wfu_shortcode_data_safe_storage', $safe_storage);
 }
@@ -6168,10 +6477,10 @@ function wfu_extract_css_js_from_components($section_array, &$css, &$js) {
  */
 function wfu_add_loading_overlay($dlp, $code) {
 	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
-	$echo_str = $dlp.'<div id="wfu_'.$code.'_overlay" style="margin:0; padding: 0; width:100%; height:100%; position:absolute; left:0; top:0; border:none; background:none; display:none;">';
+	$echo_str = $dlp.'<div id="wfu_'.esc_attr($code).'_overlay" style="margin:0; padding: 0; width:100%; height:100%; position:absolute; left:0; top:0; border:none; background:none; display:none;">';
 	$echo_str .= $dlp."\t".'<div style="margin:0; padding: 0; width:100%; height:100%; position:absolute; left:0; top:0; border:none; background-color:rgba(255,255,255,0.8); z-index:1;""></div>';
 	$echo_str .= $dlp."\t".'<table style="margin:0; padding: 0; table-layout:fixed; width:100%; height:100%; position:absolute; left:0; top:0; border:none; background:none; z-index:2;"><tbody><tr><td align="center" style="border:none;">';
-	$echo_str .= $dlp."\t\t".'<img src="'.WFU_IMAGE_OVERLAY_LOADING.'" /><br /><span>loading...</span>';
+	$echo_str .= $dlp."\t\t".'<img src="'.esc_url(WFU_IMAGE_OVERLAY_LOADING).'" /><br /><span>loading...</span>';
 	$echo_str .= $dlp."\t".'</td></tr></tbody></table>';
 	$echo_str .= $dlp.'</div>';
 	
@@ -6200,20 +6509,20 @@ function wfu_add_pagination_header($dlp, $code, $curpage, $pages, $nonce = false
 	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	if ($nonce === false) $nonce = wp_create_nonce( 'wfu-'.$code.'-page' );
 	$echo_str = $dlp.'<div style="float:right;">';
-	$echo_str .= $dlp."\t".'<label id="wfu_'.$code.'_first_disabled" style="margin:0 4px; font-weight:bold; opacity:0.5; cursor:default; display:'.( $curpage == 1 ? 'inline' : 'none' ).';">&#60;&#60;</label>';
-	$echo_str .= $dlp."\t".'<label id="wfu_'.$code.'_prev_disabled" style="margin:0 4px; font-weight:bold; opacity:0.5; cursor:default; display:'.( $curpage == 1 ? 'inline' : 'none' ).';">&#60;</label>';
-	$echo_str .= $dlp."\t".'<a id="wfu_'.$code.'_first" href="javascript:wfu_goto_'.$code.'_page(\''.$nonce.'\', \'first\');" style="margin:0 4px; font-weight:bold; display:'.( $curpage == 1 ? 'none' : 'inline' ).';">&#60;&#60;</a>';
-	$echo_str .= $dlp."\t".'<a id="wfu_'.$code.'_prev" href="javascript:wfu_goto_'.$code.'_page(\''.$nonce.'\', \'prev\');" style="margin:0 4px; font-weight:bold; display:'.( $curpage == 1 ? 'none' : 'inline' ).';">&#60;</a>';
-	$echo_str .= $dlp."\t".'<label style="margin:0 0 0 4px; cursor:default;">'.WFU_PAGINATION_PAGE.'</label>';
-	$echo_str .= $dlp."\t".'<select id="wfu_'.$code.'_pages" style="margin:0 4px;" onchange="wfu_goto_'.$code.'_page(\''.$nonce.'\', \'sel\');">';
+	$echo_str .= $dlp."\t".'<label id="wfu_'.esc_attr($code).'_first_disabled" style="margin:0 4px; font-weight:bold; opacity:0.5; cursor:default; display:'.( $curpage == 1 ? 'inline' : 'none' ).';">&#60;&#60;</label>';
+	$echo_str .= $dlp."\t".'<label id="wfu_'.esc_attr($code).'_prev_disabled" style="margin:0 4px; font-weight:bold; opacity:0.5; cursor:default; display:'.( $curpage == 1 ? 'inline' : 'none' ).';">&#60;</label>';
+	$echo_str .= $dlp."\t".'<a id="wfu_'.esc_attr($code).'_first" href="javascript:wfu_goto_'.esc_attr($code).'_page(\''.esc_attr($nonce).'\', \'first\');" style="margin:0 4px; font-weight:bold; display:'.( $curpage == 1 ? 'none' : 'inline' ).';">&#60;&#60;</a>';
+	$echo_str .= $dlp."\t".'<a id="wfu_'.esc_attr($code).'_prev" href="javascript:wfu_goto_'.esc_attr($code).'_page(\''.esc_attr($nonce).'\', \'prev\');" style="margin:0 4px; font-weight:bold; display:'.( $curpage == 1 ? 'none' : 'inline' ).';">&#60;</a>';
+	$echo_str .= $dlp."\t".'<label style="margin:0 0 0 4px; cursor:default;">'.esc_html(WFU_PAGINATION_PAGE).'</label>';
+	$echo_str .= $dlp."\t".'<select id="wfu_'.esc_attr($code).'_pages" style="margin:0 4px;" onchange="wfu_goto_'.esc_attr($code).'_page(\''.esc_attr($nonce).'\', \'sel\');">';
 	for ( $i = 1; $i <= $pages; $i++ )
 		$echo_str .= $dlp."\t\t".'<option value="'.$i.'"'.( $i == $curpage ? ' selected="selected"' : '' ).'>'.$i.'</option>';
 	$echo_str .= $dlp."\t".'</select>';
-	$echo_str .= $dlp."\t".'<label style="margin:0 4px 0 0; cursor:default;">'.WFU_PAGINATION_OF.$pages.'</label>';
-	$echo_str .= $dlp."\t".'<label id="wfu_'.$code.'_next_disabled" style="margin:0 4px; font-weight:bold; opacity:0.5; cursor:default; display:'.( $curpage == $pages ? 'inline' : 'none' ).';">&#62;</label>';
-	$echo_str .= $dlp."\t".'<label id="wfu_'.$code.'_last_disabled" style="margin:0 4px; font-weight:bold; opacity:0.5; cursor:default; display:'.( $curpage == $pages ? 'inline' : 'none' ).';">&#62;&#62;</label>';
-	$echo_str .= $dlp."\t".'<a id="wfu_'.$code.'_next" href="javascript:wfu_goto_'.$code.'_page(\''.$nonce.'\', \'next\');" style="margin:0 4px; font-weight:bold; display:'.( $curpage == $pages ? 'none' : 'inline' ).';">&#62;</a>';
-	$echo_str .= $dlp."\t".'<a id="wfu_'.$code.'_last" href="javascript:wfu_goto_'.$code.'_page(\''.$nonce.'\', \'last\');" style="margin:0 4px; font-weight:bold; display:'.( $curpage == $pages ? 'none' : 'inline' ).';">&#62;&#62;</a>';
+	$echo_str .= $dlp."\t".'<label style="margin:0 4px 0 0; cursor:default;">'.esc_html(WFU_PAGINATION_OF.$pages).'</label>';
+	$echo_str .= $dlp."\t".'<label id="wfu_'.esc_attr($code).'_next_disabled" style="margin:0 4px; font-weight:bold; opacity:0.5; cursor:default; display:'.( $curpage == $pages ? 'inline' : 'none' ).';">&#62;</label>';
+	$echo_str .= $dlp."\t".'<label id="wfu_'.esc_attr($code).'_last_disabled" style="margin:0 4px; font-weight:bold; opacity:0.5; cursor:default; display:'.( $curpage == $pages ? 'inline' : 'none' ).';">&#62;&#62;</label>';
+	$echo_str .= $dlp."\t".'<a id="wfu_'.esc_attr($code).'_next" href="javascript:wfu_goto_'.esc_attr($code).'_page(\''.esc_attr($nonce).'\', \'next\');" style="margin:0 4px; font-weight:bold; display:'.( $curpage == $pages ? 'none' : 'inline' ).';">&#62;</a>';
+	$echo_str .= $dlp."\t".'<a id="wfu_'.esc_attr($code).'_last" href="javascript:wfu_goto_'.esc_attr($code).'_page(\''.esc_attr($nonce).'\', \'last\');" style="margin:0 4px; font-weight:bold; display:'.( $curpage == $pages ? 'none' : 'inline' ).';">&#62;&#62;</a>';
 	$echo_str .= $dlp.'</div>';
 	
 	return $echo_str;
@@ -6243,13 +6552,13 @@ function wfu_add_pagination_header($dlp, $code, $curpage, $pages, $nonce = false
 function wfu_add_bulkactions_header($dlp, $code, $actions) {
 	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$echo_str = $dlp.'<div style="float:left;">';
-	$echo_str .= $dlp."\t".'<select id="wfu_'.$code.'_bulkactions" onchange="wfu_apply_bulkaction_select(\''.$code.'\');">';
-	$echo_str .= $dlp."\t\t".'<option value="" selected="selected">'.( substr($code, 0, 8) == "browser_" ? WFU_BROWSER_BULKACTION_TITLE : "Bulk Actions").'</option>';
+	$echo_str .= $dlp."\t".'<select id="wfu_'.esc_attr($code).'_bulkactions" onchange="wfu_apply_bulkaction_select(\''.esc_attr($code).'\');">';
+	$echo_str .= $dlp."\t\t".'<option value="" selected="selected">'.( substr($code, 0, 8) == "browser_" ? esc_html(WFU_BROWSER_BULKACTION_TITLE) : esc_html__('Bulk Actions', 'wp-file-upload')).'</option>';
 	foreach ( $actions as $action )
-		$echo_str .= $dlp."\t\t".'<option value="'.$action["name"].'">'.$action["title"].'</option>';
+		$echo_str .= $dlp."\t\t".'<option value="'.esc_attr($action["name"]).'">'.esc_html($action["title"]).'</option>';
 	$echo_str .= $dlp."\t".'</select>';
-	$echo_str .= $dlp."\t".'<input type="button" class="button action" value="'.( substr($code, 0, 8) == "browser_" ? WFU_BROWSER_BULKACTION_LABEL : "Apply").'" onclick="wfu_apply_'.$code.'_bulkaction();" />';
-	$echo_str .= $dlp."\t".'<img src="'.WFU_IMAGE_OVERLAY_LOADING.'" style="display:none;" />';
+	$echo_str .= $dlp."\t".'<input type="button" class="button action" value="'.( substr($code, 0, 8) == "browser_" ? esc_html(WFU_BROWSER_BULKACTION_LABEL) : esc_html__('Apply', 'wp-file-upload')).'" onclick="wfu_apply_'.esc_attr($code).'_bulkaction();" />';
+	$echo_str .= $dlp."\t".'<img src="'.esc_url(WFU_IMAGE_OVERLAY_LOADING).'" style="display:none;" />';
 	$echo_str .= $dlp.'</div>';
 	
 	return $echo_str;
@@ -6283,17 +6592,17 @@ function wfu_add_multifilter_header($dlp, $code, $filters, $is_first) {
 	$echo_str .= $dlp."\t".'<ul class="subsubsub">';
 	$i = 0;
 	foreach ( $filters as $filter ) {
-		$echo_str .= $dlp."\t\t".'<li class="'.$filter["code"].'">';
+		$echo_str .= $dlp."\t\t".'<li class="'.esc_attr($filter["code"]).'">';
 		$echo_str .= $dlp."\t\t\t".'<input id="filter-'.$i.'" type="checkbox"'.( $filter["checked"] ? ' checked="checked"' : '' ).' onchange="wfu_filter_check_changed(this);" />';
-		$echo_str .= $dlp."\t\t\t".'<label for="filter-'.$i.'"'.( $filter["checked"] ? ' class="current" aria-current="page"' : '' ).'>'.$filter["title"].' ';
-		$echo_str .= $dlp."\t\t\t\t".'<span class="count">('.$filter["count"].')</span>';
+		$echo_str .= $dlp."\t\t\t".'<label for="filter-'.$i.'"'.( $filter["checked"] ? ' class="current" aria-current="page"' : '' ).'>'.esc_html($filter["title"]).' ';
+		$echo_str .= $dlp."\t\t\t\t".'<span class="count">('.esc_attr($filter["count"]).')</span>';
 		$echo_str .= $dlp."\t\t\t".'</label>';
 		if ( $i < count($filters) - 1 ) $echo_str .= ' |';
 		$echo_str .= $dlp."\t\t".'</li>';
 		$i++;
 	}
 	$echo_str .= $dlp."\t".'</ul>';
-	$echo_str .= $dlp."\t".'<input type="button" class="button action" value="Apply" onclick="wfu_apply_'.$code.'_filter();"'.( count($filters) == 0 ? ' style="display: none;"' : '' ).' />';
+	$echo_str .= $dlp."\t".'<input type="button" class="button action" value="Apply" onclick="wfu_apply_'.esc_attr($code).'_filter();"'.( count($filters) == 0 ? ' style="display: none;"' : '' ).' />';
 	$echo_str .= $dlp.'</div>';
 	
 	return $echo_str;
@@ -6352,7 +6661,8 @@ function wfu_send_notification_email($user, $uploaded_file_paths, $userdata_fiel
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
 	
 	//get consent status
-	$consent_revoked = ( $plugin_options["personaldata"] == "1" && $params["consent_result"] == "0" );
+	$consent_result = wfu_check_user_consent($user);
+	$consent_revoked = ( $plugin_options["personaldata"] == "1" && $consent_result == "0" );
 	$not_store_files = ( $params["personaldatatypes"] == "userdata and files" );
 	//create necessary variables
 	$only_filename_list = "";
@@ -6701,12 +7011,16 @@ function wfu_parse_userdata_attribute($value){
  * @return bool True if the honeypot field is filled, false otherwise.
  */
 function wfu_check_remove_honeypot_fields(&$userdata_fields, $post_key) {
+	//security check to avoid CSRF attacks
+	$nonce = ( isset($_REQUEST['wfu_uploader_nonce']) ? sanitize_text_field( wp_unslash ( $_REQUEST['wfu_uploader_nonce'] ) ) : '' );
+	if ( !wp_verify_nonce($nonce, 'wfu-uploader-nonce') ) return false;
+	
 	//check if honeypot userdata fields have been added to the form and if they
 	//contain any data
 	$honeypot_filled = false;
 	foreach ( $userdata_fields as $userdata_key => $userdata_field ) {
 		if ( $userdata_field["type"] == "honeypot" ) {
-			$val = ( isset($_POST[$post_key.$userdata_key]) ? $_POST[$post_key.$userdata_key] : "" );
+			$val = ( isset($_POST[$post_key.$userdata_key]) ? sanitize_text_field($_POST[$post_key.$userdata_key]) : "" );
 			//if a non-zero value has been passed to the server, this means
 			//that it has been filled by a bot
 			if ( $val != "" ) {
@@ -6737,7 +7051,7 @@ function wfu_check_remove_honeypot_fields(&$userdata_fields, $post_key) {
  * @return string The session ID.
  */
 function wfu_get_session_cookie() {
-	return isset($_COOKIE[WPFILEUPLOAD_COOKIE]) ? wfu_sanitize_code(substr($_COOKIE[WPFILEUPLOAD_COOKIE], 0, 32)) : "";
+	return isset($_COOKIE[WPFILEUPLOAD_COOKIE]) ? wfu_sanitize_code(substr(sanitize_text_field($_COOKIE[WPFILEUPLOAD_COOKIE]), 0, 32)) : "";
 }
 
 /**
@@ -6937,7 +7251,7 @@ function WFU_USVAR_session($var) {
 	$session_id = session_id();
 	$open_session = ( WFU_VAR("WFU_US_SESSION_LEGACY") != "true" && ( function_exists("session_status") ? ( PHP_SESSION_ACTIVE !== session_status() ) : ( session_id() == "" ) ) );
 	if ( $open_session ) session_start();
-	$value = $_SESSION[$var];
+	$value = ( isset($_SESSION[$var]) ? $_SESSION[$var] : null );
 	if ( $open_session ) session_write_close();
 	return $value;
 }
@@ -7342,8 +7656,8 @@ function wfu_check_user_consent($user) {
 		//check in user state for consent
 		if ( WFU_USVAR_exists('WFU_Consent_Data') ) {
 			$data = WFU_USVAR('WFU_Consent_Data');
-			if ( isset($data["consent_status"]) )
-				$result = $data["consent_status"];
+			if ( is_array($data) && isset($data["consent_status"]) )
+				$result = wfu_sanitize_code($data["consent_status"]);
 		}
 	}
 	
@@ -7376,6 +7690,7 @@ function wfu_update_user_consent($user, $consent_result) {
 		//check in user state for consent
 		if ( WFU_USVAR_exists('WFU_Consent_Data') ) $data = WFU_USVAR('WFU_Consent_Data');
 		else $data = array();
+		if ( !is_array($data) ) $data = array();
 		$data["consent_status"] = ( $consent_result == "yes" ? "1" : ( $consent_result == "no" ? "0" : "" ) );
 		WFU_USVAR_store( 'WFU_Consent_Data', $data );
 	}
@@ -7400,7 +7715,7 @@ function wfu_show_consent_profile_fields($user) {
 	if ( !isset($data["consent_status"]) ) $data["consent_status"] = "";
 	$status = $data["consent_status"];
 	
-	$echo_str = "\n\t".'<h3>'.esc_html__( 'Wordpress File Upload Consent Status', 'wp-file-upload' ).'</h3>';
+	$echo_str = "\n\t".'<h3>'.esc_html__( 'Iptanus File Upload Consent Status', 'wp-file-upload' ).'</h3>';
 	$echo_str .= "\n\t".'<table class="form-table">';
 	$echo_str .= "\n\t\t".'<tr>';
 	$echo_str .= "\n\t\t\t".'<th><label>'.esc_html__( 'Consent Status', 'wp-file-upload' ).'</label></th>';
@@ -7462,7 +7777,7 @@ function wfu_update_consent_profile_fields( $user_id ) {
 		return false;
 	}
 
-	$status = $_POST['consent_status'];
+	$status = ( isset($_POST['consent_status']) ? wfu_sanitize_posint($_POST['consent_status']) : '-1' );
 	if ( $status == '1' || $status == '0' || $status == '' ) {
 		$data = get_the_author_meta( 'WFU_Consent_Data', $user_id );
 		if ( !$data ) $data = array();
@@ -7488,6 +7803,7 @@ function wfu_update_consent_profile_fields( $user_id ) {
 function wfu_safe_store_browser_params($params) {
 	$code = wfu_create_random_string(16);
 	$safe_storage = ( WFU_USVAR_exists('wfu_browser_actions_safe_storage') ? WFU_USVAR('wfu_browser_actions_safe_storage') : array() );
+	if ( !is_array($safe_storage) ) $safe_storage = array();
 	$safe_storage[$code] = $params;
 	WFU_USVAR_store('wfu_browser_actions_safe_storage', $safe_storage);
 	return $code;
@@ -7512,7 +7828,7 @@ function wfu_get_browser_params_from_safe($code) {
 	//return params from session variable, if exists
 	if ( !WFU_USVAR_exists('wfu_browser_actions_safe_storage') ) return false;
 	$safe_storage = WFU_USVAR('wfu_browser_actions_safe_storage');
-	if ( !isset($safe_storage[$code]) ) return false;
+	if ( !is_array($safe_storage) || !isset($safe_storage[$code]) ) return false;
 	return $safe_storage[$code];
 }
 
@@ -7798,16 +8114,19 @@ function wfu_add_proxy_param(&$config) {
  * @since 3.10.0
  *
  * @param string $response The raw sockets HTTP response.
+ * @param bool $decode_contents Optional. If it is true then the function will
+ *             decode the response contents. Used only when Post Method is
+ *             sockets.
  *
  * @return string The clean HTTP response data.
  */
-function wfu_decode_socket_response($response) {
+function wfu_decode_socket_response($response, $decode_contents = false) {
 	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	global $wfu_http_response_header;
 	$ret = false;
 	$parts = preg_split("#\n\s*\n#Uis", $response);
 	$wfu_http_response_header = explode("\r\n", $parts[0]);
-	if (0 === strpos($response, 'HTTP/1.1 200 OK')) {
+	if ( $decode_contents && 0 === strpos($response, 'HTTP/1.1 200 OK') ) {
 		if ( count($parts) > 1 ) {
 			$rawheader = strtolower(preg_replace("/\s/", "", $parts[0]));
 			if ( strpos($rawheader, 'transfer-encoding:chunked') !== false ) {
@@ -7861,41 +8180,22 @@ function wfu_post_request($url, $params, $verifypeer = true, $internal_request =
 		'internal_request' => $internal_request,
 		'timeout' => $timeout
 	);
-	//check proxy
-	$proxy = new WP_HTTP_Proxy();
-	if ( isset($plugin_options['postmethod']) && $plugin_options['postmethod'] == 'curl' ) {
-		// POST request using CURL
-		$http_response_header = array();
-		$ch = curl_init($url);
-		$options = array(
-			CURLOPT_POST => true,
-			CURLOPT_POSTFIELDS => http_build_query($params),
-			CURLOPT_HTTPHEADER => array(
-				'Content-Type: application/x-www-form-urlencoded'
-			),
-			CURLINFO_HEADER_OUT => false,
-			CURLOPT_HEADER => false,
-			CURLOPT_RETURNTRANSFER => true,
-			CURLOPT_SSL_VERIFYPEER => $verifypeer,
-			CURLOPT_SSL_VERIFYHOST => ( $verifypeer ? 2 : false ),
-			CURLOPT_HEADERFUNCTION => 'wfu_curl_read_response_header'
+	{
+		// POST request using default WP post
+		if ( $internal_request && WFU_VAR("WFU_DASHBOARD_PROTECTED") == "true" ) {
+			$url = preg_replace("/^(http|https):\/\//", "$1://".WFU_VAR("WFU_DASHBOARD_USERNAME").":".WFU_VAR("WFU_DASHBOARD_PASSWORD")."@", $url);
+		}
+		$args = array(
+			'body' => $params,
+			'sslverify' => $verifypeer
 		);
-		if ( $timeout > 0 ) $options[CURLOPT_TIMEOUT] = $timeout;
+		if ( $timeout > 0 ) $args['timeout'] = $timeout;
 		//for internal requests to /wp-admin area that is password protected
 		//authorization is required
 		if ( $internal_request && WFU_VAR("WFU_DASHBOARD_PROTECTED") == "true" ) {
-			$options[CURLOPT_HTTPAUTH] = CURLAUTH_ANY;
-			$options[CURLOPT_USERPWD] = WFU_VAR("WFU_DASHBOARD_USERNAME").":".WFU_VAR("WFU_DASHBOARD_PASSWORD");
-		}
-		if ( WFU_VAR("WFU_RELAX_CURL_VERIFY_HOST") == "true" ) $options[CURLOPT_SSL_VERIFYHOST] = false;
-		//configure cURL request for proxy
-		if ( $proxy->is_enabled() && $proxy->send_through_proxy($url) ) {
-			$options[CURLOPT_PROXYTYPE] = CURLPROXY_HTTP;
-			$options[CURLOPT_PROXY] = $proxy->host().":".$proxy->port();
-			if ( $proxy->use_authentication() ) {
-				$options[CURLOPT_PROXYAUTH] = CURLAUTH_ANY;
-				$options[CURLOPT_PROXYUSERPWD] = $proxy->authentication();
-			}
+			$args['headers'] = array(
+				'Authorization' => 'Basic '.base64_encode(WFU_VAR("WFU_DASHBOARD_USERNAME").':'.WFU_VAR("WFU_DASHBOARD_PASSWORD"))
+			);
 		}
 		/**
 		 * Customize POST Request Options.
@@ -7920,105 +8220,15 @@ function wfu_post_request($url, $params, $verifypeer = true, $internal_request =
 		 *        @type int $timeout The request timeout in seconds.
 		 * }
 		 */
-		$options = apply_filters("_wfu_post_request_options", $options, "curl", $default_args);
-		curl_setopt_array($ch, $options);
-		$result = curl_exec($ch);
-		curl_close ($ch);
-		
-		return $result;
-	}
-	elseif ( isset($plugin_options['postmethod']) && $plugin_options['postmethod'] == 'socket' ) {
-		// POST request using sockets
-		$scheme = "";
-		$port = 80;
-		$errno = 0;
-        $errstr = '';
-		$ret = '';
-		$url_parts = parse_url($url);
-		$host = $url_parts['host'];
-		$socket_host = $host;
-		$path = $url_parts['path'];
-		if ( $url_parts['scheme'] == 'https' ) { 
-			$scheme = "ssl://";
-			$port = 443;
-			if ( $timeout == 0 ) $timeout = 30;
+		$args = apply_filters("_wfu_post_request_options", $args, "wp", $default_args);
+		$result = null;
+		$response = wp_remote_post($url, $args);
+		if ( !is_wp_error($response) ) {
+			$result = wp_remote_retrieve_body($response);
+			// run the following function on the raw response in order to
+			// populate the headers in the same format as in the previous blocks
+			wfu_decode_socket_response($response['http_response']->get_response_object()->raw);
 		}
-		elseif ( $url_parts['scheme'] != 'http' ) return '';
-		//configure sockets request for proxy
-		if ( $proxy->is_enabled() && $proxy->send_through_proxy($url) ) {
-			$scheme = "";
-			$socket_host = $proxy->host();
-			$port = $proxy->port();
-			$path = $url;
-		}
-		if ( $verifypeer ) $handle = fsockopen($scheme.$socket_host, $port, $errno, $errstr, ($timeout == 0 ? ini_get("default_socket_timeout") : $timeout));
-		else {
-			$context = stream_context_create(array(
-				'ssl' => array(
-					'verify_peer' => false,
-					'verify_peer_name' => false
-			)));
-			$handle = stream_socket_client($scheme.$socket_host.":".$port, $errno, $errstr, ($timeout == 0 ? ini_get("default_socket_timeout") : $timeout), STREAM_CLIENT_CONNECT, $context);
-		}
-		if ( $errno !== 0 || $errstr !== '' ) $handle = false;
-		if ( $handle !== false ) {
-			$content = http_build_query($params);
-			$request = "POST " . $path . " HTTP/1.1\r\n";
-			$request .= "Host: " . $host . "\r\n";
-			$request .= "Content-Type: application/x-www-form-urlencoded\r\n";
-			//for internal requests to /wp-admin area that is password protected
-			//authorization is required
-			if ( $internal_request && WFU_VAR("WFU_DASHBOARD_PROTECTED") == "true" )
-				$request .= "Authorization: Basic ".base64_encode(WFU_VAR("WFU_DASHBOARD_USERNAME").":".WFU_VAR("WFU_DASHBOARD_PASSWORD"))."\r\n";
-			//add proxy authentication if exists and is required
-			if ( $proxy->is_enabled() && $proxy->send_through_proxy($url) && $proxy->use_authentication() )
-				$request .= $proxy->authentication_header()."\r\n";
-			$request .= "Content-length: " . strlen($content) . "\r\n";
-			$request .= "Connection: close\r\n\r\n";
-			$request .= $content . "\r\n\r\n";
-			/** This filter is explained above. */
-			$request = apply_filters("_wfu_post_request_options", $request, "socket", $default_args);
-			fwrite($handle, $request, strlen($request));
-			$response = '';
-			while ( !feof($handle) ) {
-                $response .= fgets($handle, 4096);
-            }
-			fclose($handle);
-			$ret = wfu_decode_socket_response($response);
-		}
-		return $ret;
-	}
-	else {
-		// POST request using file_get_contents
-		if ( $internal_request && WFU_VAR("WFU_DASHBOARD_PROTECTED") == "true" ) {
-			$url = preg_replace("/^(http|https):\/\//", "$1://".WFU_VAR("WFU_DASHBOARD_USERNAME").":".WFU_VAR("WFU_DASHBOARD_PASSWORD")."@", $url);
-		}
-		$peer_key = version_compare(PHP_VERSION, '5.6.0', '<') ? 'CN_name' : 'peer_name';
-		$http_array = array(
-			'method'  => 'POST',
-			'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-			'content' => http_build_query($params)
-		);
-		//configure fopen request for proxy
-		if ( $proxy->is_enabled() && $proxy->send_through_proxy($url) ) {
-			$http_array['proxy'] = 'tcp://'.$proxy->host().":".$proxy->port();
-			if ( $proxy->use_authentication() )
-				$http_array['header'] .= $proxy->authentication_header()."\r\n";
-		}
-		if ( $timeout > 0 ) $http_array['timeout'] = $timeout;
-		//for internal requests to /wp-admin area that is password protected
-		//authorization is required
-		if ( $internal_request && WFU_VAR("WFU_DASHBOARD_PROTECTED") == "true" ) {
-			$http_array['header'] .= "Authorization: Basic ".base64_encode(WFU_VAR("WFU_DASHBOARD_USERNAME").":".WFU_VAR("WFU_DASHBOARD_PASSWORD"))."\r\n";
-		}
-		$context_params = array( 'http' => $http_array );
-		if ( !$verifypeer ) $context_params['ssl'] = array( 'verify_peer' => false, 'allow_self_signed' => true, 'verify_peer_name' => false );
-		/** This filter is explained above. */
-		$context_params = apply_filters("_wfu_post_request_options", $context_params, "fopen", $default_args);
-		$context = stream_context_create($context_params);
-		
-		$result = file_get_contents($url, false, $context);
-		$wfu_http_response_header = $http_response_header;
 		
 		return $result;
 	}
@@ -8060,35 +8270,21 @@ function wfu_get_request($url, $params = array(), $verifypeer = true, $internal_
 	);
 	$http_params = http_build_query($params);
 	$url .= ( $http_params == "" ? "" : "?".$http_params );
-	//check proxy
-	$proxy = new WP_HTTP_Proxy();
-	if ( isset($plugin_options['postmethod']) && $plugin_options['postmethod'] == 'curl' ) {
-		// GET request using CURL
-		$ch = curl_init($url);
-		$options = array(
-			CURLINFO_HEADER_OUT => false,
-			CURLOPT_HEADER => false,
-			CURLOPT_RETURNTRANSFER => true,
-			CURLOPT_SSL_VERIFYPEER => $verifypeer,
-			CURLOPT_SSL_VERIFYHOST => ( $verifypeer ? 2 : false ),
-			CURLOPT_HEADERFUNCTION => 'wfu_curl_read_response_header'
+	{
+		// GET request using default WP get
+		if ( $internal_request && WFU_VAR("WFU_DASHBOARD_PROTECTED") == "true" ) {
+			$url = preg_replace("/^(http|https):\/\//", "$1://".WFU_VAR("WFU_DASHBOARD_USERNAME").":".WFU_VAR("WFU_DASHBOARD_PASSWORD")."@", $url);
+		}
+		$args = array(
+			'sslverify' => $verifypeer
 		);
-		if ( $timeout > 0 ) $options[CURLOPT_TIMEOUT] = $timeout;
+		if ( $timeout > 0 ) $args['timeout'] = $timeout;
 		//for internal requests to /wp-admin area that is password protected
 		//authorization is required
 		if ( $internal_request && WFU_VAR("WFU_DASHBOARD_PROTECTED") == "true" ) {
-			$options[CURLOPT_HTTPAUTH] = CURLAUTH_ANY;
-			$options[CURLOPT_USERPWD] = WFU_VAR("WFU_DASHBOARD_USERNAME").":".WFU_VAR("WFU_DASHBOARD_PASSWORD");
-		}
-		if ( WFU_VAR("WFU_RELAX_CURL_VERIFY_HOST") == "true" ) $options[CURLOPT_SSL_VERIFYHOST] = false;
-		//configure cURL request for proxy
-		if ( $proxy->is_enabled() && $proxy->send_through_proxy($url) ) {
-			$options[CURLOPT_PROXYTYPE] = CURLPROXY_HTTP;
-			$options[CURLOPT_PROXY] = $proxy->host().":".$proxy->port();
-			if ( $proxy->use_authentication() ) {
-				$options[CURLOPT_PROXYAUTH] = CURLAUTH_ANY;
-				$options[CURLOPT_PROXYUSERPWD] = $proxy->authentication();
-			}
+			$args['headers'] = array(
+				'Authorization' => 'Basic '.base64_encode(WFU_VAR("WFU_DASHBOARD_USERNAME").':'.WFU_VAR("WFU_DASHBOARD_PASSWORD"))
+			);
 		}
 		/**
 		 * Customize GET Request Options.
@@ -8113,99 +8309,15 @@ function wfu_get_request($url, $params = array(), $verifypeer = true, $internal_
 		 *        @type int $timeout The request timeout in seconds.
 		 * }
 		 */
-		$options = apply_filters("_wfu_get_request_options", $options, "curl", $default_args);
-		curl_setopt_array($ch, $options);
-		$result = curl_exec($ch);
-		curl_close ($ch);
-		return $result;
-	}
-	elseif ( isset($plugin_options['postmethod']) && $plugin_options['postmethod'] == 'socket' ) {
-		// GET request using sockets
-		$scheme = "";
-		$port = 80;
-		$errno = 0;
-        $errstr = '';
-		$ret = '';
-		$url_parts = parse_url($url);
-		$host = $url_parts['host'];
-		$socket_host = $host;
-		$path = $url_parts['path'];
-		if ( $url_parts['scheme'] == 'https' ) { 
-			$scheme = "ssl://";
-			$port = 443;
-			if ( $timeout == 0 ) $timeout = 30;
+		$args = apply_filters("_wfu_get_request_options", $args, "wp", $default_args);
+		$result = null;
+		$response = wp_remote_get($url, $args);
+		if ( !is_wp_error($response) ) {
+			$result = wp_remote_retrieve_body($response);
+			// run the following function on the raw response in order to
+			// populate the headers in the same format as in the previous blocks
+			wfu_decode_socket_response($response['http_response']->get_response_object()->raw);
 		}
-		elseif ( $url['scheme'] != 'http' ) return '';
-		//configure sockets request for proxy
-		if ( $proxy->is_enabled() && $proxy->send_through_proxy($url) ) {
-			$scheme = "";
-			$socket_host = $proxy->host();
-			$port = $proxy->port();
-			$path = $url;
-		}
-		if ( $verifypeer ) $handle = fsockopen($scheme.$socket_host, $port, $errno, $errstr, ($timeout == 0 ? ini_get("default_socket_timeout") : $timeout));
-		else {
-			$context = stream_context_create(array(
-				'ssl' => array(
-					'verify_peer' => false,
-					'verify_peer_name' => false
-			)));
-			$handle = stream_socket_client($scheme.$socket_host.":".$port, $errno, $errstr, ($timeout == 0 ? ini_get("default_socket_timeout") : $timeout), STREAM_CLIENT_CONNECT, $context);
-		}
-		if ( $errno !== 0 || $errstr !== '' ) $handle = false;
-		if ( $handle !== false ) {
-			$request = "GET " . $path . " HTTP/1.1\r\n";
-			$request .= "Host: " . $host . "\r\n";
-			//for internal requests to /wp-admin area that is password protected
-			//authorization is required
-			if ( $internal_request && WFU_VAR("WFU_DASHBOARD_PROTECTED") == "true" )
-				$request .= "Authorization: Basic ".base64_encode(WFU_VAR("WFU_DASHBOARD_USERNAME").":".WFU_VAR("WFU_DASHBOARD_PASSWORD"))."\r\n";
-			//add proxy authentication if exists and is required
-			if ( $proxy->is_enabled() && $proxy->send_through_proxy($url) && $proxy->use_authentication() )
-				$request .= $proxy->authentication_header()."\r\n";
-			$request .= "Connection: close\r\n\r\n";
-			$request .= $content . "\r\n\r\n";
-			/** This filter is explained above. */
-			$request = apply_filters("_wfu_get_request_options", $request, "socket", $default_args);
-			fwrite($handle, $request, strlen($request));
-			$response = '';
-			while ( !feof($handle) ) {
-                $response .= fgets($handle, 4096);
-            }
-			fclose($handle);
-			$ret = wfu_decode_socket_response($response);
-		}
-		return $ret;
-	}
-	else {
-		// GET request using file_get_contents
-		if ( $internal_request && WFU_VAR("WFU_DASHBOARD_PROTECTED") == "true" ) {
-			$url = preg_replace("/^(http|https):\/\//", "$1://".WFU_VAR("WFU_DASHBOARD_USERNAME").":".WFU_VAR("WFU_DASHBOARD_PASSWORD")."@", $url);
-		}
-		$peer_key = version_compare(PHP_VERSION, '5.6.0', '<') ? 'CN_name' : 'peer_name';
-		$http_array = array(
-			'method'  => 'GET'
-		);
-		//configure fopen request for proxy
-		if ( $proxy->is_enabled() && $proxy->send_through_proxy($url) ) {
-			$http_array['proxy'] = 'tcp://'.$proxy->host().":".$proxy->port();
-			if ( $proxy->use_authentication() )
-				$http_array['header'] .= $proxy->authentication_header()."\r\n";
-		}
-		if ( $timeout > 0 ) $http_array['timeout'] = $timeout;
-		//for internal requests to /wp-admin area that is password protected
-		//authorization is required
-		if ( $internal_request && WFU_VAR("WFU_DASHBOARD_PROTECTED") == "true" ) {
-			$http_array['header'] .= "Authorization: Basic ".base64_encode(WFU_VAR("WFU_DASHBOARD_USERNAME").":".WFU_VAR("WFU_DASHBOARD_PASSWORD"))."\r\n";
-		}
-		$context_params = array( 'http' => $http_array );
-		if ( !$verifypeer ) $context_params['ssl'] = array( 'verify_peer' => false, 'allow_self_signed' => true, 'verify_peer_name' => false );
-		/** This filter is explained above. */
-		$context_params = apply_filters("_wfu_get_request_options", $context_params, "fopen", $default_args);
-		$context = stream_context_create($context_params);
-
-		$result = file_get_contents($url, false, $context);
-		$wfu_http_response_header = $http_response_header;
 		
 		return $result;
 	}

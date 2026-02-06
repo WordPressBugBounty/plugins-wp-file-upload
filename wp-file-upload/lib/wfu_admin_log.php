@@ -8,10 +8,12 @@
  *
  * @link /lib/wfu_admin_log.php
  *
- * @package WordPress File Upload Plugin
+ * @package Iptanus File Upload Plugin
  * @subpackage Core Components
  * @since 2.4.1
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
  * Display the View Log Page.
@@ -72,19 +74,19 @@ function wfu_view_log($page = 1, $only_table_rows = false, $located_rec = -1) {
 		$echo_str .= "\n\t\t\t\t\t\t".'<label>#</label>';
 		$echo_str .= "\n\t\t\t\t\t".'</th>';
 		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="30%" class="manage-column column-primary">';
-		$echo_str .= "\n\t\t\t\t\t\t".'<label>File</label>';
+		$echo_str .= "\n\t\t\t\t\t\t".'<label>'.esc_html__('File', 'wp-file-upload').'</label>';
 		$echo_str .= "\n\t\t\t\t\t".'</th>';
 		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="10%" class="manage-column">';
-		$echo_str .= "\n\t\t\t\t\t\t".'<label>Action</label>';
+		$echo_str .= "\n\t\t\t\t\t\t".'<label>'.esc_html__('Action', 'wp-file-upload').'</label>';
 		$echo_str .= "\n\t\t\t\t\t".'</th>';
 		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="15%" class="manage-column">';
-		$echo_str .= "\n\t\t\t\t\t\t".'<label>Date</label>';
+		$echo_str .= "\n\t\t\t\t\t\t".'<label>'.esc_html__('Date', 'wp-file-upload').'</label>';
 		$echo_str .= "\n\t\t\t\t\t".'</th>';
 		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="15%" class="manage-column">';
-		$echo_str .= "\n\t\t\t\t\t\t".'<label>User</label>';
+		$echo_str .= "\n\t\t\t\t\t\t".'<label>'.esc_html__('User', 'wp-file-upload').'</label>';
 		$echo_str .= "\n\t\t\t\t\t".'</th>';
 		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="25%" class="manage-column">';
-		$echo_str .= "\n\t\t\t\t\t\t".'<label>Remarks</label>';
+		$echo_str .= "\n\t\t\t\t\t\t".'<label>'.esc_html__('Remarks', 'wp-file-upload').'</label>';
 		$echo_str .= "\n\t\t\t\t\t".'</th>';
 		$echo_str .= "\n\t\t\t\t".'</tr>';
 		$echo_str .= "\n\t\t\t".'</thead>';
@@ -110,10 +112,10 @@ function wfu_view_log($page = 1, $only_table_rows = false, $located_rec = -1) {
 		$i ++;
 		$echo_str .= "\n\t\t\t\t".'<tr'.( $located_rec > 0 && $filerec->idlog == $located_rec ? ' class="wfu-highlighted"' : '' ).'>';
 		$echo_str .= "\n\t\t\t\t\t".'<th style="word-wrap: break-word;">'.$i.'</th>';
-		$echo_str .= "\n\t\t\t\t\t".'<td class="column-primary" data-colname="File">';
-		if ( $filerec->action == 'other' ) $echo_str .= "\n\t\t\t\t\t\t".'<span>Other action not related to file</span>';
-		elseif ( $filerec->action == 'datasubmit' ) $echo_str .= "\n\t\t\t\t\t\t".'<span>Submission of data without file</span>';
-		elseif ( in_array($filerec->linkedto, $deletedfiles) || in_array($filerec->idlog, $deletedfiles) ) $echo_str .= "\n\t\t\t\t\t\t".'<span>'.$displayed_path.'</span>';
+		$echo_str .= "\n\t\t\t\t\t".'<td class="column-primary" data-colname="'.esc_html__('File', 'wp-file-upload').'">';
+		if ( $filerec->action == 'other' ) $echo_str .= "\n\t\t\t\t\t\t".'<span>'.esc_html__('Other action not related to file', 'wp-file-upload').'</span>';
+		elseif ( $filerec->action == 'datasubmit' ) $echo_str .= "\n\t\t\t\t\t\t".'<span>'.esc_html__('Submission of data without file', 'wp-file-upload').'</span>';
+		elseif ( in_array($filerec->linkedto, $deletedfiles) || in_array($filerec->idlog, $deletedfiles) ) $echo_str .= "\n\t\t\t\t\t\t".'<span>'.esc_html($displayed_path).'</span>';
 		else {
 			//find newest linked record
 			$newestidlog = $filerec->idlog;
@@ -146,16 +148,16 @@ function wfu_view_log($page = 1, $only_table_rows = false, $located_rec = -1) {
 				if ( !isset($filecodes[$lid]) ) {
 					$filecodes[$lid] = ( wfu_check_file_remote_basic($file_abspath) ? "byID:".$filerec->idlog : wfu_safe_store_filepath($filerec->filepath) );
 				}
-				$echo_str .= "\n\t\t\t\t\t\t".'<a class="row-title" href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_details&file='.$filecodes[$lid].'&invoker='.$logpagecode.'" title="View and edit file details" style="font-weight:normal;">'.$displayed_path.'</a>';
+				$echo_str .= "\n\t\t\t\t\t\t".'<a class="row-title" href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_details&file='.$filecodes[$lid].'&invoker='.$logpagecode.'&c='.wp_create_nonce('wfu_admin_nonce')).'" title="'.esc_html__('View and edit file details', 'wp-file-upload').'" style="font-weight:normal;">'.esc_html($displayed_path).'</a>';
 			}
-			else $echo_str .= "\n\t\t\t\t\t\t".'<span>'.$displayed_path.'</span>';
+			else $echo_str .= "\n\t\t\t\t\t\t".'<span>'.esc_html($displayed_path).'</span>';
 		}
-		$echo_str .= "\n\t\t\t\t\t\t".'<button type="button" class="toggle-row"><span class="screen-reader-text">Show more details</span></button>';
+		$echo_str .= "\n\t\t\t\t\t\t".'<button type="button" class="toggle-row"><span class="screen-reader-text">'.esc_html__('Show more details', 'wp-file-upload').'</span></button>';
 		$echo_str .= "\n\t\t\t\t\t".'</td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Action">'.( $filerec->action != 'other' && $filerec->action != 'datasubmit' ? $filerec->action : '' ).'</td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Date">'.get_date_from_gmt($filerec->date_from).'</td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="User">'.wfu_get_username_by_id($filerec->userid).'</td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Remarks">';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="'.esc_html__('Action', 'wp-file-upload').'">'.( $filerec->action != 'other' && $filerec->action != 'datasubmit' ? esc_html($filerec->action) : '' ).'</td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="'.esc_html__('Date', 'wp-file-upload').'">'.get_date_from_gmt($filerec->date_from).'</td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="'.esc_html__('User', 'wp-file-upload').'">'.esc_html(wfu_get_username_by_id($filerec->userid)).'</td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="'.esc_html__('Remarks', 'wp-file-upload').'">';
 		$echo_str .= $remarks;
 		$echo_str .= "\n\t\t\t\t\t".'</td>';
 		$echo_str .= "\n\t\t\t\t".'</tr>';
@@ -175,33 +177,74 @@ function wfu_view_log($page = 1, $only_table_rows = false, $located_rec = -1) {
 	return $echo_str;
 }
 
+/**
+ * Generate Log Remarks.
+ *
+ * Generates the log remarks.
+ *
+ * @since 4.25.0
+ *
+ * @param object $filerec The file record.
+ * @param int $index The index of the view log line.
+ * @param array $userdatarecs Userdata of the file record.
+ * @return string The HTML code of the remarks.
+ */
 function wfu_generate_log_remarks($filerec, $index, $userdatarecs) {
+	/**
+	 * Render Plain Remarks.
+	 *
+	 * Renders remarks with a plain format. The content may contain an icon code
+	 * inside HTML comments.
+	 *
+	 * @param string $content The content to display as remarks.
+	 * @return string The HTML code of the remarks.
+	 */
 	$render_plain_remarks = function($content) {
 		// extract icon from $content, it will be enclosed in HTML comments
 		$icon = preg_replace("/^(<!--\s*(.*?)\s*-->)?.*/", "$2", $content);
-		$icon = ( $icon === "" ? "" : "&#x".$icon );
+		$icon = ( $icon === "" ? "" : "&#x".esc_attr($icon) );
 		$content = preg_replace("/^<!--.*?-->/", "", $content);
-		$remarks = "\n\t\t\t\t\t\t".'<label class="wfu-historylog-remarks-plain'.( $icon === "" ? '' : ' wfu-icon' ).'" data-icon="'.$icon.'">'.$content.'</label>';
+		$remarks = "\n\t\t\t\t\t\t".'<label class="wfu-historylog-remarks-plain'.( $icon === "" ? '' : ' wfu-icon' ).'" data-icon="'.$icon.'">'.esc_html($content).'</label>';
 		return $remarks;
 	};
+	/**
+	 * Render Key-Value Remarks.
+	 *
+	 * Renders remarks with a key-value format.
+	 *
+	 * @param array $content The content to display as remarks, which contains
+	 *        a list of key-value pairs.
+	 * @return string The HTML code of the remarks.
+	 */
 	$render_keyvalue_remarks_content = function($content) {
 		$remarks = '';
 		foreach ( $content as $item ) {
 			$remarks .= "\n\t\t\t\t\t\t\t\t".'<div class="wfu-historylog-remarks-row">';
-			$remarks .= "\n\t\t\t\t\t\t\t\t\t".'<span class="wfu-historylog-remarks-label">'.esc_attr($item["key"]).':</span>';
-			$remarks .= "\n\t\t\t\t\t\t\t\t\t".'<span class="wfu-historylog-remarks-value">'.esc_attr($item["value"]).'</span>';
+			$remarks .= "\n\t\t\t\t\t\t\t\t\t".'<span class="wfu-historylog-remarks-label">'.esc_html($item["key"]).':</span>';
+			$remarks .= "\n\t\t\t\t\t\t\t\t\t".'<span class="wfu-historylog-remarks-value">'.esc_html($item["value"]).'</span>';
 			$remarks .= "\n\t\t\t\t\t\t\t\t".'</div>';
 		}
 		return $remarks;
 	};
+	/**
+	 * Render A Remarks Block.
+	 *
+	 * Renders a remarks block.
+	 *
+	 * @param string $title The title of the remarks block.
+	 * @param array $content The content to display.
+	 * @param int $index The index of the view log line.
+	 * @param int $icon An icon code to display.
+	 * @return string The HTML code of the remarks.
+	 */
 	$render_remarks_block = function($title, $content, $index, $icon) {
-		$icon = ( $icon === "" ? "" : "&#x".$icon );
+		$icon = ( $icon === "" ? "" : "&#x".esc_attr($icon) );
 		$remarks = "\n\t\t\t\t\t\t".'<div class="wfu-historylog-remarks">';
 		if ( $title !== "" ) {
-			$remarks .= "\n\t\t\t\t\t\t\t".'<input type="checkbox" class="wfu-historylog-remarks-switch" id="wfu_historylog_remarks_switch_'.$index.'" checked />';
+			$remarks .= "\n\t\t\t\t\t\t\t".'<input type="checkbox" class="wfu-historylog-remarks-switch" id="wfu_historylog_remarks_switch_'.esc_attr($index).'" checked />';
 			$remarks .= "\n\t\t\t\t\t\t\t".'<div class="wfu-historylog-remarks-header">';
-			$remarks .= "\n\t\t\t\t\t\t\t\t".'<label class="wfu-historylog-remarks-title'.( $icon === "" ? '' : ' wfu-icon' ).'" data-icon="'.$icon.'">'.esc_attr($title).'</label>';
-			$remarks .= "\n\t\t\t\t\t\t\t\t".'<label class="wfu-historylog-remarks-toggle" for="wfu_historylog_remarks_switch_'.$index.'"></label>';
+			$remarks .= "\n\t\t\t\t\t\t\t\t".'<label class="wfu-historylog-remarks-title'.( $icon === "" ? '' : ' wfu-icon' ).'" data-icon="'.$icon.'">'.esc_html($title).'</label>';
+			$remarks .= "\n\t\t\t\t\t\t\t\t".'<label class="wfu-historylog-remarks-toggle" for="wfu_historylog_remarks_switch_'.esc_attr($index).'"></label>';
 			$remarks .= "\n\t\t\t\t\t\t\t".'</div>';
 		}
 		$remarks .= "\n\t\t\t\t\t\t\t".'<div class="wfu-historylog-remarks-content'.( $title === "" ? ' wfu-visible' : ' wfu-indent' ).'">'.$content;
@@ -216,7 +259,7 @@ function wfu_generate_log_remarks($filerec, $index, $userdatarecs) {
 		$prevfilerec = wfu_get_file_rec_from_id($filerec->linkedto);
 		if ( $prevfilerec != null ) $prevfilepath = $prevfilerec->filepath;
 		if ( $prevfilepath != '' )
-			$remarks = $render_plain_remarks("Previous filepath: $prevfilepath");
+			$remarks = $render_plain_remarks(__('Previous filepath:', 'wp-file-upload')." $prevfilepath");
 	}
 	elseif ( $filerec->action == 'upload' || $filerec->action == 'modify' || $filerec->action == 'datasubmit' ) {
 		$userdata_remarks = array();
@@ -233,7 +276,7 @@ function wfu_generate_log_remarks($filerec, $index, $userdatarecs) {
 		}
 		if ( count($userdata_remarks) > 0 ) {
 			$remarks_content = $render_keyvalue_remarks_content($userdata_remarks);
-			$remarks .= $render_remarks_block("Userdata", $remarks_content, $index, 'f337');
+			$remarks .= $render_remarks_block(__('Userdata', 'wp-file-upload'), $remarks_content, $index, 'f337');
 		}
 	}
 	elseif ( $filerec->action == 'changeuser' ) {
@@ -242,7 +285,7 @@ function wfu_generate_log_remarks($filerec, $index, $userdatarecs) {
 		if ( $prevfilerec != null ) $prevuploaduserid = $prevfilerec->uploaduserid;
 		if ( $prevuploaduserid != '' ) {
 			$prevuploaduser = wfu_get_username_by_id($prevuploaduserid);
-			$remarks = $render_plain_remarks("Previous upload user: $prevuploaduser");
+			$remarks = $render_plain_remarks(__('Previous upload user:', 'wp-file-upload')." $prevuploaduser");
 		}
 	}
 	elseif ( $filerec->action == 'other' ) {

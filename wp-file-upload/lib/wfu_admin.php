@@ -8,10 +8,12 @@
  *
  * @link /lib/wfu_admin.php
  *
- * @package WordPress File Upload Plugin
+ * @package Iptanus File Upload Plugin
  * @subpackage Core Components
  * @since 2.1.2
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
  * Register Dashboard Styles and Scripts.
@@ -21,7 +23,7 @@
  * @since 2.4.6
  */
 function wordpress_file_upload_admin_init() {
-	$uri = $_SERVER['REQUEST_URI'];
+	$uri = ( isset($_SERVER['REQUEST_URI']) ? sanitize_url($_SERVER['REQUEST_URI']) : '' );
 	$is_admin = current_user_can( 'manage_options' );
 	$can_edit_posts = ( current_user_can( 'edit_pages' ) || current_user_can( 'edit_posts' ) );
 	$can_open_composer = ( WFU_VAR("WFU_SHORTCODECOMPOSER_NOADMIN") == "true" && $can_edit_posts );
@@ -149,14 +151,14 @@ function wordpress_file_upload_add_admin_pages() {
 	$table_name1 = $wpdb->prefix . "wfu_log";
 
 	$page_hook_suffix = false;
-	if ( current_user_can( 'manage_options' ) ) $page_hook_suffix = add_options_page('Wordpress File Upload', 'Wordpress File Upload', 'manage_options', 'wordpress_file_upload', 'wordpress_file_upload_manage_dashboard');
+	if ( current_user_can( 'manage_options' ) ) $page_hook_suffix = add_options_page(__('Iptanus File Upload', 'wp-file-upload'), __('Iptanus File Upload', 'wp-file-upload'), 'manage_options', 'wordpress_file_upload', 'wordpress_file_upload_manage_dashboard');
 	if ( $page_hook_suffix !== false ) add_action('admin_print_scripts-'.$page_hook_suffix, 'wfu_enqueue_admin_scripts');
-	//conditional that will create Wordpress File Upload Dashboard menu, if it
+	//conditional that will create Iptanus File Upload Dashboard menu, if it
 	//has not already been created, for non-admin users who can edit posts or
 	//pages, so that their requests for opening the shortcode composer can be
 	//handled
 	elseif ( WFU_VAR("WFU_SHORTCODECOMPOSER_NOADMIN") == "true" && ( current_user_can( 'edit_pages' ) || current_user_can( 'edit_posts' ) ) ) {
-		$page_hook_suffix = add_menu_page('Wordpress File Upload', 'Wordpress File Upload', 'read', 'wordpress_file_upload', 'wordpress_file_upload_manage_dashboard_editor');
+		$page_hook_suffix = add_menu_page('Iptanus File Upload', 'Iptanus File Upload', 'read', 'wordpress_file_upload', 'wordpress_file_upload_manage_dashboard_editor');
 		if ( $page_hook_suffix !== false ) add_action('admin_print_scripts-'.$page_hook_suffix, 'wfu_enqueue_admin_scripts');
 	}
 	//add Uploaded Files menu if it is allowed
@@ -166,9 +168,9 @@ function wordpress_file_upload_add_admin_pages() {
 		$unread_files_count = wfu_get_unread_files_count();
 		$text = $unread_files_count;
 		if ( $unread_files_count > 99 ) $text = "99+";
-		$title = 'Uploaded Files <span class="update-plugins count-'.$unread_files_count.'"><span class="plugin-count">'.$text.'</span></span>';
+		$title = __('Uploaded Files', 'wp-file-upload').' <span class="update-plugins count-'.$unread_files_count.'"><span class="plugin-count">'.$text.'</span></span>';
 		$wfu_uploadedfiles_hook_suffix = add_menu_page( 
-			'Uploaded Files',
+			__('Uploaded Files', 'wp-file-upload'),
 			$title,
 			'manage_options',
 			'wfu_uploaded_files',
@@ -194,7 +196,7 @@ function wordpress_file_upload_add_admin_pages() {
  * @since 2.4.6
  */
 function wfu_enqueue_admin_scripts() {
-	$uri = $_SERVER['REQUEST_URI'];
+	$uri = ( isset($_SERVER['REQUEST_URI']) ? sanitize_url($_SERVER['REQUEST_URI']) : '' );
 	$is_admin = current_user_can( 'manage_options' );
 	$can_open_composer = ( WFU_VAR("WFU_SHORTCODECOMPOSER_NOADMIN") == "true" && ( current_user_can( 'edit_pages' ) || current_user_can( 'edit_posts' ) ) );
 	if ( is_admin() && ( ( $is_admin && strpos($uri, "options-general.php") !== false ) ) ||
@@ -231,8 +233,8 @@ function wfu_enqueue_admin_scripts() {
 		 * @since 4.1.0
 		 */
 		do_action("_wfu_enqueue_admin_scripts");
-		$AdminParams = array("wfu_ajax_url" => wfu_ajaxurl());
-		wp_localize_script( 'wordpress_file_upload_admin_script', 'AdminParams', $AdminParams );
+		$WFUPluginParams = array("wfu_ajax_url" => wfu_ajaxurl());
+		wp_localize_script( 'wordpress_file_upload_admin_script', 'WFUPluginParams', $WFUPluginParams );
 	}
 }
 
@@ -245,7 +247,7 @@ function wfu_enqueue_admin_scripts() {
  * @since 4.7.0
  */
 function wfu_enqueue_uploadedfiles_admin_scripts() {
-	$uri = $_SERVER['REQUEST_URI'];
+	$uri = ( isset($_SERVER['REQUEST_URI']) ? sanitize_url($_SERVER['REQUEST_URI']) : '' );
 	$is_admin = current_user_can( 'manage_options' );
 	if ( is_admin() && $is_admin && strpos($uri, "admin.php") !== false ) {
 		//apply wfu_before_admin_scripts to get additional settings 
@@ -264,8 +266,8 @@ function wfu_enqueue_uploadedfiles_admin_scripts() {
 			( !isset($ret_data["correct_JQueryUI_incompatibility"]) || $ret_data["correct_JQueryUI_incompatibility"] != "true" ) )
 			wp_enqueue_style('jquery-ui-css');
 		wp_enqueue_script('wordpress_file_upload_admin_script');
-		$AdminParams = array("wfu_ajax_url" => wfu_ajaxurl());
-		wp_localize_script( 'wordpress_file_upload_admin_script', 'AdminParams', $AdminParams );
+		$WFUPluginParams = array("wfu_ajax_url" => wfu_ajaxurl());
+		wp_localize_script( 'wordpress_file_upload_admin_script', 'WFUPluginParams', $WFUPluginParams );
 	}
 }
 
@@ -440,22 +442,33 @@ function wordpress_file_upload_update_db_check() {
  */
 function wordpress_file_upload_manage_dashboard() {
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
-	$_POST = stripslashes_deep($_POST);
-	$_GET = stripslashes_deep($_GET);
-	$action = (!empty($_POST['action']) ? $_POST['action'] : (!empty($_GET['action']) ? $_GET['action'] : ''));
-	$dir = (!empty($_POST['dir']) ? $_POST['dir'] : (!empty($_GET['dir']) ? $_GET['dir'] : ''));
-	$file = (!empty($_POST['file']) ? $_POST['file'] : (!empty($_GET['file']) ? $_GET['file'] : ''));
-	$referer = (!empty($_POST['referer']) ? $_POST['referer'] : (!empty($_GET['referer']) ? $_GET['referer'] : ''));
-	$data_enc = (!empty($_POST['data']) ? $_POST['data'] : (!empty($_GET['data']) ? $_GET['data'] : ''));
-	$postid = (!empty($_POST['postid']) ? $_POST['postid'] : (!empty($_GET['postid']) ? $_GET['postid'] : ''));
-	$nonce = (!empty($_POST['nonce']) ? $_POST['nonce'] : (!empty($_GET['nonce']) ? $_GET['nonce'] : ''));
-	$tag = (!empty($_POST['tag']) ? $_POST['tag'] : (!empty($_GET['tag']) ? $_GET['tag'] : ''));
-	$username = (!empty($_POST['username']) ? $_POST['username'] : (!empty($_GET['username']) ? $_GET['username'] : ''));
-	$invoker = (!empty($_POST['invoker']) ? $_POST['invoker'] : (!empty($_GET['invoker']) ? $_GET['invoker'] : ''));
-	$key = (!empty($_POST['key']) ? $_POST['key'] : (!empty($_GET['key']) ? $_GET['key'] : ''));
-	$sort = (!empty($_POST['sort']) ? $_POST['sort'] : (!empty($_GET['sort']) ? $_GET['sort'] : ''));
-	$page = (!empty($_POST['pageid']) ? $_POST['pageid'] : (!empty($_GET['pageid']) ? $_GET['pageid'] : 1));
-	$filter = (isset($_POST['filter']) ? $_POST['filter'] : (isset($_GET['filter']) ? $_GET['filter'] : 'all'));
+	// check nonce
+	$nonce = ( isset($_REQUEST['c']) ? sanitize_text_field( wp_unslash ( $_REQUEST['c'] ) ) : null );
+	$valid_nonce = ( $nonce !== null && wp_verify_nonce($nonce, 'wfu_admin_nonce') !== false );
+	if ( $nonce !== null && !$valid_nonce ) exit(esc_html__('Not allowed!', 'wp-file-upload'));
+
+	// read params from request only on valid nonce
+	if ( $valid_nonce ) {
+		$_POST = stripslashes_deep($_POST);
+		$_GET = stripslashes_deep($_GET);
+	}
+	// Params are read and sanitized here using general Wordpress sanitization.
+	// The plugin in several cases imposes additional stricter sanitization
+	// later on.
+	$action = ( $valid_nonce && !empty($_POST['action']) ? sanitize_key($_POST['action']) : ( $valid_nonce && !empty($_GET['action']) ? sanitize_key($_GET['action']) : '' ) );
+	$dir = ( $valid_nonce && !empty($_POST['dir']) ? sanitize_text_field($_POST['dir']) : ( $valid_nonce && !empty($_GET['dir']) ? sanitize_text_field($_GET['dir']) : '') );
+	$file = ( $valid_nonce && !empty($_POST['file']) ? sanitize_text_field($_POST['file']) : ( $valid_nonce && !empty($_GET['file']) ? sanitize_text_field($_GET['file']) : '' ) );
+	$referer = ( $valid_nonce && !empty($_POST['referer']) ? sanitize_text_field($_POST['referer']) : ( $valid_nonce && !empty($_GET['referer']) ? sanitize_text_field($_GET['referer']) : '' ) );
+	$data_enc = ( $valid_nonce && !empty($_POST['data']) ? sanitize_text_field($_POST['data']) : ( $valid_nonce && !empty($_GET['data']) ? sanitize_text_field($_GET['data']) : '' ) );
+	$postid = ( $valid_nonce && !empty($_POST['postid']) ? sanitize_text_field($_POST['postid']) : ( $valid_nonce && !empty($_GET['postid']) ? sanitize_text_field($_GET['postid']) : '' ) );
+	$nonce = ( $valid_nonce && !empty($_POST['nonce']) ? sanitize_text_field($_POST['nonce']) : ( $valid_nonce && !empty($_GET['nonce']) ? sanitize_text_field($_GET['nonce']) : '' ) );
+	$tag = ( $valid_nonce && !empty($_POST['tag']) ? sanitize_text_field($_POST['tag']) : ( $valid_nonce && !empty($_GET['tag']) ? sanitize_text_field($_GET['tag']) : '' ) );
+	$username = ( $valid_nonce && !empty($_POST['username']) ? sanitize_user($_POST['username']) : ( $valid_nonce && !empty($_GET['username']) ? sanitize_user($_GET['username']) : '' ) );
+	$invoker = ( $valid_nonce && !empty($_POST['invoker']) ? sanitize_text_field($_POST['invoker']) : ( $valid_nonce && !empty($_GET['invoker']) ? sanitize_text_field($_GET['invoker']) : '' ) );
+	$key = ( $valid_nonce && !empty($_POST['key']) ? sanitize_text_field($_POST['key']) : ( $valid_nonce && !empty($_GET['key']) ? sanitize_text_field($_GET['key']) : '' ) );
+	$sort = ( $valid_nonce && !empty($_POST['sort']) ? sanitize_text_field($_POST['sort']) : ( $valid_nonce && !empty($_GET['sort']) ? sanitize_text_field($_GET['sort']) : '' ) );
+	$page = ( $valid_nonce && !empty($_POST['pageid']) ? sanitize_text_field($_POST['pageid']) : ( $valid_nonce && !empty($_GET['pageid']) ? sanitize_text_field($_GET['pageid']) : 1 ) );
+	$filter = ( $valid_nonce && isset($_POST['filter']) ? sanitize_text_field($_POST['filter']) : ( $valid_nonce && isset($_GET['filter']) ? sanitize_text_field($_GET['filter']) : 'all' ) );
 	$echo_str = "";
 
 	if ( $action == 'edit_settings' ) {
@@ -670,12 +683,15 @@ function wordpress_file_upload_manage_dashboard() {
 		$echo_str = wfu_manage_notifications($sort, $page, false, $filter);
 	}
 	elseif ( $action == 'add_shortcode' && $postid != "" && $nonce != "" && $tag != "" ) {
-		if ( WFU_USVAR('wfu_add_shortcode_ticket_for_'.$tag) != $nonce ) $echo_str = wfu_manage_mainmenu();
+		$tag = wfu_sanitize_tag($tag);
+		if ( wfu_sanitize_code(WFU_USVAR('wfu_add_shortcode_ticket_for_'.$tag)) != $nonce )
+			$echo_str = wfu_manage_mainmenu();
 		elseif ( wfu_add_shortcode($postid, $tag) ) $echo_str = wfu_manage_mainmenu();
 		else $echo_str = wfu_manage_mainmenu(WFU_DASHBOARD_ADD_SHORTCODE_REJECTED);
 		WFU_USVAR_store('wfu_add_shortcode_ticket', 'noticket');
 	}
 	elseif ( $action == 'edit_shortcode' && $data_enc != "" && $tag != "" ) {
+		$tag = wfu_sanitize_tag($tag);
 		$data = wfu_decode_array_from_string(wfu_get_shortcode_data_from_safe($data_enc));
 		if ( $data['post_id'] == "" || $referer == 'guteditor' || wfu_check_edit_shortcode($data) ) wfu_shortcode_composer($data, $tag, $referer);
 		else $echo_str = wfu_manage_mainmenu(WFU_DASHBOARD_EDIT_SHORTCODE_REJECTED);
@@ -707,10 +723,11 @@ function wordpress_file_upload_manage_dashboard() {
 		 *
 		 * @param string $echo_str The HTML output of the plugin's Dashboard
 		 *        page.
+		 * @param bool $valid_nonce True if the request passed a valid nonce.
 		 * @param string $action The 'action' parameter passed in the
 		 *        Dashboard request.
 		 */
-		$echo_str = apply_filters("_wfu_dashboard_actions", "", $action);
+		$echo_str = apply_filters("_wfu_dashboard_actions", "", $valid_nonce, $action);
 		if ( $echo_str == "" )
 			$echo_str = wfu_manage_mainmenu();
 	}
@@ -727,15 +744,27 @@ function wordpress_file_upload_manage_dashboard() {
  * @since 4.11.0
  */
 function wordpress_file_upload_manage_dashboard_editor() {
-	$_POST = stripslashes_deep($_POST);
-	$_GET = stripslashes_deep($_GET);
-	$action = (!empty($_POST['action']) ? $_POST['action'] : (!empty($_GET['action']) ? $_GET['action'] : ''));
-	$referer = (!empty($_POST['referer']) ? $_POST['referer'] : (!empty($_GET['referer']) ? $_GET['referer'] : ''));
-	$data_enc = (!empty($_POST['data']) ? $_POST['data'] : (!empty($_GET['data']) ? $_GET['data'] : ''));
-	$tag = (!empty($_POST['tag']) ? $_POST['tag'] : (!empty($_GET['tag']) ? $_GET['tag'] : ''));
+	// check nonce
+	$nonce = ( isset($_REQUEST['c']) ? sanitize_text_field( wp_unslash ( $_REQUEST['c'] ) ) : null );
+	$valid_nonce = ( $nonce !== null && wp_verify_nonce($nonce, 'wfu_admin_nonce') !== false );
+	if ( $nonce !== null && !$valid_nonce ) exit(esc_html__('Not allowed!', 'wp-file-upload'));
+
+	// read params from request only on valid nonce
+	if ( $valid_nonce ) {
+		$_POST = stripslashes_deep($_POST);
+		$_GET = stripslashes_deep($_GET);
+	}
+	// Params are read and sanitized here using general Wordpress sanitization.
+	// The plugin in several cases imposes additional stricter sanitization
+	// later on.
+	$action = ( $valid_nonce && !empty($_POST['action']) ? sanitize_key($_POST['action']) : ( $valid_nonce && !empty($_GET['action']) ? sanitize_key($_GET['action']) : '' ) );
+	$referer = ( $valid_nonce && !empty($_POST['referer']) ? sanitize_text_field($_POST['referer']) : ( $valid_nonce && !empty($_GET['referer']) ? sanitize_text_field($_GET['referer']) : '' ) );
+	$data_enc = ( $valid_nonce && !empty($_POST['data']) ? sanitize_text_field($_POST['data']) : ( $valid_nonce && !empty($_GET['data']) ? sanitize_text_field($_GET['data']) : '' ) );
+	$tag = ( $valid_nonce && !empty($_POST['tag']) ? sanitize_text_field($_POST['tag']) : ( $valid_nonce && !empty($_GET['tag']) ? sanitize_text_field($_GET['tag']) : '' ) );
 	$echo_str = "";
 
 	if ( $action == 'edit_shortcode' && $data_enc != "" && $tag != "" ) {
+		$tag = wfu_sanitize_tag($tag);
 		$data = wfu_decode_array_from_string(wfu_get_shortcode_data_from_safe($data_enc));
 		if ( $data['post_id'] == "" || $referer == 'guteditor' || wfu_check_edit_shortcode($data) ) wfu_shortcode_composer($data, $tag, $referer);
 		else $echo_str = wfu_manage_mainmenu(WFU_DASHBOARD_EDIT_SHORTCODE_REJECTED);
@@ -771,14 +800,14 @@ function wfu_manage_mainmenu($message = '') {
 	$echo_str .= wfu_generate_dashboard_menu_title("\n\t");
 	if ( $message != '' ) {
 		$echo_str .= "\n\t".'<div class="updated">';
-		$echo_str .= "\n\t\t".'<p>'.$message.'</p>';
+		$echo_str .= "\n\t\t".'<p>'.esc_html($message).'</p>';
 		$echo_str .= "\n\t".'</div>';
 	}
 	$echo_str .= "\n\t".'<div style="margin-top:20px;">';
 	$echo_str .= wfu_generate_dashboard_menu("\n\t\t", "Main");
-	$echo_str .= "\n\t\t".'<h3 style="margin-bottom: 10px;">Status';
+	$echo_str .= "\n\t\t".'<h3 style="margin-bottom: 10px;">'.esc_html__('Status', 'wp-file-upload');
 	if ( $plugin_options["altserver"] == "1" && substr(trim(WFU_VAR("WFU_ALT_IPTANUS_SERVER")), 0, 5) == "http:" ) {
-		$echo_str .= '<div style="display: inline-block; margin-left:20px;" title="'.WFU_WARNING_ALT_IPTANUS_SERVER_ACTIVATED.'"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 200 800" version="1.1" style="background:darkorange; border-radius:13px; padding:2px; vertical-align:middle; border: 1px solid silver;"><path d="M 110,567 L 90,567 L 42,132 C 40,114 40,100 40,90 C 40,70 45,49 56,35 C 70,22 83,15 100,15 C 117,15 130,22 144,35 C 155,49 160,70 160,90 C 160,100 160,114 158,132 z M 100,640 A 60,60 0 1,1 100,760 A 60,60 0 1,1 100,640 z"/></svg></div>';
+		$echo_str .= '<div style="display: inline-block; margin-left:20px;" title="'.esc_html(WFU_WARNING_ALT_IPTANUS_SERVER_ACTIVATED).'"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 200 800" version="1.1" style="background:darkorange; border-radius:13px; padding:2px; vertical-align:middle; border: 1px solid silver;"><path d="M 110,567 L 90,567 L 42,132 C 40,114 40,100 40,90 C 40,70 45,49 56,35 C 70,22 83,15 100,15 C 117,15 130,22 144,35 C 155,49 160,70 160,90 C 160,100 160,114 158,132 z M 100,640 A 60,60 0 1,1 100,760 A 60,60 0 1,1 100,640 z"/></svg></div>';
 	}
 	$echo_str .= '</h3>';
 	$echo_str .= "\n\t\t".'<table class="form-table">';
@@ -791,18 +820,17 @@ function wfu_manage_mainmenu($message = '') {
 	);
 	$echo_str .= "\n\t\t\t\t".'<tr>';
 	$echo_str .= "\n\t\t\t\t\t".'<th scope="row">';
-	$echo_str .= "\n\t\t\t\t\t\t".'<label style="cursor:default;">Edition</label>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<label style="cursor:default;">'.esc_html__('Edition', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t\t\t\t".'</th>';
 	$echo_str .= "\n\t\t\t\t\t".'<td class="wfu-td-align-top" style="width:100px; vertical-align:top;">';
-	$echo_str .= "\n\t\t\t\t\t\t".'<label style="font-weight:bold; cursor:default;">'.$edition_props['title'].'</label>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<label style="font-weight:bold; cursor:default;">'.esc_html($edition_props['title']).'</label>';
 	$echo_str .= "\n\t\t\t\t\t".'</td>';
 	$echo_str .= "\n\t\t\t\t\t".'<td>';
 	$echo_str .= "\n\t\t\t\t\t\t".'<div style="display:inline-block; background-color:bisque; padding:0 0 0 4px; border-left:3px solid lightcoral;">';
-	$echo_str .= "\n\t\t\t\t\t\t\t".'<label style="cursor:default;">Consider </label><a href="'.WFU_PRO_VERSION_URL.'">Upgrading</a><label style="cursor:default;"> to the Professional Version. </label>';
-	$echo_str .= "\n\t\t\t\t\t\t\t".'<button class="button wfu-versioncompare-btn" onclick="if (this.innerText == \'See why\') {this.innerText = \'Close\'; this.classList.add(\'wfu-open\'); document.getElementById(\'wfu_version_comparison\').style.display = \'inline-block\';} else {this.innerText = \'See why\';  this.classList.remove(\'wfu-open\'); document.getElementById(\'wfu_version_comparison\').style.display = \'none\';}" style="vertical-align: middle;">See why</button>';
+	$echo_str .= "\n\t\t\t\t\t\t\t".'<label style="cursor:default;">'.wfu_esc_html_a(__('Consider :upgrading: to the Professional Version.', 'wp-file-upload'), WFU_PRO_VERSION_URL).'</label>';
+	$echo_str .= "\n\t\t\t\t\t\t\t".'<button class="button wfu-versioncompare-btn" onclick="if (!this.classList.contains(\'wfu-open\')) {this.innerText = this.getAttribute(\'data-title-open\'); this.classList.add(\'wfu-open\'); document.getElementById(\'wfu_version_comparison\').style.display = \'inline-block\';} else {this.innerText = this.getAttribute(\'data-title-closed\');  this.classList.remove(\'wfu-open\'); document.getElementById(\'wfu_version_comparison\').style.display = \'none\';}" style="vertical-align: middle;" data-title-open="'.esc_html__('Close', 'wp-file-upload').'" data-title-closed="'.esc_html__('See why', 'wp-file-upload').'">'.esc_html__('See why', 'wp-file-upload').'</button>';
 	$echo_str .= "\n\t\t\t\t\t\t".'</div>';
 	$echo_str .= "\n\t\t\t\t\t\t".'<br /><div id="wfu_version_comparison" style="display:none; background-color:lightyellow; border:1px solid yellow; margin:10px 0; padding:10px;">';
-	//$echo_str .= "\n\t\t\t\t\t\t\t".'<img src="'.WFU_IMAGE_VERSION_COMPARISON.'" style="display:block; margin-bottom:6px;" />';
 	$version_comparison_data = array(
 		"File upload form in posts and pages" => "wfu-free wfu-pro",
 		"Material UI Theme" => "wfu-free wfu-pro wfu-new",
@@ -841,26 +869,26 @@ function wfu_manage_mainmenu($message = '') {
 	);
 	$echo_str .= "\n\t\t\t\t\t\t\t".'<div class="wfu-versioncompare-tb">';
 	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<div class="wfu-versioncompare-tr wfu-head">';
-	$echo_str .= "\n\t\t\t\t\t\t\t\t\t".'<div class="wfu-versioncompare-th wfu-col-1"><span>Feature</span></div>';
-	$echo_str .= "\n\t\t\t\t\t\t\t\t\t".'<div class="wfu-versioncompare-th wfu-col-2"><span>Free</span></div>';
-	$echo_str .= "\n\t\t\t\t\t\t\t\t\t".'<div class="wfu-versioncompare-th wfu-col-3"><span>Pro</span></div>';
+	$echo_str .= "\n\t\t\t\t\t\t\t\t\t".'<div class="wfu-versioncompare-th wfu-col-1"><span>'.esc_html__('Feature', 'wp-file-upload').'</span></div>';
+	$echo_str .= "\n\t\t\t\t\t\t\t\t\t".'<div class="wfu-versioncompare-th wfu-col-2"><span>'.esc_html__('Free', 'wp-file-upload').'</span></div>';
+	$echo_str .= "\n\t\t\t\t\t\t\t\t\t".'<div class="wfu-versioncompare-th wfu-col-3"><span>'.esc_html__('Pro', 'wp-file-upload').'</span></div>';
 	$echo_str .= "\n\t\t\t\t\t\t\t\t".'</div>';
 	foreach ( $version_comparison_data as $title => $cls ) {
 		$echo_str .= "\n\t\t\t\t\t\t\t\t".'<div class="wfu-versioncompare-tr wfu-body '.$cls.'">';
-		$echo_str .= "\n\t\t\t\t\t\t\t\t\t".'<div class="wfu-versioncompare-td wfu-col-1"><span class="wfu-versioncompare-title">'.$title.'</span></div>';
+		$echo_str .= "\n\t\t\t\t\t\t\t\t\t".'<div class="wfu-versioncompare-td wfu-col-1"><span class="wfu-versioncompare-title">'.esc_html($title).'</span></div>';
 		$echo_str .= "\n\t\t\t\t\t\t\t\t\t".'<div class="wfu-versioncompare-td wfu-col-2"><span class="wfu-versioncompare-free"></span></div>';
 		$echo_str .= "\n\t\t\t\t\t\t\t\t\t".'<div class="wfu-versioncompare-td wfu-col-3"><span class="wfu-versioncompare-pro"></span></div>';
 		$echo_str .= "\n\t\t\t\t\t\t\t\t".'</div>';
 	}
 	$echo_str .= "\n\t\t\t\t\t\t\t".'</div>';
-	$echo_str .= "\n\t\t\t\t\t\t\t".'<a class="button-primary" href="'.WFU_PRO_VERSION_URL.'">Go for the PRO version</a>';
+	$echo_str .= "\n\t\t\t\t\t\t\t".'<a class="button-primary" href="'.esc_url(WFU_PRO_VERSION_URL).'">'.esc_html__('Go for the PRO version', 'wp-file-upload').'</a>';
 	$echo_str .= "\n\t\t\t\t\t\t".'</div>';
 	$echo_str .= "\n\t\t\t\t\t".'</td>';
 	$echo_str .= "\n\t\t\t\t".'</tr>';
 	//plugin version
 	$echo_str .= "\n\t\t\t\t".'<tr>';
 	$echo_str .= "\n\t\t\t\t\t".'<th scope="row">';
-	$echo_str .= "\n\t\t\t\t\t\t".'<label style="cursor:default;">Version</label>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<label style="cursor:default;">'.esc_html__('Version', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t\t\t\t".'</th>';
 	$echo_str .= "\n\t\t\t\t\t".'<td style="width:100px;">';
 	$cur_version = wfu_get_plugin_version();
@@ -872,20 +900,20 @@ function wfu_manage_mainmenu($message = '') {
 	if ( $lat_version == "" && WFU_VAR("WFU_DISABLE_VERSION_CHECK") != "true" ) {
 		$echo_str .= "\n\t\t\t\t\t\t".'<div style="display:inline-block; background-color:transparent; padding:0 0 0 4px; color:red;">';
 		$echo_str .= "\n\t\t\t\t\t\t\t".'<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 200 800" version="1.1" style="background:transparent; border-radius:13px; padding:2px; vertical-align:middle; border: 2px solid red; fill:red;"><path d="M 110,567 L 90,567 L 42,132 C 40,114 40,100 40,90 C 40,70 45,49 56,35 C 70,22 83,15 100,15 C 117,15 130,22 144,35 C 155,49 160,70 160,90 C 160,100 160,114 158,132 z M 100,640 A 60,60 0 1,1 100,760 A 60,60 0 1,1 100,640 z"/></svg>';
-		$warning_text = preg_replace("/:(\w+):/", '<a target="_blank" href="'.WFU_IPTANUS_SERVER_UNREACHABLE_ARTICLE.'" title="Iptanus Services Server Unreachable Error of WFU Plugin">$1</a>', WFU_WARNING_IPTANUS_SERVER_UNREACHABLE);
+		$warning_text = wfu_esc_html_a(WFU_WARNING_IPTANUS_SERVER_UNREACHABLE, WFU_IPTANUS_SERVER_UNREACHABLE_ARTICLE, true, __('Iptanus Services Server Unreachable Error of WFU Plugin', 'wp-file-upload'));
 		$echo_str .= "\n\t\t\t\t\t\t\t".'<label style="cursor:default;">'.$warning_text.'</label>';
 		$echo_str .= "\n\t\t\t\t\t\t".'</div>';
 	}
 	elseif ( $ret['status'] && $ret['result'] == 'lower' ) {
 		$echo_str .= "\n\t\t\t\t\t\t".'<div style="display:inline-block; background-color:bisque; padding:0 0 0 4px; border-left:3px solid lightcoral;">';
-		$echo_str .= "\n\t\t\t\t\t\t\t".'<label style="cursor:default;">Version <strong>'.$lat_version.'</strong> of the plugin is available. Go to Plugins page of your Dashboard to update to the latest version.</label>';
-		if ( $ret['custom'] ) $echo_str .= '<label style="cursor:default; color: purple;"> <em>Please note that you are using a custom version of the plugin. If you upgrade to the newest version, custom changes will be lost.</em></label>';
+		$echo_str .= "\n\t\t\t\t\t\t\t".'<label style="cursor:default;">'.sprintf(esc_html__('Version %s of the plugin is available. Go to Plugins page of your Dashboard to update to the latest version.', 'wp-file-upload'), '<strong>'.$lat_version.'</strong>').'</label>';
+		if ( $ret['custom'] ) $echo_str .= '<label style="cursor:default; color: purple;"> <em>'.esc_html__('Please note that you are using a custom version of the plugin. If you upgrade to the newest version, custom changes will be lost.', 'wp-file-upload').'</em></label>';
 		$echo_str .= "\n\t\t\t\t\t\t".'</div>';
 	}
 	elseif ( $ret['status'] && $ret['result'] == 'equal' ) {
 		$echo_str .= "\n\t\t\t\t\t\t".'<div style="display:inline-block; background-color:rgb(220,255,220); padding:0 0 0 4px; border-left:3px solid limegreen;">';
-		$echo_str .= "\n\t\t\t\t\t\t\t".'<label style="cursor:default;">You have the latest version.</label>';
-		if ( $ret['custom'] ) $echo_str .= '<label style="cursor:default; color: purple;"> <em>(Please note that your version is custom)</em></label>';
+		$echo_str .= "\n\t\t\t\t\t\t\t".'<label style="cursor:default;">'.esc_html__('You have the latest version.', 'wp-file-upload').'</label>';
+		if ( $ret['custom'] ) $echo_str .= '<label style="cursor:default; color: purple;"> <em>'.esc_html__('(Please note that your version is custom)', 'wp-file-upload').'</em></label>';
 		$echo_str .= "\n\t\t\t\t\t\t".'</div>';
 	}
 	$echo_str .= "\n\t\t\t\t\t".'</td>';
@@ -894,17 +922,17 @@ function wfu_manage_mainmenu($message = '') {
 	$php_env = wfu_get_server_environment();
 	$echo_str .= "\n\t\t\t\t".'<tr>';
 	$echo_str .= "\n\t\t\t\t\t".'<th scope="row">';
-	$echo_str .= "\n\t\t\t\t\t\t".'<label style="cursor:default;">Server Environment</label>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<label style="cursor:default;">'.esc_html__('Server Environment', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t\t\t\t".'</th>';
 	$echo_str .= "\n\t\t\t\t\t".'<td style="width:100px;">';
-	if ( $php_env == '64bit' ) $echo_str .= "\n\t\t\t\t\t\t".'<label style="font-weight:bold; cursor:default;">64bit</label></td><td><label style="font-weight:normal; font-style:italic; cursor:default;">(Your server supports files up to 1 Exabyte, practically unlimited)</label>';
-	if ( $php_env == '32bit' ) $echo_str .= "\n\t\t\t\t\t\t".'<label style="font-weight:bold; cursor:default;">32bit</label></td><td><label style="font-weight:normal; font-style:italic; cursor:default;">(Your server does not support files larger than 2GB)</label>';
-	if ( $php_env == '' ) $echo_str .= "\n\t\t\t\t\t\t".'<label style="font-weight:bold; cursor:default;">Unknown</label></td><td><label style="font-weight:normal; font-style:italic; cursor:default;">(The maximum file size supported by the server cannot be determined)</label>';
+	if ( $php_env == '64bit' ) $echo_str .= "\n\t\t\t\t\t\t".'<label style="font-weight:bold; cursor:default;">64bit</label></td><td><label style="font-weight:normal; font-style:italic; cursor:default;">'.esc_html__('(Your server supports files up to 1 Exabyte, practically unlimited)', 'wp-file-upload').'</label>';
+	if ( $php_env == '32bit' ) $echo_str .= "\n\t\t\t\t\t\t".'<label style="font-weight:bold; cursor:default;">32bit</label></td><td><label style="font-weight:normal; font-style:italic; cursor:default;">'.esc_html__('(Your server does not support files larger than 2GB)', 'wp-file-upload').'</label>';
+	if ( $php_env == '' ) $echo_str .= "\n\t\t\t\t\t\t".'<label style="font-weight:bold; cursor:default;">'.esc_html__('Unknown', 'wp-file-upload').'</label></td><td><label style="font-weight:normal; font-style:italic; cursor:default;">'.esc_html__('(The maximum file size supported by the server cannot be determined)', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t\t\t\t".'</td>';
 	$echo_str .= "\n\t\t\t\t".'</tr>';
 	$echo_str .= "\n\t\t\t\t".'<tr>';
 	$echo_str .= "\n\t\t\t\t\t".'<th scope="row">';
-	$echo_str .= "\n\t\t\t\t\t\t".'<label style="cursor:default;">PHP Version</label>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<label style="cursor:default;">'.esc_html__('PHP Version', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t\t\t\t".'</th>';
 	$echo_str .= "\n\t\t\t\t\t".'<td style="width:100px;">';
 	$cur_version = wfu_get_plugin_version();
@@ -915,7 +943,7 @@ function wfu_manage_mainmenu($message = '') {
 	$echo_str .= "\n\t\t\t\t".'</tr>';
 	$echo_str .= "\n\t\t\t\t".'<tr>';
 	$echo_str .= "\n\t\t\t\t\t".'<th scope="row">';
-	$echo_str .= "\n\t\t\t\t\t\t".'<label style="cursor:default;">Home Domain</label>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<label style="cursor:default;">'.esc_html__('Home Domain', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t\t\t\t".'</th>';
 	$echo_str .= "\n\t\t\t\t\t".'<td colspan="2" style="width:100px;">';
 	$echo_str .= "\n\t\t\t\t\t\t".'<label style="font-weight:bold; cursor:default;">'.wfu_home_domain().'</label>';
@@ -923,7 +951,7 @@ function wfu_manage_mainmenu($message = '') {
 	$echo_str .= "\n\t\t\t\t".'</tr>';
 	$echo_str .= "\n\t\t\t\t".'<tr>';
 	$echo_str .= "\n\t\t\t\t\t".'<th scope="row">';
-	$echo_str .= "\n\t\t\t\t\t\t".'<label style="cursor:default;">Release Notes</label>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<label style="cursor:default;">'.esc_html__('Release Notes', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t\t\t\t".'</th>';
 	$echo_str .= "\n\t\t\t\t\t".'<td class="wfu-td-align-top" colspan="2" style="width:100px;">';
 	$rel_path = ABSWPFILEUPLOAD_DIR.'release_notes.txt';
@@ -960,14 +988,14 @@ function wfu_manage_mainmenu_editor($message = '') {
 	if ( !current_user_can( 'edit_pages' ) && !current_user_can( 'edit_posts' ) ) return;
 	
 	$echo_str = '<div class="wrap wfumain">';
-	$echo_str .= "\n\t".'<h2>Wordpress File Upload Control Panel</h2>';
+	$echo_str .= wfu_generate_dashboard_menu_title("\n\t", false);
 	if ( $message != '' ) {
 		$echo_str .= "\n\t".'<div class="updated">';
 		$echo_str .= "\n\t\t".'<p>'.$message.'</p>';
 		$echo_str .= "\n\t".'</div>';
 	}
 	$echo_str .= "\n\t".'<div style="margin-top:20px;">';
-	$echo_str .= "\n\t\t".'<h3 style="margin-bottom: 10px;">This menu item exists to show the plugin\'s shortcode composer when editing pages or posts.</h3>';
+	$echo_str .= "\n\t\t".'<h3 style="margin-bottom: 10px;">'.esc_html__('This menu item exists to show the plugin\'s shortcode composer when editing pages or posts.', 'wp-file-upload').'</h3>';
 	$echo_str .= "\n\t".'</div>';
 	$echo_str .= "\n".'</div>';
 	
@@ -991,16 +1019,32 @@ function wfu_manage_mainmenu_editor($message = '') {
 function wfu_generate_dashboard_menu($dlp, $active) {
 	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$siteurl = site_url();
+	$admin_nonce = wp_create_nonce('wfu_admin_nonce');
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
 	
-	$tabline = function($tab, $action = null, $title = null, $html = null, $custom_class = null) use($dlp, $active, $siteurl) {
-		return $dlp."\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload'.( $action === null ? '' : '&amp;action='.$action ).'" class="nav-tab'.( $active == $tab ? ' nav-tab-active' : '' ).( $custom_class === null ? '' : ' '.$custom_class ).'" title="'.( $title === null ? $tab : $title ).'">'.( $html === null ? $tab : $html ).'</a>';
+	/**
+	 * Generate a Tab.
+	 *
+	 * This function generates a tab of the plugin's main area in Dashboard.
+	 *
+	 * @param string $id The unique identifier of the tab.
+	 * @param string $tab The tab text.
+	 * @param string $action Optional. The tab action.
+	 * @param string $title Optional. The tab hint.
+	 * @param string $html Optional. The tab HTML code taht will replace the tab
+	 *        text.
+	 * @param string $custom_class Optional. The tab class.
+	 *
+	 * @return string The HTML code of the tab.
+	 */
+	$tabline = function($id, $tab, $action = null, $title = null, $html = null, $custom_class = null) use($dlp, $active, $siteurl, $admin_nonce) {
+		return $dlp."\t".'<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload'.( $action === null ? '' : '&amp;action='.$action )).'&amp;c='.$admin_nonce.'" class="nav-tab'.( $active == $id ? ' nav-tab-active' : '' ).( $custom_class === null ? '' : ' '.$custom_class ).'" title="'.( $title === null ? esc_html($tab) : esc_html($title) ).'">'.( $html === null ? esc_html($tab) : $html ).'</a>';
 	};
 	
 	$tabs = array();
 	$echo_str = $dlp.'<h2 class="nav-tab-wrapper wfu-nav-tab-wrapper" style="margin-bottom:40px;">';
-	$tabs["Main"] = $tabline("Main");
-	$tabs["Settings"] = $tabline("Settings", "plugin_settings");
+	$tabs["Main"] = $tabline('Main', __('Main', 'wp-file-upload'));
+	$tabs["Settings"] = $tabline("Settings", __('Settings', 'wp-file-upload'), "plugin_settings");
 	
 	$unread_admin_notification_stats = wfu_get_unread_admin_notification_stats();
 	$notf_count = $unread_admin_notification_stats['all'];
@@ -1008,16 +1052,16 @@ function wfu_generate_dashboard_menu($dlp, $active) {
 	if ( $unread_admin_notification_stats['error'] > 0 ) $mark = 'error';
 	elseif ( $unread_admin_notification_stats['warning'] > 0 ) $mark = 'warning';
 	if ( $unread_admin_notification_stats['all'] > 99 ) $notf_count = "99+";
-	$hint = 'You have '.$unread_admin_notification_stats['all'].' unread notification'.( $unread_admin_notification_stats['all'] > 1 ? 's' : '' );
-	$notf_title = 'Notifications <span class="with-count with-count-'.$mark.' count-'.$unread_admin_notification_stats['all'].'" title="'.$hint.'"><span class="item-count">'.$notf_count.'</span></span>';
+	$hint = sprintf(_n('You have %s unread notification', 'You have %s unread notifications', $unread_admin_notification_stats['all'], 'wp-file-upload'), $unread_admin_notification_stats['all']);
+	$notf_title = esc_html__('Notifications', 'wp-file-upload').' <span class="with-count with-count-'.$mark.' count-'.$unread_admin_notification_stats['all'].'" title="'.esc_html($hint).'"><span class="item-count">'.$notf_count.'</span></span>';
 	
-	$tabs["Notifications"] = $tabline("Notifications", "plugin_notifications", null, $notf_title);
-	$tabs["File Browser"] = $tabline("File Browser", "file_browser", "File browser");
-	$tabs["View Log"] = $tabline("View Log", "view_log", "View log");
+	$tabs["Notifications"] = $tabline("Notifications", __('Notifications', 'wp-file-upload'), "plugin_notifications", null, $notf_title);
+	$tabs["File Browser"] = $tabline("File Browser", __('File Browser', 'wp-file-upload'), "file_browser", __('File browser', 'wp-file-upload'));
+	$tabs["View Log"] = $tabline("View Log", __('View Log', 'wp-file-upload'), "view_log", __('View log', 'wp-file-upload'));
 	if ( $plugin_options["personaldata"] == "1" )
-		$tabs["Personal Data"] = $tabline("Personal Data", "personal_data", "Personal data");
+		$tabs["Personal Data"] = $tabline("Personal Data", __('Personal Data', 'wp-file-upload'), "personal_data", __('Personal data', 'wp-file-upload'));
 	
-	$tabs["Maintenance Actions"] = $tabline("Maintenance Actions", "maintenance_actions", "Maintenance actions");
+	$tabs["Maintenance Actions"] = $tabline("Maintenance Actions", __('Maintenance Actions', 'wp-file-upload'), "maintenance_actions", __('Maintenance actions', 'wp-file-upload'));
 
 	$echo_str .= implode("", $tabs);
 	$echo_str .= $dlp.'</h2>';
@@ -1038,53 +1082,56 @@ function wfu_generate_dashboard_menu($dlp, $active) {
  *
  * @return string The HTML output of the title.
  */
-function wfu_generate_dashboard_menu_title($dlp) {
+function wfu_generate_dashboard_menu_title($dlp, $include_info = true) {
 	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$siteurl = site_url();
 	
-	// check if debug mode is on; in this case we show an icon in menu title
 	$debugmode_html = '';
-	$maintenance_options = get_option( "wfu_maintenance_options", array() );
-	$debug_logging = ( isset($maintenance_options["debug_logging"]) ? $maintenance_options["debug_logging"] === true : false );
-	if ( $debug_logging ) {
-		$debugmode_html = '
-			<div class="wfu-debuglog-mark" title="Debug Logging is ON">
-				<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0 0 24 24">
-					<path d="M5 16c0 3.87 3.13 7 7 7s7-3.13 7-7v-4H5v4zM16.12 4.37l2.1-2.1-.82-.83-2.3 2.31C14.16 3.28 13.12 3 12 3s-2.16.28-3.09.75L6.6 1.44l-.82.83 2.1 2.1C6.14 5.64 5 7.68 5 10v1h14v-1c0-2.32-1.14-4.36-2.88-5.63zM9 9c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm6 0c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"></path>
-				</svg>
-			</div>
-		';
-	}
-	
-	// check if there are unread notifications
-	$mark = '';
 	$mark_html = '';
-	$title = '';
-	$unread_admin_notification_stats = wfu_get_unread_admin_notification_stats();
-	if ( $unread_admin_notification_stats['single'] != null ) {
-		$mark = $unread_admin_notification_stats['single']['category'];
-		$description = $unread_admin_notification_stats['single']['brief'];
-		if ( $description == '' ) $description = $unread_admin_notification_stats['single']['content'];
-		$title = $description . ' Click to review it.';
-	}
-	else {
-		if ( $unread_admin_notification_stats['error'] > 0 ) $mark = 'error';
-		elseif ( $unread_admin_notification_stats['warning'] > 0 ) $mark = 'warning';
-		$title = 'You have unread '.$mark.' notifications. Click to review them.';
-	}
-	if ( $mark != '' ) {
-		$notfs_page = $siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=plugin_notifications';
-		$mark_html = '
-			<a class="wfu-mark-link" href="'.$notfs_page.'">
-				<span class="wfu-mark wfu-mark-'.$mark.' dashicons dashicons-warning" title="'.$title.'"></span>
-			</a>
-		';
+	
+	if ( $include_info ) {
+		// check if debug mode is on; in this case we show an icon in menu title
+		$maintenance_options = get_option( "wfu_maintenance_options", array() );
+		$debug_logging = ( isset($maintenance_options["debug_logging"]) ? $maintenance_options["debug_logging"] === true : false );
+		if ( $debug_logging ) {
+			$debugmode_html = '
+				<div class="wfu-debuglog-mark" title="'.esc_html__('Debug Logging is ON', 'wp-file-upload').'">
+					<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0 0 24 24">
+						<path d="M5 16c0 3.87 3.13 7 7 7s7-3.13 7-7v-4H5v4zM16.12 4.37l2.1-2.1-.82-.83-2.3 2.31C14.16 3.28 13.12 3 12 3s-2.16.28-3.09.75L6.6 1.44l-.82.83 2.1 2.1C6.14 5.64 5 7.68 5 10v1h14v-1c0-2.32-1.14-4.36-2.88-5.63zM9 9c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm6 0c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"></path>
+					</svg>
+				</div>
+			';
+		}
+		
+		// check if there are unread notifications
+		$mark = '';
+		$title = '';
+		$unread_admin_notification_stats = wfu_get_unread_admin_notification_stats();
+		if ( $unread_admin_notification_stats['single'] != null ) {
+			$mark = $unread_admin_notification_stats['single']['category'];
+			$description = $unread_admin_notification_stats['single']['brief'];
+			if ( $description == '' ) $description = $unread_admin_notification_stats['single']['content'];
+			$title = $description . ' '.__('Click to review it.', 'wp-file-upload');
+		}
+		else {
+			if ( $unread_admin_notification_stats['error'] > 0 ) $mark = __('error', 'wp-file-upload');
+			elseif ( $unread_admin_notification_stats['warning'] > 0 ) $mark = __('warning', 'wp-file-upload');
+			$title = sprintf(__('You have unread %s notifications. Click to review them.', 'wp-file-upload'), $mark);
+		}
+		if ( $mark != '' ) {
+			$notfs_page = $siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=plugin_notifications&c='.wp_create_nonce('wfu_admin_nonce');
+			$mark_html = '
+				<a class="wfu-mark-link" href="'.esc_url($notfs_page).'">
+					<span class="wfu-mark wfu-mark-'.$mark.' dashicons dashicons-warning" title="'.esc_html($title).'"></span>
+				</a>
+			';
+		}
 	}
 	
 	return $dlp.'
 		<h2 class="wfu-dashmenu-title-container">
 			<div class="wfu-inner">
-				<span class="wfu-title">Wordpress File Upload Control Panel</span>
+				<span class="wfu-title">'.esc_html__('Iptanus File Upload Control Panel', 'wp-file-upload').'</span>
 				'.$debugmode_html.$mark_html.'
 			</div>
 		</h2>
@@ -1210,7 +1257,7 @@ function wfu_flatten_post_list($list) {
  * @return string The HTML code of the list of instances of all the shortcodes.
  */
 function wfu_manage_instances() {
-	$echo_str = wfu_manage_instances_of_shortcode('wordpress_file_upload', 'Uploader Instances', 'uploader', 1);
+	$echo_str = wfu_manage_instances_of_shortcode('wordpress_file_upload', __('Uploader Instances', 'wp-file-upload'), 'uploader', 1);
 	
 	return $echo_str;
 }
@@ -1234,6 +1281,7 @@ function wfu_manage_instances_of_shortcode($tag, $title, $slug, $inc) {
 	global $wp_registered_widgets, $wp_registered_sidebars;
 	
 	$siteurl = site_url();
+	$admin_nonce = wp_create_nonce('wfu_admin_nonce');
 	$args = array( 'post_type' => array( "post", "page" ), 'post_status' => "publish,private,draft", 'posts_per_page' => -1 );
 	/**
 	 * Filter Arguments for Getting List of Posts.
@@ -1286,51 +1334,51 @@ function wfu_manage_instances_of_shortcode($tag, $title, $slug, $inc) {
 	$pagelist = ( isset($list["page"]) ? wfu_flatten_post_list($list["page"]) : array() );
 	$postlist = ( isset($list["post"]) ? wfu_flatten_post_list($list["post"]) : array() );
 
-	$echo_str = "\n\t\t".'<h3 style="margin-bottom: 10px; margin-top: 40px;">'.$title.'</h3>';
+	$echo_str = "\n\t\t".'<h3 style="margin-bottom: 10px; margin-top: 40px;">'.esc_html($title).'</h3>';
 	$onchange_js = 'document.getElementById(\'wfu_add_plugin_ok_'.$inc.'\').disabled = !((document.getElementById(\'wfu_page_type_'.$inc.'\').value == \'page\' && document.getElementById(\'wfu_page_list_'.$inc.'\').value != \'\') || (document.getElementById(\'wfu_page_type_'.$inc.'\').value == \'post\' && document.getElementById(\'wfu_post_list_'.$inc.'\').value != \'\'));';
 	$no_shortcodes = ( count($wfu_shortcodes) == 0 );
 	$echo_str .= "\n\t\t".'<div id="wfu_add_plugin_button_'.$inc.'" style="'. ( !$no_shortcodes ? '' : 'color:blue; font-weight:bold; font-size:larger;' ).'margin-bottom: 20px; margin-top: 10px;">';
-	$addbutton_pre = ( !$no_shortcodes ? '' : '<label>Press </label>');
-	$addbutton_post = ( !$no_shortcodes ? '' : '<label> to get started and add the '.$slug.' in a page</label>');
-	$echo_str .= "\n\t\t\t".$addbutton_pre.'<button onclick="document.getElementById(\'wfu_add_plugin_button_'.$inc.'\').style.display = \'none\'; document.getElementById(\'wfu_add_plugin_'.$inc.'\').style.display = \'inline-block\'; '.$onchange_js.'">'.( !$no_shortcodes ? 'Add Plugin Instance' : 'here' ).'</button>'.$addbutton_post;
+	$addbutton_pre = ( !$no_shortcodes ? '' : '<label>'.esc_html__('Press', 'wp-file-upload').' </label>');
+	$addbutton_post = ( !$no_shortcodes ? '' : '<label> '.esc_html(sprintf(__('to get started and add the %s in a page', 'wp-file-upload'), $slug)).'</label>');
+	$echo_str .= "\n\t\t\t".$addbutton_pre.'<button onclick="document.getElementById(\'wfu_add_plugin_button_'.$inc.'\').style.display = \'none\'; document.getElementById(\'wfu_add_plugin_'.$inc.'\').style.display = \'inline-block\'; '.$onchange_js.'">'.( !$no_shortcodes ? esc_html__('Add Plugin Instance', 'wp-file-upload') : esc_html__('here', 'wp-file-upload') ).'</button>'.$addbutton_post;
 	$echo_str .= "\n\t\t".'</div>';
 	$echo_str .= "\n\t\t".'<div id="wfu_add_plugin_'.$inc.'" style="margin-bottom: 20px; margin-top: 10px; position:relative; display:none;">';
 	$echo_str .= "\n\t\t\t".'<div id="wfu_add_plugin_'.$inc.'_overlay" style="position:absolute; top:0; left:0; width:100%; height:100%; background-color:rgba(255,255,255,0.8); border:none; display:none;">';
-	$echo_str .= "\n\t\t\t\t".'<table style="background:none; border:none; margin:0; padding:0; line-height:1; border-spacing:0; width:100%; height:100%; table-layout:fixed;"><tbody><tr><td style="text-align:center; vertical-align:middle;"><div style="display:inline-block;"><span class="spinner" style="opacity:1; float:left; margin:0; display:inline;"></span><label style="margin-left:4px;">please wait...</label></div></td></tr></tbody></table>';
+	$echo_str .= "\n\t\t\t\t".'<table style="background:none; border:none; margin:0; padding:0; line-height:1; border-spacing:0; width:100%; height:100%; table-layout:fixed;"><tbody><tr><td style="text-align:center; vertical-align:middle;"><div style="display:inline-block;"><span class="spinner" style="opacity:1; float:left; margin:0; display:inline;"></span><label style="margin-left:4px;">'.esc_html__('please wait...', 'wp-file-upload').'</label></div></td></tr></tbody></table>';
 	$echo_str .= "\n\t\t\t".'</div>';
-	$echo_str .= "\n\t\t\t".'<label>Add '.$slug.' to </label><select id="wfu_page_type_'.$inc.'" onchange="document.getElementById(\'wfu_page_list_'.$inc.'\').style.display = (this.value == \'page\' ? \'inline-block\' : \'none\'); document.getElementById(\'wfu_post_list_'.$inc.'\').style.display = (this.value == \'post\' ? \'inline-block\' : \'none\'); '.$onchange_js.'"><option value="page" selected="selected">Page</option><option value="post">Post</option></select>';
+	$echo_str .= "\n\t\t\t".'<label>'.esc_html(sprintf(__('Add %s to', 'wp-file-upload'), $slug)).' </label><select id="wfu_page_type_'.$inc.'" onchange="document.getElementById(\'wfu_page_list_'.$inc.'\').style.display = (this.value == \'page\' ? \'inline-block\' : \'none\'); document.getElementById(\'wfu_post_list_'.$inc.'\').style.display = (this.value == \'post\' ? \'inline-block\' : \'none\'); '.$onchange_js.'"><option value="page" selected="selected">'.esc_html__('Page', 'wp-file-upload').'</option><option value="post">'.esc_html__('Post', 'wp-file-upload').'</option></select>';
 	$echo_str .= "\n\t\t\t".'<select id="wfu_page_list_'.$inc.'" style="margin-bottom:6px;" onchange="'.$onchange_js.'">';
 	$echo_str .= "\n\t\t\t\t".'<option value=""></option>';
 	foreach ( $pagelist as $item )
-		$echo_str .= "\n\t\t\t\t".'<option value="'.$item['id'].'">'.str_repeat('&nbsp;', 4 * $item['level']).( $item['status'] == 1 ? '[Private]' : ( $item['status'] == 2 ? '[Draft]' : '' ) ).$item['title'].'</option>';
+		$echo_str .= "\n\t\t\t\t".'<option value="'.$item['id'].'">'.str_repeat('&nbsp;', 4 * $item['level']).( $item['status'] == 1 ? '[Private]' : ( $item['status'] == 2 ? '[Draft]' : '' ) ).esc_html($item['title']).'</option>';
 	$echo_str .= "\n\t\t\t".'</select>';
 	$echo_str .= "\n\t\t\t".'<select id="wfu_post_list_'.$inc.'" style="display:none; margin-bottom:6px;" onchange="'.$onchange_js.'">';
 	$echo_str .= "\n\t\t\t\t".'<option value=""></option>';
 	foreach ( $postlist as $item )
-		$echo_str .= "\n\t\t\t\t".'<option value="'.$item['id'].'">'.str_repeat('&nbsp;', 4 * $item['level']).( $item['status'] == 1 ? '[Private]' : ( $item['status'] == 2 ? '[Draft]' : '' ) ).$item['title'].'</option>';
+		$echo_str .= "\n\t\t\t\t".'<option value="'.$item['id'].'">'.str_repeat('&nbsp;', 4 * $item['level']).( $item['status'] == 1 ? '[Private]' : ( $item['status'] == 2 ? '[Draft]' : '' ) ).esc_html($item['title']).'</option>';
 	$echo_str .= "\n\t\t\t".'</select><br />';
 	$add_shortcode_ticket = wfu_create_random_string(16);
 	WFU_USVAR_store('wfu_add_shortcode_ticket_for_'.$tag, $add_shortcode_ticket);
-	$echo_str .= "\n\t\t".'<button id="wfu_add_plugin_ok_'.$inc.'" style="float:right; margin: 0 2px 0 4px;" disabled="disabled" onclick="document.getElementById(\'wfu_add_plugin_'.$inc.'_overlay\').style.display = \'block\'; window.location = \''.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=add_shortcode&amp;tag='.$tag.'&amp;postid=\' + (document.getElementById(\'wfu_page_type_'.$inc.'\').value == \'page\' ? document.getElementById(\'wfu_page_list_'.$inc.'\').value : document.getElementById(\'wfu_post_list_'.$inc.'\').value) + \'&amp;nonce='.$add_shortcode_ticket.'\';">Ok</button>';
-	$echo_str .= "\n\t\t".'<button style="float:right;" onclick="document.getElementById(\'wfu_page_type_'.$inc.'\').value = \'page\'; document.getElementById(\'wfu_page_list_'.$inc.'\').value = \'\'; document.getElementById(\'wfu_post_list_'.$inc.'\').value = \'\'; document.getElementById(\'wfu_add_plugin_'.$inc.'\').style.display = \'none\'; document.getElementById(\'wfu_add_plugin_button_'.$inc.'\').style.display = \'inline-block\';">Cancel</button>';
+	$echo_str .= "\n\t\t".'<button id="wfu_add_plugin_ok_'.$inc.'" style="float:right; margin: 0 2px 0 4px;" disabled="disabled" onclick="document.getElementById(\'wfu_add_plugin_'.$inc.'_overlay\').style.display = \'block\'; window.location = \''.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=add_shortcode&amp;tag='.$tag.'&amp;postid=\' + (document.getElementById(\'wfu_page_type_'.$inc.'\').value == \'page\' ? document.getElementById(\'wfu_page_list_'.$inc.'\').value : document.getElementById(\'wfu_post_list_'.$inc.'\').value) + \'&amp;nonce='.$add_shortcode_ticket.'&amp;c='.$admin_nonce.'\';">'.esc_html__('Ok', 'wp-file-upload').'</button>';
+	$echo_str .= "\n\t\t".'<button style="float:right;" onclick="document.getElementById(\'wfu_page_type_'.$inc.'\').value = \'page\'; document.getElementById(\'wfu_page_list_'.$inc.'\').value = \'\'; document.getElementById(\'wfu_post_list_'.$inc.'\').value = \'\'; document.getElementById(\'wfu_add_plugin_'.$inc.'\').style.display = \'none\'; document.getElementById(\'wfu_add_plugin_button_'.$inc.'\').style.display = \'inline-block\';">'.esc_html__('Cancel', 'wp-file-upload').'</button>';
 	$echo_str .= "\n\t\t".'</div>';
 	$echo_str .= "\n\t\t".'<table class="wp-list-table widefat fixed striped">';
 	$echo_str .= "\n\t\t\t".'<thead>';
 	$echo_str .= "\n\t\t\t\t".'<tr>';
 	$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="5%" class="manage-column column-primary">';
-	$echo_str .= "\n\t\t\t\t\t\t".'<label>ID</label>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<label>'.esc_html__('ID', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t\t\t\t".'</th>';
 //	$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="10%" style="text-align:center;">';
 //	$echo_str .= "\n\t\t\t\t\t\t".'<label>ID</label>';
 //	$echo_str .= "\n\t\t\t\t\t".'</th>';
 	$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="10%" class="manage-column">';
-	$echo_str .= "\n\t\t\t\t\t\t".'<label>Contained In</label>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<label>'.esc_html__('Contained In', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t\t\t\t".'</th>';
 	$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="30%" class="manage-column">';
-	$echo_str .= "\n\t\t\t\t\t\t".'<label>Page/Post Title</label>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<label>'.esc_html__('Page/Post Title', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t\t\t\t".'</th>';
 	$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="45%" class="manage-column">';
-	$echo_str .= "\n\t\t\t\t\t\t".'<label>Shortcode</label>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<label>'.esc_html__('Shortcode', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t\t\t\t".'</th>';
 	$echo_str .= "\n\t\t\t\t".'</tr>';
 	$echo_str .= "\n\t\t\t".'</thead>';
@@ -1343,10 +1391,10 @@ function wfu_manage_instances_of_shortcode($tag, $title, $slug, $inc) {
 			$posttype_obj = get_post_type_object(get_post_type($id));
 			$type = ( $posttype_obj ? $posttype_obj->labels->singular_name : "" );
 			$title = get_the_title($id);
-			if ( trim($title) == "" ) $title = 'ID: '.$id;
+			if ( trim($title) == "" ) $title = sprintf(__('ID: %s', 'wp-file-upload'), $id);
 		}
 		else {
-			$type = 'Sidebar';
+			$type = __('Sidebar', 'wp-file-upload');
 			$title = $data['sidebar'];
 		}
 		// sanitize title
@@ -1354,23 +1402,23 @@ function wfu_manage_instances_of_shortcode($tag, $title, $slug, $inc) {
 		$data_enc = wfu_safe_store_shortcode_data(wfu_encode_array_to_string($data));
 		$echo_str .= "\n\t\t\t\t".'<tr onmouseover="var actions=document.getElementsByName(\'wfu_shortcode_actions_'.$inc.'\'); for (var i=0; i<actions.length; i++) {actions[i].style.visibility=\'hidden\';} document.getElementById(\'wfu_shortcode_actions_'.$inc.'_'.$i.'\').style.visibility=\'visible\'" onmouseout="var actions=document.getElementsByName(\'wfu_shortcode_actions_'.$inc.'\'); for (var i=0; i<actions.length; i++) {actions[i].style.visibility=\'hidden\';}">';
 		$echo_str .= "\n\t\t\t\t\t".'<td class="column-primary" data-colname="ID">';
-		$echo_str .= "\n\t\t\t\t\t\t".'<a class="row-title" href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=edit_shortcode&tag='.$tag.'&data='.$data_enc.'&referer=dashboard" title="Instance #'.$i.'">Instance '.$i.'</a>';
+		$echo_str .= "\n\t\t\t\t\t\t".'<a class="row-title" href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=edit_shortcode&tag='.$tag.'&data='.$data_enc.'&referer=dashboard&c='.$admin_nonce).'" title="'.esc_html(sprintf(__('Instance #%s', 'wp-file-upload'), $i)).'">'.esc_html(sprintf(__('Instance #%s', 'wp-file-upload'), $i)).'</a>';
 		$echo_str .= "\n\t\t\t\t\t\t".'<div id="wfu_shortcode_actions_'.$inc.'_'.$i.'" name="wfu_shortcode_actions_'.$inc.'" style="visibility:hidden;">';
 		$echo_str .= "\n\t\t\t\t\t\t\t".'<span>';
-		$echo_str .= "\n\t\t\t\t\t\t\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=edit_shortcode&tag='.$tag.'&data='.$data_enc.'&referer=dashboard" title="Edit this shortcode">Edit</a>';
+		$echo_str .= "\n\t\t\t\t\t\t\t\t".'<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=edit_shortcode&tag='.$tag.'&data='.$data_enc.'&referer=dashboard&c='.$admin_nonce).'" title="'.esc_html__('Edit this shortcode', 'wp-file-upload').'">'.esc_html__('Edit', 'wp-file-upload').'</a>';
 		$echo_str .= "\n\t\t\t\t\t\t\t\t".' | ';
 		$echo_str .= "\n\t\t\t\t\t\t\t".'</span>';
 		$echo_str .= "\n\t\t\t\t\t\t\t".'<span>';
-		$echo_str .= "\n\t\t\t\t\t\t\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=delete_shortcode&data='.$data_enc.'" title="Delete this shortcode">Delete</a>';
+		$echo_str .= "\n\t\t\t\t\t\t\t\t".'<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=delete_shortcode&data='.$data_enc.'&c='.$admin_nonce).'" title="'.esc_html__('Delete this shortcode', 'wp-file-upload').'">'.esc_html__('Delete', 'wp-file-upload').'</a>';
 		$echo_str .= "\n\t\t\t\t\t\t\t".'</span>';
 		$echo_str .= "\n\t\t\t\t\t\t".'</div>';
-		$echo_str .= "\n\t\t\t\t\t\t".'<button type="button" class="toggle-row"><span class="screen-reader-text">Show more details</span></button>';
+		$echo_str .= "\n\t\t\t\t\t\t".'<button type="button" class="toggle-row"><span class="screen-reader-text">'.esc_html__('Show more details', 'wp-file-upload').'</span></button>';
 		$echo_str .= "\n\t\t\t\t\t".'</td>';
 //		$echo_str .= "\n\t\t\t\t\t".'<td style="padding: 5px 5px 5px 10px; text-align:center;">'.$id.'</td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Contained In">'.$type.'</td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Page/Post Title">'.$title.'</td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Shortcode">';
-		$echo_str .= "\n\t\t\t\t\t\t".'<textarea rows="3" disabled="disabled" style="width:100%;">'.trim($data['shortcode']).'</textarea>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="'.esc_html__('Contained In', 'wp-file-upload').'">'.esc_html($type).'</td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="'.esc_html__('Page/Post Title', 'wp-file-upload').'">'.esc_html($title).'</td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="'.esc_html__('Shortcode', 'wp-file-upload').'">';
+		$echo_str .= "\n\t\t\t\t\t\t".'<textarea rows="3" disabled="disabled" style="width:100%;">'.esc_textarea(trim($data['shortcode'])).'</textarea>';
 		$echo_str .= "\n\t\t\t\t\t".'</td>';
 		$echo_str .= "\n\t\t\t\t".'</tr>';
 		$i++;
@@ -1496,6 +1544,8 @@ function wfu_check_edit_shortcode($data) {
  *         false otherwise.
  */
 function wfu_add_shortcode($postid, $tag) {
+	$postid = wfu_sanitize_int($postid);
+	$tag = wfu_sanitize_tag($tag);
 	/**
 	 * Let Custom Scripts Add a Shortcode to Post.
 	 *
@@ -1580,21 +1630,23 @@ function wfu_replace_shortcode($data, $new_shortcode) {
  */
 function wfu_delete_shortcode_prompt($data_enc) {
 	$siteurl = site_url();
+	$admin_nonce = wp_create_nonce('wfu_admin_nonce');
 	$data = wfu_decode_array_from_string(wfu_get_shortcode_data_from_safe($data_enc));
 	$postid = $data['post_id'];
 	$echo_str = "\n".'<div class="wrap">';
-	$echo_str .= "\n\t".'<h2>Wordpress File Upload Control Panel</h2>';
+	$echo_str .= wfu_generate_dashboard_menu_title("\n\t");
 	$echo_str .= "\n\t".'<div style="margin-top:20px;">';
-	$echo_str .= "\n\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=manage_mainmenu" class="button" title="go back">Go to Main Menu</a>';
+	$echo_str .= "\n\t\t".'<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=manage_mainmenu&amp;c='.$admin_nonce).'" class="button" title="'.esc_html__('go back', 'wp-file-upload').'">'.esc_html__('Go to Main Menu', 'wp-file-upload').'</a>';
 	$echo_str .= "\n\t".'</div>';
-	$echo_str .= "\n\t".'<h2 style="margin-bottom: 10px; margin-top: 20px;">Delete Shortcode</h2>';
-	$echo_str .= "\n\t".'<form enctype="multipart/form-data" name="deletefile" id="deleteshortcode" method="post" action="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload" class="validate">';
+	$echo_str .= "\n\t".'<h2 style="margin-bottom: 10px; margin-top: 20px;">'.esc_html__('Delete Shortcode', 'wp-file-upload').'</h2>';
+	$echo_str .= "\n\t".'<form enctype="multipart/form-data" name="deletefile" id="deleteshortcode" method="post" action="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload').'" class="validate">';
 	$echo_str .= "\n\t\t".'<input type="hidden" name="action" value="deleteshortcode">';
-	$echo_str .= "\n\t\t".'<input type="hidden" name="data" value="'.$data_enc.'">';
-	$echo_str .= "\n\t\t".'<label>Are you sure that you want to delete shortcode for <strong>'.get_post_type($postid).' "'.sanitize_text_field(get_the_title($postid)).'" ('.$postid.') Position '.$data['position'].'</strong> ?</label><br/>';
+	$echo_str .= "\n\t\t".'<input type="hidden" name="c" value="'.$admin_nonce.'" />';
+	$echo_str .= "\n\t\t".'<input type="hidden" name="data" value="'.esc_attr($data_enc).'">';
+	$echo_str .= "\n\t\t".'<label>'.sprintf(esc_html__('Are you sure that you want to delete shortcode for %s ?"', 'wp-file-upload'), '<strong>'.esc_html(get_post_type($postid)).' "'.esc_html(get_the_title($postid)).'" ('.$postid.') '.esc_html__('Position', 'wp-file-upload').' '.$data['position'].'</strong>').'</label><br/>';
 	$echo_str .= "\n\t\t".'<p class="submit">';
-	$echo_str .= "\n\t\t\t".'<input type="submit" class="button-primary" name="submit" value="Delete">';
-	$echo_str .= "\n\t\t\t".'<input type="submit" class="button-primary" name="submit" value="Cancel">';
+	$echo_str .= "\n\t\t\t".'<button class="button-primary" name="submit" value="Delete">'.esc_html__('Delete', 'wp-file-upload').'</button>';
+	$echo_str .= "\n\t\t\t".'<button class="button-primary" name="submit" value="Cancel">'.esc_html__('Cancel', 'wp-file-upload').'</button>';
 	$echo_str .= "\n\t\t".'</p>';
 	$echo_str .= "\n\t".'</form>';
 	$echo_str .= "\n".'</div>';
@@ -1615,6 +1667,8 @@ function wfu_delete_shortcode_prompt($data_enc) {
  * @return bool True if deletion succeeded, false otherwise.
  */
 function wfu_delete_shortcode($data) {
+	if ( !wp_verify_nonce(( isset($_POST['c']) ? sanitize_text_field( wp_unslash ( $_POST["c"] ) ) : "" ), "wfu_admin_nonce") ) return;
+	
 	//check if user is allowed to perform this action
 	if ( !current_user_can( 'manage_options' ) ) return false;
 
@@ -1650,7 +1704,7 @@ function wfu_media_editor_properties() {
 	$echo_str = "";
 	if ( isset($meta["WFU User Data"]) && is_array($meta["WFU User Data"]) ) {
 		foreach ( $meta["WFU User Data"] as $label => $value )
-			$echo_str .= '<div class="misc-pub-section misc-pub-userdata">'.$label.': <strong>'.$value.'</strong></div>';
+			$echo_str .= '<div class="misc-pub-section misc-pub-userdata">'.esc_html($label).': <strong>'.esc_html($value).'</strong></div>';
 	}
 	echo $echo_str;
 }

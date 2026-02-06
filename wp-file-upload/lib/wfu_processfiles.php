@@ -7,14 +7,18 @@
  *
  * @link /lib/wfu_processfiles.php
  *
- * @package WordPress File Upload Plugin
+ * @package Iptanus File Upload Plugin
  * @subpackage Core Components
  * @since 2.1.2
  */
 
+if ( ! defined( 'ABSPATH' ) ) exit;
+
 function wfu_process_files_queue($params, $method) {
+	check_ajax_referer( 'wfu-uploader-nonce', 'wfu_uploader_nonce' );
+	
 	$sid = $params["uploadid"];
-	$unique_id = sanitize_text_field($_POST['uniqueuploadid_'.$sid]);
+	$unique_id = ( isset($_POST['uniqueuploadid_'.$sid]) ? sanitize_text_field($_POST['uniqueuploadid_'.$sid]) : '' );
 	$queue = "wfu_queue_".$unique_id;
 	if ( $unique_id != "" ) {
 		$queue_id = wfu_create_random_string(16);
@@ -26,7 +30,7 @@ function wfu_process_files_queue($params, $method) {
 		}
 	}
 	$queue_count = intval(wfu_get_option("wfu_queue_".$unique_id."_count", 0, "string")) + 1;
-	$chunk_data = explode(",", ( isset($_POST['chunk_data']) ? $_POST['chunk_data'] : "0,0,0,0," ));
+	$chunk_data = explode(",", ( isset($_POST['chunk_data']) ? sanitize_text_field($_POST['chunk_data']) : "0,0,0,0," ));
 	if ( count($chunk_data) != 5 ) $chunk_data = array( "0", "0", "0", "0", "" );
 	list($file_id, $file_size, $chunk_count, $chunk_id, $filename_enc) = $chunk_data;
 	$file_id = wfu_sanitize_int($file_id);
@@ -41,6 +45,9 @@ function wfu_process_files_queue($params, $method) {
 
 function wfu_process_files($params, $method) {
 	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	
+	check_ajax_referer( 'wfu-uploader-nonce', 'wfu_uploader_nonce' );
+	
 	$sid = $params["uploadid"];
 	$sesid = wfu_get_session_id();
 	$user = wp_get_current_user();
@@ -57,7 +64,7 @@ function wfu_process_files($params, $method) {
 		$is_admin = current_user_can('manage_options');
 	}
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
-	$unique_id = sanitize_text_field($_POST['uniqueuploadid_'.$sid]);
+	$unique_id = ( isset($_POST['uniqueuploadid_'.$sid]) ? sanitize_text_field($_POST['uniqueuploadid_'.$sid]) : '' );
 	// determine if this routine is only for checking the file
 	$only_check = ( isset($_POST['only_check']) ? ( $_POST['only_check'] == "1" ) : false );
 	// determine if this is an upload without a file
@@ -83,7 +90,7 @@ function wfu_process_files($params, $method) {
 	}
 	$userdata_fields = $params["userdata_fields"]; 
 	foreach ( $userdata_fields as $userdata_key => $userdata_field ) {
-		$userdata_fields[$userdata_key]["value"] = ( isset($_POST[$hiddeninput.'_userdata_'.$userdata_key]) ? strip_tags($_POST[$hiddeninput.'_userdata_'.$userdata_key]) : "" );
+		$userdata_fields[$userdata_key]["value"] = ( isset($_POST[$hiddeninput.'_userdata_'.$userdata_key]) ? sanitize_textarea_field($_POST[$hiddeninput.'_userdata_'.$userdata_key]) : "" );
 	}
 	$params_output_array["version"] = "full";
 	$params_output_array["general"]['shortcode_id'] = $sid;
@@ -123,18 +130,34 @@ function wfu_process_files($params, $method) {
 	/* notify admin if this is a redirection caused because the browser of the user could not handle AJAX upload */
 	$params_output_array["general"]['admin_messages']['other'] = $params['adminerrors'];
 
-	if ( isset($_FILES[$uploadedfile]['error']) || $only_check || $nofileupload ) {
+	$uploadedfile_props = array();
+	if ( isset($_FILES[$uploadedfile]['name']) || $only_check || $nofileupload ) {
 		$files_count = 1;
 		// in case of checking of file or no file upload, then the $_FILES
 		// variable has not been set because no file has been uploaded,
 		// so we set it manually in order to allow the routine to continue
 		if ( $only_check || $nofileupload ) {
 			//use wfu_basename() function to avoid directory traversal attacks
-			$_FILES[$uploadedfile]['name'] = wfu_basename(wfu_plugin_decode_string($_POST[$uploadedfile.'_name']));
-			$_FILES[$uploadedfile]['type'] = 'any';
-			$_FILES[$uploadedfile]['tmp_name'] = 'any';
-			$_FILES[$uploadedfile]['error'] = '';
-			$_FILES[$uploadedfile]['size'] = wfu_sanitize_int($_POST[$uploadedfile.'_size']);
+			$uploadedfile_name_hex = ( isset($_POST[$uploadedfile.'_name']) ? wfu_sanitize_hex($_POST[$uploadedfile.'_name']) : '' );
+			$uploadedfile_props['name'] = sanitize_text_field(wfu_basename(wfu_plugin_decode_string($uploadedfile_name_hex)));
+			$uploadedfile_props['type'] = 'any';
+			$uploadedfile_props['tmp_name'] = 'any';
+			$uploadedfile_props['error'] = '';
+			$uploadedfile_props['size'] = ( isset($_POST[$uploadedfile.'_size']) ? wfu_sanitize_int($_POST[$uploadedfile.'_size']) : '0' );
+		}
+		elseif ( !is_array($_FILES[$uploadedfile]['name']) ) {
+			$uploadedfile_props['name'] = ( isset($_FILES[$uploadedfile]['name']) ? sanitize_text_field($_FILES[$uploadedfile]['name']) : '' );
+			$uploadedfile_props['type'] = ( isset($_FILES[$uploadedfile]['type']) ? sanitize_text_field($_FILES[$uploadedfile]['type']) : '' );
+			$uploadedfile_props['tmp_name'] = ( isset($_FILES[$uploadedfile]['tmp_name']) ? sanitize_text_field($_FILES[$uploadedfile]['tmp_name']) : '' );
+			$uploadedfile_props['error'] = ( isset($_FILES[$uploadedfile]['error']) ? sanitize_text_field($_FILES[$uploadedfile]['error']) : '' );
+			$uploadedfile_props['size'] = ( isset($_FILES[$uploadedfile]['size']) ? sanitize_text_field($_FILES[$uploadedfile]['size']) : '' );			
+		}
+		else {
+			$uploadedfile_props['name'] = ( isset($_FILES[$uploadedfile]['name']) ? array_map('sanitize_text_field', $_FILES[$uploadedfile]['name']) : array() );
+			$uploadedfile_props['type'] = ( isset($_FILES[$uploadedfile]['type']) ? array_map('sanitize_text_field', $_FILES[$uploadedfile]['type']) : array() );
+			$uploadedfile_props['tmp_name'] = ( isset($_FILES[$uploadedfile]['tmp_name']) ? array_map('sanitize_text_field', $_FILES[$uploadedfile]['tmp_name']) : array() );
+			$uploadedfile_props['error'] = ( isset($_FILES[$uploadedfile]['error']) ? array_map('sanitize_text_field', $_FILES[$uploadedfile]['error']) : array() );
+			$uploadedfile_props['size'] = ( isset($_FILES[$uploadedfile]['size']) ? array_map('sanitize_text_field', $_FILES[$uploadedfile]['size']) : array() );
 		}
 	}
 	else $files_count = 0;
@@ -142,7 +165,7 @@ function wfu_process_files($params, $method) {
 	// index of uploaded file in case of ajax uploads (in ajax uploads only one file is uploaded in every ajax call)
 	// the index is used to store any file data in session variables, in case the file is uploaded in two or more passes
 	// (like the case were in the first pass it is only checked) 
-	$single_file_index = ( isset($_POST[$uploadedfile.'_index']) ? $_POST[$uploadedfile.'_index'] : -1 );
+	$single_file_index = ( isset($_POST[$uploadedfile.'_index']) ? sanitize_text_field($_POST[$uploadedfile.'_index']) : -1 );
 	$single_file_index = wfu_sanitize_int($single_file_index);
 
 	/* append userdata fields to upload path */
@@ -169,7 +192,8 @@ function wfu_process_files($params, $method) {
 
 	/* if webcam uploads are enabled, then correct the filename */
 	if ( strpos($params["placements"], "webcam") !== false && $params["webcam"] == "true" && isset($_POST[$uploadedfile.'_isblob']) && $_POST[$uploadedfile.'_isblob'] == "1" ) {
-			$initial_file_name = $_FILES[$uploadedfile]['name'];
+			$initial_file_name = ( isset($uploadedfile_props['name']) ? $uploadedfile_props['name'] : '' );
+		$initial_file_name = sanitize_file_name($initial_file_name);
 		$dotfileext = wfu_fileext($initial_file_name, true);
 		$file_name = wfu_filename($initial_file_name);
 		if ( $file_name == "videostream" ) $file_name = $params["videoname"];
@@ -184,15 +208,16 @@ function wfu_process_files($params, $method) {
 		$file_name = preg_replace($search, $replace, $file_name);
 		//avoid directory traversal by using wfu_basename
 		$file_name = wfu_basename($file_name);
-			$_FILES[$uploadedfile]['name'] = $file_name.$dotfileext;
+			$uploadedfile_props['name'] = $file_name.$dotfileext;
 	}
 	
 	if ( $files_count == 1 ) {
 
-		foreach ( $_FILES[$uploadedfile] as $key => $prop )
+		foreach ( $uploadedfile_props as $key => $prop )
 				$fileprops[$key] = $prop;
 
 		$sftp_not_supported = false;
+		$ftps_not_supported = false;
 		$upload_path_forbidden = false;
 		$upload_path_ok = false;
 		$allowed_file_ok = false;
@@ -220,7 +245,7 @@ function wfu_process_files($params, $method) {
 		// retrieve unique id of the file, used in filter actions for identifying each separate file
 		if ( WFU_USVAR_exists($file_map) ) {
 			$file_map_arr = WFU_USVAR($file_map);
-			$file_unique_id = $file_map_arr['file_unique_id'];
+			$file_unique_id = ( is_array($file_map_arr) ? wfu_sanitize_code($file_map_arr['file_unique_id']) : '' );
 		}
 		else $file_unique_id = '';
 		$filedata_previously_defined = ( $file_unique_id != '' );
@@ -259,6 +284,7 @@ function wfu_process_files($params, $method) {
 				if ( !$nofileupload ) {
 					if ( !WFU_USVAR_exists("filedata_".$unique_id) ) WFU_USVAR_store("filedata_".$unique_id, array());
 					$filedata_id = WFU_USVAR("filedata_".$unique_id);
+					if ( !is_array($filedata_id) ) $filedata_id = array();
 					$filedata_id[$real_file_index] = array(
 						"file_unique_id"	=> $file_unique_id,
 						"original_filename"	=> $only_filename,
@@ -361,8 +387,10 @@ function wfu_process_files($params, $method) {
 				if ( $only_check && !$nofileupload ) {
 					if ( !WFU_USVAR_exists($file_map) ) WFU_USVAR_store($file_map, array());
 					$file_map_arr = WFU_USVAR($file_map);
+					if ( !is_array($file_map_arr) ) $file_map_arr = array();
 					$file_map_arr['file_unique_id'] = $file_unique_id;
 					$file_map_arr['filepath'] = $target_path;
+					$file_map_arr['filepath_final'] = false;
 					$file_map_arr['userdata'] = $userdata_fields;
 					WFU_USVAR_store($file_map, $file_map_arr);
 				}
@@ -372,9 +400,10 @@ function wfu_process_files($params, $method) {
 			// have previously changed because of application of filters
 			if ( $filedata_previously_defined ) {
 				$file_map_arr = WFU_USVAR($file_map);
-				$target_path = $file_map_arr['filepath'];
+				if ( !is_array($file_map_arr) ) $file_map_arr = array();
+				$target_path = strip_tags($file_map_arr['filepath']);
 				$only_filename = wfu_basename($target_path);
-				$userdata_fields = $file_map_arr['userdata'];
+				$userdata_fields = wfu_sanitize_userdata_fields($file_map_arr['userdata']);
 			}
 			if ( $filter_error_message != '' ) {
 				// errorabort flag designates that file will be aborted and no
@@ -430,6 +459,11 @@ function wfu_process_files($params, $method) {
 						$upload_path_ok = false;
 						$sftp_not_supported = true;
 					}
+					/* Check if this is an ftps upload and ftps is supported */
+					elseif ( substr($target_path, 0, 7) == "ftps://" && !function_exists("ftp_ssl_connect") ) {
+						$upload_path_ok = false;
+						$ftps_not_supported = true;
+					}
 					/* Check if upload path is forbidden */
 					elseif ( wfu_is_dir_blacklisted( wfu_basedir($target_path) ) ) {		
 						$upload_path_ok = false;
@@ -441,7 +475,7 @@ function wfu_process_files($params, $method) {
 					}
 					/* Attempt to create path if user has selected to do so */ 
 					else if ( $params["createpath"] == "true" ) {
-						$wfu_create_directory_ret = wfu_create_directory(wfu_basedir($target_path), $params["accessmethod"], $params["ftpinfo"]);
+						$wfu_create_directory_ret = wfu_create_directory(wfu_basedir($target_path), $params["accessmethod"], $params["ftpinfo"], $params["ftppassivemode"]);
 						if ( $wfu_create_directory_ret != "" ) {
 							$file_output['admin_messages'] = wfu_join_strings("<br />", $file_output['admin_messages'], $wfu_create_directory_ret);
 						}
@@ -503,7 +537,13 @@ function wfu_process_files($params, $method) {
 					$additional_file_output = array( "message" => "", "admin_messages" => "" );
 					if ( !$upload_path_ok ) {
 						$fail_reason = "upload_path";
-						$additional_file_output["message"] = ( $sftp_not_supported ? WFU_ERROR_ADMIN_SFTP_UNSUPPORTED : ( $upload_path_forbidden ? WFU_ERROR_DIR_ALLOW : WFU_ERROR_DIR_EXIST ) );
+						$additional_file_output["message"] = ( $sftp_not_supported
+							? WFU_ERROR_ADMIN_SFTP_UNSUPPORTED
+							: ( $ftps_not_supported
+								? WFU_ERROR_ADMIN_FTPS_UNSUPPORTED
+								: ( $upload_path_forbidden
+									? WFU_ERROR_DIR_ALLOW
+									: WFU_ERROR_DIR_EXIST ) ) );
 					}
 					if ( !$allowed_file_ok ) {
 						$fail_reason = ( $security_check_result !== "" ? "security:".$security_check_result : "not_allowed" );
@@ -545,7 +585,7 @@ function wfu_process_files($params, $method) {
 			$upload_error = $fileprops['error'];
 			if ( $upload_error == 1 ) {
 				$message_text = WFU_ERROR_FILE_PHP_SIZE;
-				$file_output['admin_messages'] = wfu_join_strings("<br />", $file_output['admin_messages'], WFU_ERROR_ADMIN_FILE_PHP_SIZE);
+				$file_output['admin_messages'] = wfu_join_strings("<br />", $file_output['admin_messages'], sprintf(WFU_ERROR_ADMIN_FILE_PHP_SIZE, ini_get("upload_max_filesize")));
 			}
 			elseif ( $upload_error == 2 ) $message_text = WFU_ERROR_FILE_HTML_SIZE;
 			elseif ( $upload_error == 3 ) $message_text = WFU_ERROR_FILE_PARTIAL;
@@ -557,7 +597,7 @@ function wfu_process_files($params, $method) {
 				$upload_time_limit = ini_get("max_input_time");
 				$params_output_array["general"]['upload_finish_time'] = $params["upload_start_time"] + $upload_time_limit * 1000;
 				$message_text = WFU_ERROR_FILE_PHP_TIME;
-				$file_output['admin_messages'] = wfu_join_strings("<br />", $file_output['admin_messages'], WFU_ERROR_ADMIN_FILE_PHP_TIME);
+				$file_output['admin_messages'] = wfu_join_strings("<br />", $file_output['admin_messages'], sprintf(WFU_ERROR_ADMIN_FILE_PHP_TIME, ini_get("max_input_time")));
 			}
 			//error (and not errorabort) flag designates that a resuming of the file may be attempted
 			$file_output['message_type'] = "error";
@@ -577,8 +617,8 @@ function wfu_process_files($params, $method) {
 					$file_copied = false;
 
 					if ($source_path) {
-						$file_exists = wfu_file_exists_extended($target_path);
-						if ( !$file_exists || $params["duplicatespolicy"] == "" || $params["duplicatespolicy"] == "overwrite" ) {
+						$file_available = !wfu_file_exists_extended($target_path) && ( $file_unique_id == '' || !wfu_is_file_reserved($target_path) );
+						if ( $file_available || $params["duplicatespolicy"] == "" || $params["duplicatespolicy"] == "overwrite" ) {
 							//redirect echo in internal buffer to receive and process any unwanted warning messages from wfu_upload_file
 							ob_start();
 							ob_clean();
@@ -604,9 +644,14 @@ function wfu_process_files($params, $method) {
 								$target_path = apply_filters('wfu_before_file_upload', $target_path, $file_unique_id);
 								if ( WFU_USVAR_exists($file_map) ) {
 									$file_map_arr = WFU_USVAR($file_map);
+									if ( !is_array($file_map_arr) ) $file_map_arr = array();
 									$file_map_arr['filepath'] = $target_path;
+									$file_map_arr['filepath_final'] = true;
 									WFU_USVAR_store($file_map, $file_map_arr);
 								}
+								// reserve the uploaded file path so that no
+								// other uploaded file can use it
+								wfu_reserve_file($target_path);
 							}
 							//recalculate $only_filename in case it changed with wfu_before_file_upload filter
 							$only_filename = wfu_basename($target_path);
@@ -635,7 +680,7 @@ function wfu_process_files($params, $method) {
 								$file_output['admin_messages'] = wfu_join_strings("<br />", $file_output['admin_messages'], $wfu_upload_file_ret["admin_message"]);
 							}
 						}
-						else if ( $file_exists && $params["duplicatespolicy"] == "maintain both" ) {
+						else if ( !$file_available && $params["duplicatespolicy"] == "maintain both" ) {
 							$full_path = wfu_basedir($target_path);
 							$name_part = $only_filename;
 							$ext_part = "";
@@ -651,7 +696,7 @@ function wfu_process_files($params, $method) {
 									$only_filename = $name_part . "(" . $unique_ind . ")" . $ext_part;
 									$target_path = $full_path . $only_filename;
 								}
-								while ( wfu_file_exists_extended($target_path) );
+								while ( wfu_file_exists_extended($target_path) || wfu_is_file_reserved($target_path) );
 							}
 							else {
 								$current_datetime = gmdate("U") - 1;
@@ -660,17 +705,22 @@ function wfu_process_files($params, $method) {
 									$only_filename = $name_part . "-" . gmdate("YmdHis", $current_datetime) . $ext_part;
 									$target_path = $full_path . $only_filename;
 								}
-								while ( wfu_file_exists_extended($target_path) );
+								while ( wfu_file_exists_extended($target_path) || wfu_is_file_reserved($target_path) );
 							}
 							//redirect echo in internal buffer to receive and process any unwanted warning messages from move_uploaded_file
 							ob_start();
 							ob_clean();
-							/* This filter is documented above. */
 							if ( $file_unique_id != '' ) {
+								/* This filter is documented above. */
 								$target_path = apply_filters('wfu_before_file_upload', $target_path, $file_unique_id);
 								$file_map_arr = WFU_USVAR($file_map);
+								if ( !is_array($file_map_arr) ) $file_map_arr = array();
 								$file_map_arr['filepath'] = $target_path;
+								$file_map_arr['filepath_final'] = true;
 								WFU_USVAR_store($file_map, $file_map_arr);
+								// reserve the uploaded file path so that no
+								// other uploaded file can use it
+								wfu_reserve_file($target_path);
 							}
 							//recalculate $only_filename in case it changed with wfu_before_file_upload filter
 							$only_filename = wfu_basename($target_path);
@@ -908,7 +958,7 @@ function wfu_process_files($params, $method) {
 			$file_output['header'] = esc_html(preg_replace($search, $replace, $params['successmessage']));
 			/* prepare details of successful file upload, visible only to
 			   administrator */
-			$file_output['admin_messages'] = wfu_join_strings("<br />", preg_replace($search, $replace, WFU_SUCCESSMESSAGE_DETAILS), $file_output['admin_messages']);
+			$file_output['admin_messages'] = wfu_join_strings("<br />", preg_replace($search, $replace, wfu_unesc_percent(WFU_SUCCESSMESSAGE_DETAILS)), $file_output['admin_messages']);
 		}
 		/* FileResult: B */
 		elseif ( $file_output['message_type'] == "warning" ) {
@@ -917,10 +967,10 @@ function wfu_process_files($params, $method) {
 			$file_output['color'] = $color_array[0];
 			$file_output['bgcolor'] = $color_array[1];
 			$file_output['borcolor'] = $color_array[2];
-			$file_output['header'] = esc_html(preg_replace($search, $replace, ( $store_nothing ? WFU_WARNINGMESSAGE_NOSAVE : $params['warningmessage'] )));
+			$file_output['header'] = esc_html(preg_replace($search, $replace, ( $store_nothing ? wfu_unesc_percent(WFU_WARNINGMESSAGE_NOSAVE) : $params['warningmessage'] )));
 			/* prepare and prepend details of successful file upload, visible
 			   only to administrator */
-			$file_output['admin_messages'] = wfu_join_strings("<br />", preg_replace($search, $replace, WFU_SUCCESSMESSAGE_DETAILS), $file_output['admin_messages']);
+			$file_output['admin_messages'] = wfu_join_strings("<br />", preg_replace($search, $replace, wfu_unesc_percent(WFU_SUCCESSMESSAGE_DETAILS)), $file_output['admin_messages']);
 		}
 		/* FileResult: C */
 		elseif ( substr($file_output['message_type'], 0, 5) == "error" ) {
@@ -932,7 +982,7 @@ function wfu_process_files($params, $method) {
 			$replace = array ($user_login, ( $user_email == "" ? "no email" : $user_email ), $only_filename, $target_path);
 			$file_output['header'] = esc_html(preg_replace($search, $replace, $params['errormessage']));
 			/* prepare and prepend details of failed file upload, visible only to administrator */
-			if ( !$nofileupload ) $file_output['admin_messages'] = wfu_join_strings("<br />", preg_replace($search, $replace, WFU_FAILMESSAGE_DETAILS), $file_output['admin_messages']);
+			if ( !$nofileupload ) $file_output['admin_messages'] = wfu_join_strings("<br />", preg_replace($search, $replace, wfu_unesc_percent(WFU_FAILMESSAGE_DETAILS)), $file_output['admin_messages']);
 		}
 
 		/* suppress again any admin messages if user is not administrator or
@@ -1187,7 +1237,7 @@ function wfu_process_files($params, $method) {
 		if ( ( $file_finished_successfully || $file_finished_unsuccessfully ) && !$ignore_server_actions && !$nofileupload ) {
 			if ( WFU_USVAR_exists("filedata_".$unique_id) ) {
 				$filedata_id = WFU_USVAR("filedata_".$unique_id);
-				if ( isset($filedata_id[$real_file_index]) ) {
+				if ( is_array($filedata_id) && isset($filedata_id[$real_file_index]) ) {
 					$filedata_id[$real_file_index]["filepath"] = $target_path;
 					$filedata_id[$real_file_index]["user_data"] = $userdata_fields;
 					$filedata_id[$real_file_index]["upload_result"] = $file_output['message_type'];
@@ -1196,6 +1246,11 @@ function wfu_process_files($params, $method) {
 					WFU_USVAR_store("filedata_".$unique_id, $filedata_id);
 				}
 			}
+		}
+		
+		/* remove file from reservation list */
+		if ( ( $file_finished_successfully || $file_finished_unsuccessfully ) && !$ignore_server_actions && !$nofileupload ) {
+			wfu_unreserve_files($target_path);
 		}
 	}
 

@@ -8,10 +8,12 @@
  *
  * @link /lib/wfu_admin_uploadedfiles.php
  *
- * @package WordPress File Upload Plugin
+ * @package Iptanus File Upload Plugin
  * @subpackage Core Components
  * @since 4.7.0
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
  * Process Dashboard Requests for Uploaded Files Page
@@ -22,8 +24,15 @@
  * @since 4.7.0
  */
 function wfu_uploadedfiles_menu() {
-	$_GET = stripslashes_deep($_GET);
-	$tag = (!empty($_GET['tag']) ? $_GET['tag'] : '1');
+	// check nonce
+	$nonce = ( isset($_REQUEST['c']) ? sanitize_text_field( wp_unslash ( $_REQUEST['c'] ) ) : null );
+	$valid_nonce = ( $nonce !== null && wp_verify_nonce($nonce, 'wfu_uploadedfiles_nonce') !== false );
+	if ( $nonce !== null && !$valid_nonce ) exit(esc_html__('Not allowed!', 'wp-file-upload'));
+
+	// read params from request only on valid nonce
+	if ( $valid_nonce ) $_GET = stripslashes_deep($_GET);
+	$tag = ( $valid_nonce && !empty($_GET['tag']) ? wfu_sanitize_int($_GET['tag']) : '1' );
+
 	$page = max((int)$tag, 1);
 	echo wfu_uploadedfiles_manager($page);
 }
@@ -50,6 +59,7 @@ function wfu_uploadedfiles_manager($page = 1, $only_table_rows = false) {
 
 	if ( !current_user_can( 'manage_options' ) ) return;
 
+	$admin_nonce = wp_create_nonce('wfu_admin_nonce');
 	$siteurl = site_url();
 	$maxrows = (int)WFU_VAR("WFU_UPLOADEDFILES_TABLE_MAXROWS");
 
@@ -106,7 +116,7 @@ function wfu_uploadedfiles_manager($page = 1, $only_table_rows = false) {
 		}
 		
 		$echo_str .= "\n".'<div class="wrap">';
-		$echo_str .= "\n\t".'<h2>List of Uploaded Files</h2>';
+		$echo_str .= "\n\t".'<h2>'.esc_html__('List of Uploaded Files', 'wp-file-upload').'</h2>';
 		$echo_str .= "\n\t".'<div style="position:relative;">';
 		$echo_str .= wfu_add_loading_overlay("\n\t\t", "uploadedfiles");
 		$echo_str .= "\n\t\t".'<div class="wfu_uploadedfiles_header" style="width: 100%;">';
@@ -123,32 +133,32 @@ function wfu_uploadedfiles_manager($page = 1, $only_table_rows = false) {
 		$echo_str .= "\n\t\t\t\t\t\t".'<label>#</label>';
 		$echo_str .= "\n\t\t\t\t\t".'</th>';
 		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="30%" class="manage-column column-primary">';
-		$echo_str .= "\n\t\t\t\t\t\t".'<label>File</label>';
+		$echo_str .= "\n\t\t\t\t\t\t".'<label>'.esc_html__('File', 'wp-file-upload').'</label>';
 		$echo_str .= "\n\t\t\t\t\t".'</th>';
 		foreach ( $cols as $col => $is_visible ) {
 			if ( $col == 'upload_date' ) {
 				$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="10%" class="manage-column'.( $is_visible ? '' : ' hidden' ).'">';
-				$echo_str .= "\n\t\t\t\t\t\t".'<label>Upload Date</label>';
+				$echo_str .= "\n\t\t\t\t\t\t".'<label>'.esc_html__('Upload Date', 'wp-file-upload').'</label>';
 				$echo_str .= "\n\t\t\t\t\t".'</th>';
 			}
 			elseif ( $col == 'user' ) {
 				$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="10%" class="manage-column'.( $is_visible ? '' : ' hidden' ).'">';
-				$echo_str .= "\n\t\t\t\t\t\t".'<label>User</label>';
+				$echo_str .= "\n\t\t\t\t\t\t".'<label>'.esc_html__('User', 'wp-file-upload').'</label>';
 				$echo_str .= "\n\t\t\t\t\t".'</th>';
 			}
 			elseif ( $col == 'properties' ) {
 				$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="10%" class="manage-column'.( $is_visible ? '' : ' hidden' ).'">';
-				$echo_str .= "\n\t\t\t\t\t\t".'<label>Properties</label>';
+				$echo_str .= "\n\t\t\t\t\t\t".'<label>'.esc_html__('Properties', 'wp-file-upload').'</label>';
 				$echo_str .= "\n\t\t\t\t\t".'</th>';
 			}
 			elseif ( $col == 'remarks' ) {
 				$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="25%" class="manage-column'.( $is_visible ? '' : ' hidden' ).'">';
-				$echo_str .= "\n\t\t\t\t\t\t".'<label>Remarks</label>';
+				$echo_str .= "\n\t\t\t\t\t\t".'<label>'.esc_html__('Remarks', 'wp-file-upload').'</label>';
 				$echo_str .= "\n\t\t\t\t\t".'</th>';
 			}
 			elseif ( $col == 'actions' ) {
 				$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="10%" class="manage-column'.( $is_visible ? '' : ' hidden' ).'">';
-				$echo_str .= "\n\t\t\t\t\t\t".'<label>Actions</label>';
+				$echo_str .= "\n\t\t\t\t\t\t".'<label>'.esc_html__('Actions', 'wp-file-upload').'</label>';
 				$echo_str .= "\n\t\t\t\t\t".'</th>';
 			}
 		}
@@ -209,7 +219,7 @@ function wfu_uploadedfiles_manager($page = 1, $only_table_rows = false) {
 		$properties['userdata']['visible'] = ( count(wfu_get_userdata_from_rec($filerec)) > 0 );
 		if ( $has_media ) {
 			$properties['media']['visible'] = true;
-			$properties['media']['remarks'] = 'File is associated with Media item ID <strong>'.$filedata["media"]["attach_id"].'</strong>';
+			$properties['media']['remarks'] = sprintf(__('File is associated with Media item ID %s', 'wp-file-upload'), '<strong>'.$filedata["media"]["attach_id"].'</strong>');
 		}
 		$properties['ftp']['visible'] = $file_in_ftp;
 		/**
@@ -230,7 +240,7 @@ function wfu_uploadedfiles_manager($page = 1, $only_table_rows = false) {
 		$details_href_net = $siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_details&file=byID:'.$filerec->idlog;
 		if ( $actions['details']['allowed'] ) {
 			$actions['details']['visible'] = true;
-			$actions['details']['href'] = $details_href_net.'&invoker='.$nopagecode;
+			$actions['details']['href'] = $details_href_net.'&invoker='.$nopagecode.'&c='.$admin_nonce;
 		}
 		$media_href = null;
 		if ( $has_media && $actions['media']['allowed'] ) {
@@ -242,11 +252,11 @@ function wfu_uploadedfiles_manager($page = 1, $only_table_rows = false) {
 		if ( $file_in_root && $file_exists && !$obsolete && $actions['adminbrowser']['allowed'] ) {
 			$only_path = wfu_basedir($file_relpath);
 			$dir_code = wfu_prepare_to_batch_safe_store_filepath($only_path.'{{'.wfu_basename($file_relpath).'}}');
-			$adminbrowser_href = $siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_browser&dir='.$dir_code;
+			$adminbrowser_href = $siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_browser&dir='.$dir_code.'&c='.$admin_nonce;
 			$actions['adminbrowser']['visible'] = true;
 			$actions['adminbrowser']['href'] = $adminbrowser_href;
 		}
-		$historylog_href = $siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=view_log&invoker='.$initialrec->idlog;
+		$historylog_href = $siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=view_log&invoker='.$initialrec->idlog.'&c='.$admin_nonce;
 		if ( $actions['historylog']['allowed'] ) {
 			$actions['historylog']['visible'] = true;
 			$actions['historylog']['href'] = $historylog_href;
@@ -259,9 +269,10 @@ function wfu_uploadedfiles_manager($page = 1, $only_table_rows = false) {
 		$download_href = false;
 		if ( $file_exists && !$obsolete && !$remote && $actions['download']['allowed'] ) {
 			$file_code = wfu_prepare_to_batch_safe_store_filepath(wfu_path_abs2rel($file_abspath));
-			$download_href = 'javascript:wfu_download_file(\''.$file_code.'\', '.$i.');';
+			$download_href = 'wfu_download_file(\''.$file_code.'\', '.$i.'); return false;';
 			$actions['download']['visible'] = true;
-			$actions['download']['href'] = $download_href;
+			$actions['download']['href'] = '';
+			$actions['download']['onclick'] = $download_href;
 			$actions['download']['newtab'] = false;
 		}
 		/**
@@ -279,27 +290,27 @@ function wfu_uploadedfiles_manager($page = 1, $only_table_rows = false) {
 		$actions = apply_filters("_wfu_uploadefiles_file_actions", $actions, $filerec, $i);
 
 		//update default file link action
-		$default_link = $displayed_data["file"];
+		$default_link = esc_html($displayed_data["file"]);
 		if ( WFU_VAR("WFU_UPLOADEDFILES_DEFACTION") == "details" )
-			$default_link = '<a href="'.$details_href_net.'&invoker='.$pagecode.'" title="Go to file details">'.$file_relpath.'</a>';
+			$default_link = '<a href="'.esc_url($details_href_net).'&invoker='.esc_attr($pagecode).'" title="'.esc_html__('Go to file details', 'wp-file-upload').'">'.esc_html($file_relpath).'</a>';
 		elseif ( $file_in_root && $file_exists && !$obsolete && WFU_VAR("WFU_UPLOADEDFILES_DEFACTION") == "adminbrowser" ) {
 			if ( $adminbrowser_href === false ) {
 				$only_path = wfu_basedir($file_relpath);
 				$dir_code = wfu_prepare_to_batch_safe_store_filepath($only_path.'{{'.wfu_basename($file_relpath).'}}');
-				$adminbrowser_href = $siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_browser&dir='.$dir_code;
+				$adminbrowser_href = $siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_browser&dir='.$dir_code.'&c='.$admin_nonce;
 			}
-			$default_link = '<a href="'.$adminbrowser_href.'" title="Open file in File Browser">'.$file_relpath.'</a>';
+			$default_link = '<a href="'.esc_url($adminbrowser_href).'" title="'.esc_html__('Open file in File Browser', 'wp-file-upload').'">'.esc_html($file_relpath).'</a>';
 		}
 		elseif ( WFU_VAR("WFU_UPLOADEDFILES_DEFACTION") == "historylog" )
-			$default_link = '<a href="'.$historylog_href.'" title="Go to View Log record of file">'.$file_relpath.'</a>';
+			$default_link = '<a href="'.esc_url($historylog_href).'" title="'.esc_html__('Go to View Log record of file', 'wp-file-upload').'">'.esc_html($file_relpath).'</a>';
 		elseif ( ( $file_in_ftp || $file_in_root ) && $file_exists && !$obsolete && WFU_VAR("WFU_UPLOADEDFILES_DEFACTION") == "link" )
-			$default_link = '<a href="'.$link_href.'" title="Open file link">'.$file_relpath.'</a>';
+			$default_link = '<a href="'.esc_url($link_href).'" title="'.esc_html__('Open file link', 'wp-file-upload').'">'.esc_html($file_relpath).'</a>';
 		elseif ( !$file_in_ftp && $file_exists && !$obsolete && WFU_VAR("WFU_UPLOADEDFILES_DEFACTION") == "download" ) {
 			if ( $download_href === false ) {
 				$file_code = wfu_prepare_to_batch_safe_store_filepath(wfu_path_abs2rel($file_abspath));
-				$download_href = 'javascript:wfu_download_file(\''.$file_code.'\', '.$i.');';
+				$download_href = 'wfu_download_file(\''.esc_attr($file_code).'\', '.$i.'); return false;';
 			}
-			$default_link = '<a href="'.$download_href.'" title="Download file">'.$file_relpath.'</a>';
+			$default_link = '<a href="" title="'.esc_html__('Download file', 'wp-file-upload').'" onclick="'.esc_attr($download_href).'">'.esc_html($file_relpath).'</a>';
 		}
 		/**
 		 * Customize Default File Link.
@@ -319,16 +330,16 @@ function wfu_uploadedfiles_manager($page = 1, $only_table_rows = false) {
 		$displayed_data["properties"] = wfu_render_uploadedfiles_properties($properties, $i);
 		$displayed_data["actions"] = wfu_render_uploadedfiles_actions($actions);
 		$echo_str .= "\n\t\t\t\t\t".'<th style="word-wrap: break-word;"'.( $id_visible ? '' : ' class="hidden"' ).'>'.$i.'</th>';
-		$echo_str .= "\n\t\t\t\t\t".'<td class="column-primary" data-colname="File">'.$displayed_data["file"];
+		$echo_str .= "\n\t\t\t\t\t".'<td class="column-primary" data-colname="'.esc_html__('File', 'wp-file-upload').'">'.$displayed_data["file"];
 		$echo_str .= "\n\t\t\t\t\t\t".'<div id="wfu_file_download_container_'.$i.'" style="display: none;"></div>';
-		if ( $visible_cols_count > 0 ) $echo_str .= "\n\t\t\t\t\t\t".'<button type="button" class="toggle-row"><span class="screen-reader-text">Show more details</span></button>';
+		if ( $visible_cols_count > 0 ) $echo_str .= "\n\t\t\t\t\t\t".'<button type="button" class="toggle-row"><span class="screen-reader-text">'.esc_html__('Show more details', 'wp-file-upload').'</span></button>';
 		$echo_str .= "\n\t\t\t\t\t".'</td>';
 		foreach ( $cols as $col => $is_visible )
-			if ( $col == 'upload_date' ) $echo_str .= "\n\t\t\t\t\t".'<td data-colname="Upload Date"'.( $is_visible ? '' : ' class="hidden"' ).'>'.$displayed_data["date"].'</td>';
-			elseif ( $col == 'user' ) $echo_str .= "\n\t\t\t\t\t".'<td data-colname="User"'.( $is_visible ? '' : ' class="hidden"' ).'>'.$displayed_data["user"].'</td>';
-			elseif ( $col == 'properties' ) $echo_str .= "\n\t\t\t\t\t".'<td data-colname="Properties"'.( $is_visible ? '' : ' class="hidden"' ).'>'.$displayed_data["properties"].'</td>';
-			elseif ( $col == 'remarks' ) $echo_str .= "\n\t\t\t\t\t".'<td data-colname="Remarks"'.( $is_visible ? '' : ' class="hidden"' ).'>'.$displayed_data["remarks"].'</td>';
-			elseif ( $col == 'actions' ) $echo_str .= "\n\t\t\t\t\t".'<td data-colname="Actions"'.( $is_visible ? '' : ' class="hidden"' ).'>'.$displayed_data["actions"].'</td>';
+			if ( $col == 'upload_date' ) $echo_str .= "\n\t\t\t\t\t".'<td data-colname="'.esc_html__('Upload Date', 'wp-file-upload').'"'.( $is_visible ? '' : ' class="hidden"' ).'>'.esc_html($displayed_data["date"]).'</td>';
+			elseif ( $col == 'user' ) $echo_str .= "\n\t\t\t\t\t".'<td data-colname="'.esc_html__('User', 'wp-file-upload').'"'.( $is_visible ? '' : ' class="hidden"' ).'>'.esc_html($displayed_data["user"]).'</td>';
+			elseif ( $col == 'properties' ) $echo_str .= "\n\t\t\t\t\t".'<td data-colname="'.esc_html__('Properties', 'wp-file-upload').'"'.( $is_visible ? '' : ' class="hidden"' ).'>'.$displayed_data["properties"].'</td>';
+			elseif ( $col == 'remarks' ) $echo_str .= "\n\t\t\t\t\t".'<td data-colname="'.esc_html__('Remarks', 'wp-file-upload').'"'.( $is_visible ? '' : ' class="hidden"' ).'>'.$displayed_data["remarks"].'</td>';
+			elseif ( $col == 'actions' ) $echo_str .= "\n\t\t\t\t\t".'<td data-colname="'.esc_html__('Actions', 'wp-file-upload').'"'.( $is_visible ? '' : ' class="hidden"' ).'>'.$displayed_data["actions"].'</td>';
 		$echo_str .= "\n\t\t\t\t".'</tr>';
 	}
 	//store file paths to safe
@@ -432,38 +443,38 @@ function wfu_init_uploadedfiles_properties() {
 		),
 		"title"			=> "",
 		"title-list"	=> array(
-			"ok"			=> "File is Ok",
-			"notexists"		=> "File does not exist",
-			"obsolete"		=> "Record is invalid"
+			"ok"			=> __('File is Ok', 'wp-file-upload'),
+			"notexists"		=> __('File does not exist', 'wp-file-upload'),
+			"obsolete"		=> __('Record is invalid', 'wp-file-upload')
 		),
 		"visible"		=> true,
 		"remarks"		=> '',
 		"remarks-list"	=> array(
-			"ok"			=> "File uploaded successfully to the website",
-			"notexists"		=> "File does not exist anymore in the website",
-			"obsolete"		=> "Record is not valid anymore"
+			"ok"			=> __('File uploaded successfully to the website', 'wp-file-upload'),
+			"notexists"		=> __('File does not exist anymore in the website', 'wp-file-upload'),
+			"obsolete"		=> __('Record is not valid anymore', 'wp-file-upload')
 		),
 		"code"		=> wfu_create_random_string(6)
 	);
 	$props["userdata"] = array(
 		"icon"		=> "dashicons-id-alt",
-		"title"		=> "File has user data",
+		"title"		=> __('File has user data', 'wp-file-upload'),
 		"visible"	=> false,
-		"remarks"	=> 'File has user data, accessible in File Details',
+		"remarks"	=> __('File has user data, accessible in File Details', 'wp-file-upload'),
 		"code"		=> wfu_create_random_string(6)
 	);
 	$props["media"] = array(
 		"icon"		=> "dashicons-admin-media",
-		"title"		=> "File is associated with Media item",
+		"title"		=> __('File is associated with Media item', 'wp-file-upload'),
 		"visible"	=> false,
-		"remarks"	=> 'File is associated with Media item',
+		"remarks"	=> __('File is associated with Media item', 'wp-file-upload'),
 		"code"		=> wfu_create_random_string(6)
 	);
 	$props["ftp"] = array(
 		"icon"		=> "wfu-dashicons-ftp",
-		"title"		=> "File saved in FTP",
+		"title"		=> __('File saved in FTP', 'wp-file-upload'),
 		"visible"	=> false,
-		"remarks"	=> 'File has been saved in FTP location',
+		"remarks"	=> __('File has been saved in FTP location', 'wp-file-upload'),
 		"code"		=> wfu_create_random_string(6)
 	);
 	
@@ -484,7 +495,7 @@ function wfu_init_uploadedfiles_properties() {
 function wfu_init_uploadedfiles_actions() {
 	$def_actions["details"] = array(
 		"icon"		=> "dashicons-info",
-		"title"		=> "View file details",
+		"title"		=> __('View file details', 'wp-file-upload'),
 		"allowed"	=> false,
 		"visible"	=> false,
 		"href"		=> "",
@@ -493,7 +504,7 @@ function wfu_init_uploadedfiles_actions() {
 	);
 	$def_actions["media"] = array(
 		"icon"		=> "wfu-dashicons-media-external",
-		"title"		=> "Open associated Media item",
+		"title"		=> __('Open associated Media item', 'wp-file-upload'),
 		"allowed"	=> false,
 		"visible"	=> false,
 		"href"		=> "",
@@ -502,7 +513,7 @@ function wfu_init_uploadedfiles_actions() {
 	);
 	$def_actions["adminbrowser"] = array(
 		"icon"		=> "dashicons-portfolio",
-		"title"		=> "Locate file in File Browser",
+		"title"		=> __('Locate file in File Browser', 'wp-file-upload'),
 		"allowed"	=> false,
 		"visible"	=> false,
 		"href"		=> "",
@@ -511,7 +522,7 @@ function wfu_init_uploadedfiles_actions() {
 	);
 	$def_actions["historylog"] = array(
 		"icon"		=> "dashicons-backup",
-		"title"		=> "Locate file record in View Log",
+		"title"		=> __('Locate file record in View Log', 'wp-file-upload'),
 		"allowed"	=> false,
 		"visible"	=> false,
 		"href"		=> "",
@@ -520,7 +531,7 @@ function wfu_init_uploadedfiles_actions() {
 	);
 	$def_actions["link"] = array(
 		"icon"		=> "dashicons-external",
-		"title"		=> "Open file link",
+		"title"		=> __('Open file link', 'wp-file-upload'),
 		"allowed"	=> false,
 		"visible"	=> false,
 		"href"		=> "",
@@ -529,7 +540,7 @@ function wfu_init_uploadedfiles_actions() {
 	);
 	$def_actions["download"] = array(
 		"icon"		=> "dashicons-download",
-		"title"		=> "Download file",
+		"title"		=> __('Download file', 'wp-file-upload'),
 		"allowed"	=> false,
 		"visible"	=> false,
 		"href"		=> "",
@@ -582,7 +593,7 @@ function wfu_render_uploadedfiles_properties($props, $index) {
 		if ( isset($prop['title-list']) ) $title = $prop['title-list'][$prop['icon']];
 		$remarks = $prop['remarks'];
 		if ( isset($prop['remarks-list']) ) $remarks = $prop['remarks-list'][$prop['icon']];
-		$echo_str .= '<div id="p_'.$index.'_'.$ii.'" class="wfu-properties dashicons '.$iconclass.( $i == 0 ? '' : ' wfu-dashicons-after' ).( $prop['visible'] ? '' : ' wfu-dashicons-hidden' ).'" title="'.$title.'"><input type="hidden" class="wfu-remarks" value="'.wfu_plugin_encode_string($remarks).'" /></div>';
+		$echo_str .= '<div id="p_'.esc_attr($index.'_'.$ii).'" class="wfu-properties dashicons '.esc_attr($iconclass).( $i == 0 ? '' : ' wfu-dashicons-after' ).( $prop['visible'] ? '' : ' wfu-dashicons-hidden' ).'" title="'.esc_attr($title).'"><input type="hidden" class="wfu-remarks" value="'.wfu_plugin_encode_string($remarks).'" /></div>';
 		$i ++;
 	}
 	
@@ -612,7 +623,8 @@ function wfu_render_uploadedfiles_actions($actions) {
 		if ( isset($action['icon-list']) ) $iconclass = $action['icon-list'][$action['icon']];
 		$title = $action['title'];
 		if ( isset($action['title-list']) ) $title = $action['title-list'][$action['icon']];
-		$echo_str .= '<a class="dashicons '.$iconclass.( $i == 0 ? '' : ' wfu-dashicons-after' ).( $action['visible'] ? '' : ' wfu-dashicons-hidden' ).'" href="'.$action['href'].'" target="'.( !isset($action['newtab']) || $action['newtab'] ? '_blank' : '_self' ).'" title="'.$title.'"'.( isset($action['color']) && $action['color'] != 'default' ? ' style="color:'.$action['color'].';"' : '' ).'></a>';
+		$onclick = ( isset($action['onclick']) ? ' onclick="'.esc_attr($action['onclick']).'"' : '' );
+		$echo_str .= '<a class="dashicons '.esc_attr($iconclass).( $i == 0 ? '' : ' wfu-dashicons-after' ).( $action['visible'] ? '' : ' wfu-dashicons-hidden' ).'" href="'.esc_url($action['href']).'" target="'.( !isset($action['newtab']) || $action['newtab'] ? '_blank' : '_self' ).'" title="'.esc_attr($title).'"'.( isset($action['color']) && $action['color'] != 'default' ? ' style="color:'.esc_attr($action['color']).';"' : '' ).$onclick.'></a>';
 		$i ++;
 	}
 	
@@ -635,11 +647,11 @@ function wfu_admin_toolbar_new_uploads() {
 		$unread_files_count = wfu_get_unread_files_count();
 		$text = $unread_files_count;
 		if ( $unread_files_count > 99 ) $text = "99+";
-		$title = ( $unread_files_count == 0 ? 'No new files uploaded' : ( $unread_files_count == 1 ? '1 new file uploaded' : $unread_files_count.' files uploaded' ) );
+		$title = ( $unread_files_count <= 0 ? __('No new files uploaded', 'wp-file-upload') : sprintf(_n('%s new file uploaded', '%s new files uploaded', $unread_files_count, 'wp-file-upload'), $unread_files_count) );
 
 		$args = array(
 			'id'     => 'wfu_uploads',
-			'title'  => '<span class="ab-icon"></span><span class="ab-label">'.$unread_files_count.'</span><span class="screen-reader-text">'.$title.'</span>',
+			'title'  => '<span class="ab-icon"></span><span class="ab-label">'.esc_html($unread_files_count).'</span><span class="screen-reader-text">'.esc_html($title).'</span>',
 			'href'   => admin_url( 'admin.php?page=wfu_uploaded_files' ),
 			'group'  => false,
 			'meta'   => array(
@@ -667,7 +679,7 @@ function wfu_uploadedfiles_screen_options() {
 	if( !is_object($screen) || $screen->id != $wfu_uploadedfiles_hook_suffix ) return;
 
 	$args = array(
-		'label'    => 'Files per page',
+		'label'    => __('Files per page', 'wp-file-upload'),
 		'default'  => WFU_VAR("WFU_UPLOADEDFILES_TABLE_MAXROWS"),
 		'option'   => 'wfu_uploadedfiles_per_page'
 	);

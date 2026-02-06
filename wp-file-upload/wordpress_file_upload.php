@@ -1,16 +1,19 @@
 <?php
-/*Plugin Name: Wordpress File Upload
+/*Plugin Name: Iptanus File Upload
 /*
 Plugin URI: https://www.iptanus.com/support/wordpress-file-upload
-Description: Simple interface to upload files from a page.
-Version: 4.25.3
+Description: <strong>This is former Wordpress File Upload plugin.</strong> It provides a simple, yet powerful, interface to upload files from a page or post.
+Version: 5.1.7
+Requires at least: 3.0
 Author: Nickolas Bossinas
 Author URI: https://www.iptanus.com/nickolas
+License: GPLv3 or later
+License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Text Domain: wp-file-upload
 Domain Path: /languages
 
-Wordpress File Upload (Wordpress Plugin)
-Copyright (C) 2010-2023 Nickolas Bossinas
+Iptanus File Upload (Wordpress Plugin)
+Copyright (C) 2010-2025 Nickolas Bossinas
 Contact me at https://www.iptanus.com/contact
 
 This program is free software: you can redistribute it and/or modify
@@ -27,6 +30,8 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+if ( ! defined( 'ABSPATH' ) ) exit;
+
 /**
  * Extract the Request URI.
  *
@@ -36,11 +41,11 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
  * @return string the correct request URI
  */
 function wfu_get_request_uri() {
-	$pathinfo         = isset( $_SERVER['PATH_INFO'] ) ? $_SERVER['PATH_INFO'] : ''; 
+	$pathinfo         = isset( $_SERVER['PATH_INFO'] ) ? sanitize_url($_SERVER['PATH_INFO']) : ''; 
 	list( $pathinfo ) = explode( '?', $pathinfo );
 	$pathinfo         = str_replace( '%', '%25', $pathinfo );
 
-	list( $req_uri ) = explode( '?', $_SERVER['REQUEST_URI'] );
+	list( $req_uri ) = explode( '?', ( isset($_SERVER['REQUEST_URI']) ? sanitize_url($_SERVER['REQUEST_URI']) : '' ) );
 	$home_path       = trim( (string)parse_url( home_url(), PHP_URL_PATH ), '/' );
 	$home_path_regex = sprintf( '|^%s|i', preg_quote( $home_path, '|' ) );
 

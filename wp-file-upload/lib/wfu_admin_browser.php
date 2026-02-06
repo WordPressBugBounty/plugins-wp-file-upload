@@ -8,10 +8,12 @@
  *
  * @link /lib/wfu_admin_browser.php
  *
- * @package WordPress File Upload Plugin
+ * @package Iptanus File Upload Plugin
  * @subpackage Core Components
  * @since 3.7.1
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
  * Display the File Browser Page.
@@ -37,6 +39,7 @@ function wfu_browse_files($basedir_code, $page = -1, $only_table_rows = false) {
 	
 	if ( !current_user_can( 'manage_options' ) ) return;
 
+	$admin_nonce = wp_create_nonce('wfu_admin_nonce');
 	//first sanitize and decode basedir_code
 	$basedir_code = strip_tags($basedir_code);
 	$basedir = wfu_get_filepath_from_safe($basedir_code);
@@ -103,7 +106,7 @@ function wfu_browse_files($basedir_code, $page = -1, $only_table_rows = false) {
 	if ( $delim_pos !== false ) $updir = substr($updir, 0, $delim_pos + 1);
 
 	//define referer (with sort data) to point to this url for use by the elements
-	$referer = $siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_browser&dir='.$basedir_code;
+	$referer = $siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_browser&dir='.$basedir_code.'&c='.$admin_nonce;
 	$referer_code = wfu_safe_store_filepath($referer.'[['.$sort.']]');
 	//define header parameters that can be later used when defining file actions
 	$header_params = array();
@@ -307,11 +310,11 @@ function wfu_browse_files($basedir_code, $page = -1, $only_table_rows = false) {
 		$echo_str .= "\n\t".'<div style="margin-top:20px;">';
 		$echo_str .= wfu_generate_dashboard_menu("\n\t\t", "File Browser");
 		$echo_str .= "\n\t".'<div>';
-		$echo_str .= "\n\t\t".'<span><strong>Location:</strong> </span>';
+		$echo_str .= "\n\t\t".'<span><strong>'.esc_html__('Location:', 'wp-file-upload').'</strong> </span>';
 		foreach ( $route as $item ) {
 			// store dir path that we need to pass to other functions in session, instead of exposing it in the url
 			$dir_code = wfu_safe_store_filepath($item['path']);
-			$echo_str .= '<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_browser&dir='.$dir_code.'">'.$item['item'].'</a>';
+			$echo_str .= '<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_browser&dir='.$dir_code).'&c='.$admin_nonce.'">'.esc_html($item['item']).'</a>';
 			$echo_str .= '<span>/</span>';
 		}
 		//file browser header
@@ -331,9 +334,10 @@ function wfu_browse_files($basedir_code, $page = -1, $only_table_rows = false) {
 		if ( $maxrows > 0 ) {
 			$echo_str .= wfu_add_pagination_header("\n\t\t\t", "adminbrowser", $page, $pages, $adminbrowser_nonce);
 		}
-		$echo_str .= "\n\t\t\t".'<input id="wfu_adminbrowser_action_url" type="hidden" value="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload" />';
+		$echo_str .= "\n\t\t\t".'<input id="wfu_adminbrowser_action_url" type="hidden" value="'.esc_attr($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload').'" />';
 		$echo_str .= "\n\t\t\t".'<input id="wfu_adminbrowser_code" type="hidden" value="'.esc_attr($basedir_code).'" />';
-		$echo_str .= "\n\t\t\t".'<input id="wfu_adminbrowser_referer" type="hidden" value="'.$referer_code.'" />';
+		$echo_str .= "\n\t\t\t".'<input id="wfu_adminbrowser_referer" type="hidden" value="'.esc_attr($referer_code).'" />';
+		$echo_str .= "\n\t\t\t".'<input id="wfu_admin_nonce" type="hidden" value="'.$admin_nonce.'" />';
 		$echo_str .= "\n\t\t\t".'<input id="wfu_download_file_nonce" type="hidden" value="'.wp_create_nonce('wfu_download_file_invoker').'" />';
 		$echo_str .= "\n\t\t\t".'<input id="wfu_include_file_nonce" type="hidden" value="'.wp_create_nonce('wfu_include_file').'" />';
 		$echo_str .= "\n\t\t".'</div>';
@@ -345,22 +349,22 @@ function wfu_browse_files($basedir_code, $page = -1, $only_table_rows = false) {
 		$echo_str .= "\n\t\t\t\t\t".'</td>';
 		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="25%" class="manage-column column-primary">';
 		$dir_code = wfu_safe_store_filepath(wfu_path_abs2rel($basedir).'[['.( substr($sort, -4) == 'name' ? ( $order == SORT_ASC ? '-name' : 'name' ) : 'name' ).']]');
-		$echo_str .= "\n\t\t\t\t\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_browser&dir='.$dir_code.'">Name'.( substr($sort, -4) == 'name' ? ( $order == SORT_ASC ? ' &uarr;' : ' &darr;' ) : '' ).'</a>';
+		$echo_str .= "\n\t\t\t\t\t\t".'<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_browser&dir='.$dir_code).'&c='.$admin_nonce.'">'.esc_html__('Name', 'wp-file-upload').( substr($sort, -4) == 'name' ? ( $order == SORT_ASC ? ' &uarr;' : ' &darr;' ) : '' ).'</a>';
 		$echo_str .= "\n\t\t\t\t\t".'</th>';
 		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="10%" class="manage-column">';
 		$dir_code = wfu_safe_store_filepath(wfu_path_abs2rel($basedir).'[['.( substr($sort, -4) == 'size' ? ( $order == SORT_ASC ? '-size' : 'size' ) : 'size' ).']]');
-		$echo_str .= "\n\t\t\t\t\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_browser&dir='.$dir_code.'">Size'.( substr($sort, -4) == 'size' ? ( $order == SORT_ASC ? ' &uarr;' : ' &darr;' ) : '' ).'</a>';
+		$echo_str .= "\n\t\t\t\t\t\t".'<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_browser&dir='.$dir_code.'&c='.$admin_nonce).'">'.esc_html__('Size', 'wp-file-upload').( substr($sort, -4) == 'size' ? ( $order == SORT_ASC ? ' &uarr;' : ' &darr;' ) : '' ).'</a>';
 		$echo_str .= "\n\t\t\t\t\t".'</th>';
 		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="20%" class="manage-column">';
 		$dir_code = wfu_safe_store_filepath(wfu_path_abs2rel($basedir).'[['.( substr($sort, -4) == 'date' ? ( $order == SORT_ASC ? '-date' : 'date' ) : 'date' ).']]');
-		$echo_str .= "\n\t\t\t\t\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_browser&dir='.$dir_code.'">Date'.( substr($sort, -4) == 'date' ? ( $order == SORT_ASC ? ' &uarr;' : ' &darr;' ) : '' ).'</a>';
+		$echo_str .= "\n\t\t\t\t\t\t".'<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_browser&dir='.$dir_code.'&c='.$admin_nonce).'">'.esc_html__('Date', 'wp-file-upload').( substr($sort, -4) == 'date' ? ( $order == SORT_ASC ? ' &uarr;' : ' &darr;' ) : '' ).'</a>';
 		$echo_str .= "\n\t\t\t\t\t".'</th>';
 		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="10%" class="manage-column">';
 		$dir_code = wfu_safe_store_filepath(wfu_path_abs2rel($basedir).'[['.( substr($sort, -4) == 'user' ? ( $order == SORT_ASC ? '-user' : 'user' ) : 'user' ).']]');
-		$echo_str .= "\n\t\t\t\t\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_browser&dir='.$dir_code.'">Uploaded By'.( substr($sort, -4) == 'user' ? ( $order == SORT_ASC ? ' &uarr;' : ' &darr;' ) : '' ).'</a>';
+		$echo_str .= "\n\t\t\t\t\t\t".'<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_browser&dir='.$dir_code.'&c='.$admin_nonce).'">'.esc_html__('Uploaded By', 'wp-file-upload').( substr($sort, -4) == 'user' ? ( $order == SORT_ASC ? ' &uarr;' : ' &darr;' ) : '' ).'</a>';
 		$echo_str .= "\n\t\t\t\t\t".'</th>';
 		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="30%" class="manage-column">';
-		$echo_str .= "\n\t\t\t\t\t\t".'<label>User Data</label>';
+		$echo_str .= "\n\t\t\t\t\t\t".'<label>'.esc_html__('User Data', 'wp-file-upload').'</label>';
 		$echo_str .= "\n\t\t\t\t\t".'</th>';
 		$echo_str .= "\n\t\t\t\t".'</tr>';
 		$echo_str .= "\n\t\t\t".'</thead>';
@@ -372,13 +376,13 @@ function wfu_browse_files($basedir_code, $page = -1, $only_table_rows = false) {
 		$dir_code = wfu_safe_store_filepath(wfu_path_abs2rel($updir));
 		$echo_str .= "\n\t\t\t\t".'<tr>';
 		$echo_str .= "\n\t\t\t\t\t".'<th class="check-column"><input type="checkbox" disabled="disabled" /></th>';
-		$echo_str .= "\n\t\t\t\t\t".'<td class="column-primary" data-colname="Name">';
-		$echo_str .= "\n\t\t\t\t\t\t".'<a class="row-title" href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_browser&dir='.$dir_code.'" title="go up">..</a>';
+		$echo_str .= "\n\t\t\t\t\t".'<td class="column-primary" data-colname="'.esc_html__('Name', 'wp-file-upload').'">';
+		$echo_str .= "\n\t\t\t\t\t\t".'<a class="row-title" href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_browser&dir='.$dir_code.'&c='.$admin_nonce).'" title="'.esc_html__('go up', 'wp-file-upload').'">..</a>';
 		$echo_str .= "\n\t\t\t\t\t".'</td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Size"> </td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Date"> </td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Uploaded By"> </td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="User Data"> </td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="'.esc_html__('Size', 'wp-file-upload').'"> </td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="'.esc_html__('Date', 'wp-file-upload').'"> </td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="'.esc_html__('Uploaded By', 'wp-file-upload').'"> </td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="'.esc_html__('User Data', 'wp-file-upload').'"> </td>';
 		$echo_str .= "\n\t\t\t\t".'</tr>';
 	}
 	$ii = 1;
@@ -386,11 +390,11 @@ function wfu_browse_files($basedir_code, $page = -1, $only_table_rows = false) {
 		$dir_code = wfu_prepare_to_batch_safe_store_filepath(wfu_path_abs2rel($dir['fullpath']).'[['.$sort.']]');
 		$echo_str .= "\n\t\t\t\t".'<tr onmouseover="var actions=document.getElementsByName(\'wfu_dir_actions\'); for (var i=0; i<actions.length; i++) {actions[i].style.visibility=\'hidden\';} document.getElementById(\'wfu_dir_actions_'.$ii.'\').style.visibility=\'visible\'" onmouseout="var actions=document.getElementsByName(\'wfu_dir_actions\'); for (var i=0; i<actions.length; i++) {actions[i].style.visibility=\'hidden\';}">';
 		$echo_str .= "\n\t\t\t\t\t".'<th class="check-column"><input type="checkbox" disabled="disabled" /></th>';
-		$echo_str .= "\n\t\t\t\t\t".'<td class="column-primary" data-colname="Name">';
-		$echo_str .= "\n\t\t\t\t\t\t".'<a class="row-title" href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_browser&dir='.$dir_code.'" title="'.$dir['name'].'">'.$dir['name'].'</a>';
+		$echo_str .= "\n\t\t\t\t\t".'<td class="column-primary" data-colname="'.esc_html__('Name', 'wp-file-upload').'">';
+		$echo_str .= "\n\t\t\t\t\t\t".'<a class="row-title" href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_browser&dir='.$dir_code.'&c='.$admin_nonce).'" title="'.esc_html($dir['name']).'">'.esc_html($dir['name']).'</a>';
 		$echo_str .= "\n\t\t\t\t\t\t".'<div id="wfu_dir_actions_'.$ii.'" name="wfu_dir_actions" style="visibility:hidden;">';
 		$echo_str .= "\n\t\t\t\t\t\t\t".'<span style="visibility:hidden;">';
-		$echo_str .= "\n\t\t\t\t\t\t\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_browser&dir=">Noaction</a>';
+		$echo_str .= "\n\t\t\t\t\t\t\t\t".'<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_browser&dir=&c='.$admin_nonce).'">'.esc_html__('Noaction', 'wp-file-upload').'</a>';
 		$echo_str .= "\n\t\t\t\t\t\t\t\t".' | ';
 		$echo_str .= "\n\t\t\t\t\t\t\t".'</span>';
 //		$echo_str .= "\n\t\t\t\t\t\t\t".'<span>';
@@ -401,12 +405,12 @@ function wfu_browse_files($basedir_code, $page = -1, $only_table_rows = false) {
 //		$echo_str .= "\n\t\t\t\t\t\t\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=delete_dir&file='.$dir_code.'" title="Delete this folder">Delete</a>';
 //		$echo_str .= "\n\t\t\t\t\t\t\t".'</span>';
 		$echo_str .= "\n\t\t\t\t\t\t".'</div>';
-		$echo_str .= "\n\t\t\t\t\t\t".'<button type="button" class="toggle-row"><span class="screen-reader-text">Show more details</span></button>';
+		$echo_str .= "\n\t\t\t\t\t\t".'<button type="button" class="toggle-row"><span class="screen-reader-text">'.esc_html__('Show more details', 'wp-file-upload').'</span></button>';
 		$echo_str .= "\n\t\t\t\t\t".'</td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Size"> </td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Date">'.get_date_from_gmt(date("Y-m-d H:i:s", $dir['mdate']), "d/m/Y H:i:s").'</td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Uploaded By"> </td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="User Data"> </td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="'.esc_html__('Size', 'wp-file-upload').'"> </td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="'.esc_html__('Date', 'wp-file-upload').'">'.get_date_from_gmt(date("Y-m-d H:i:s", $dir['mdate']), "d/m/Y H:i:s").'</td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="'.esc_html__('Uploaded By', 'wp-file-upload').'"> </td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="'.esc_html__('User Data', 'wp-file-upload').'"> </td>';
 		$echo_str .= "\n\t\t\t\t".'</tr>';
 		$ii ++;
 	}
@@ -424,11 +428,11 @@ function wfu_browse_files($basedir_code, $page = -1, $only_table_rows = false) {
 		if ( $is_included || $can_be_included ) $echo_str .= "\n\t\t\t\t\t\t".'<input class="wfu_selectors'.( $is_included ? ' wfu_included' : '' ).' wfu_selcode_'.$file_code.'" type="checkbox" onchange="wfu_adminbrowser_selector_changed(this);" />';
 		else $echo_str .= "\n\t\t\t\t\t\t".'<input type="checkbox" disabled="disabled" />';
 		$echo_str .= "\n\t\t\t\t\t".'</th>';
-		$echo_str .= "\n\t\t\t\t\t".'<td class="column-primary" data-colname="Name">';
+		$echo_str .= "\n\t\t\t\t\t".'<td class="column-primary" data-colname="'.esc_html__('Name', 'wp-file-upload').'">';
 		if ( $is_included || $can_be_included )
-			$echo_str .= "\n\t\t\t\t\t\t".'<a id="wfu_file_link_'.$ii.'" class="row-title" href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_details&file='.$file_code.'" title="View and edit file details" style="font-weight:normal;'.( $is_included ? '' : ' display:none;' ).'">'.$file['name'].'</a>';
+			$echo_str .= "\n\t\t\t\t\t\t".'<a id="wfu_file_link_'.$ii.'" class="row-title" href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_details&file='.$file_code.'&c='.$admin_nonce).'" title="'.esc_html__('View and edit file details', 'wp-file-upload').'" style="font-weight:normal;'.( $is_included ? '' : ' display:none;' ).'">'.esc_html($file['name']).'</a>';
 		if ( !$is_included )
-			$echo_str .= "\n\t\t\t\t\t\t".'<span id="wfu_file_flat_'.$ii.'">'.$file['name'].'</span>';
+			$echo_str .= "\n\t\t\t\t\t\t".'<span id="wfu_file_flat_'.$ii.'">'.esc_html($file['name']).'</span>';
 		//set additional $file properties for generating file actions
 		$file["index"] = $ii;
 		$file["code"] = $file_code;
@@ -463,23 +467,23 @@ function wfu_browse_files($basedir_code, $page = -1, $only_table_rows = false) {
 		}
 		else {
 			$echo_str .= "\n\t\t\t\t\t\t\t".'<span style="visibility:hidden;">';
-			$echo_str .= "\n\t\t\t\t\t\t\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_browser&dir=">Noaction</a>';
+			$echo_str .= "\n\t\t\t\t\t\t\t\t".'<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_browser&dir=&c='.$admin_nonce).'">'.esc_html__('Noaction', 'wp-file-upload').'</a>';
 			$echo_str .= "\n\t\t\t\t\t\t\t\t".' | ';
 			$echo_str .= "\n\t\t\t\t\t\t\t".'</span>';
 		}
 		$echo_str .= "\n\t\t\t\t\t\t".'</div>';
 		$echo_str .= "\n\t\t\t\t\t\t".'<div id="wfu_file_download_container_'.$ii.'" style="display: none;"></div>';
-		$echo_str .= "\n\t\t\t\t\t\t".'<button type="button" class="toggle-row"><span class="screen-reader-text">Show more details</span></button>';
+		$echo_str .= "\n\t\t\t\t\t\t".'<button type="button" class="toggle-row"><span class="screen-reader-text">'.esc_html__('Show more details', 'wp-file-upload').'</span></button>';
 		$echo_str .= "\n\t\t\t\t\t".'</td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Size">'.$file['size'].'</td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Date">'.get_date_from_gmt(date("Y-m-d H:i:s", $file['mdate']), "d/m/Y H:i:s").'</td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="Uploaded By">'.$file['user'].'</td>';
-		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="User Data">';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="'.esc_html__('Size', 'wp-file-upload').'">'.esc_html($file['size']).'</td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="'.esc_html__('Date', 'wp-file-upload').'">'.get_date_from_gmt(date("Y-m-d H:i:s", $file['mdate']), "d/m/Y H:i:s").'</td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="'.esc_html__('Uploaded By', 'wp-file-upload').'">'.esc_html($file['user']).'</td>';
+		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="'.esc_html__('User Data', 'wp-file-upload').'">';
 		if ( $is_included ) {
 			if ( is_array($file['filedata']->userdata) && count($file['filedata']->userdata) > 0 ) {
 				$echo_str .= "\n\t\t\t\t\t\t".'<select multiple="multiple" style="width:100%; height:40px; background:none; font-size:small;">';
 				foreach ( $file['filedata']->userdata as $userdata )
-					$echo_str .= "\n\t\t\t\t\t\t\t".'<option>'.esc_attr($userdata->property).': '.esc_attr($userdata->propvalue).'</option>';
+					$echo_str .= "\n\t\t\t\t\t\t\t".'<option>'.esc_html($userdata->property).': '.esc_html($userdata->propvalue).'</option>';
 				$echo_str .= "\n\t\t\t\t\t\t".'</select>';
 			}
 		}
@@ -527,19 +531,20 @@ function wfu_adminbrowser_file_actions($file, $params) {
 		"can_be_included"	=> array()
 	);
 	//add file actions if file is already included
+	$admin_nonce = wp_create_nonce('wfu_admin_nonce');
 	$actions["is_included"] += array(
-		array( '<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_details&file='.$file["code"].'" title="View and edit file details">Details</a>' ),
-		array( '<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=rename_file&file='.$file["code"].'" title="Rename this file">Rename</a>' ),
-		array( '<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=move_file&file='.$file["code"].'" title="Move this file">Move</a>' ),
-		array( '<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=delete_file&file='.$file["code"].'&referer='.$file["referer_code"].'" title="Delete this file">Delete</a>' ),
-		array( '<a href="javascript:wfu_download_file(\''.$file["code"].'\', '.$file["index"].');" title="Download this file">Download</a>' )
+		array( '<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_details&file='.$file["code"].'&c='.$admin_nonce).'" title="'.esc_html__('View and edit file details', 'wp-file-upload').'">'.esc_html__('Details', 'wp-file-upload').'</a>' ),
+		array( '<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=rename_file&file='.$file["code"]).'&c='.$admin_nonce.'" title="'.esc_html__('Rename this file', 'wp-file-upload').'">'.esc_html__('Rename', 'wp-file-upload').'</a>' ),
+		array( '<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=move_file&file='.$file["code"]).'&c='.$admin_nonce.'" title="'.esc_html__('Move this file', 'wp-file-upload').'">'.esc_html__('Move', 'wp-file-upload').'</a>' ),
+		array( '<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=delete_file&file='.$file["code"].'&referer='.$file["referer_code"]).'&c='.$admin_nonce.'" title="'.esc_html__('Delete this file', 'wp-file-upload').'">'.esc_html__('Delete', 'wp-file-upload').'</a>' ),
+		array( '<a href="javascript:wfu_download_file(\''.esc_attr($file["code"]).'\', '.esc_attr($file["index"]).');" title="'.esc_html__('Download this file', 'wp-file-upload').'">'.esc_html__('Download', 'wp-file-upload').'</a>' )
 	);
 	//add file actions if file can be included
 	$actions["can_be_included"] += array(
 		array(
-			'<a id="wfu_include_file_'.$file["index"].'_a" href="javascript:wfu_include_file(\''.$file["code"].'\', '.$file["index"].');" title="Include file in plugin\'s database">Include File</a>',
-			'<img id="wfu_include_file_'.$file["index"].'_img" src="'.WFU_IMAGE_ADMIN_SUBFOLDER_LOADING.'" style="width:12px; display:none;" />',
-			'<input id="wfu_include_file_'.$file["index"].'_inpfail" type="hidden" value="File could not be included!" />'
+			'<a id="wfu_include_file_'.$file["index"].'_a" href="javascript:wfu_include_file(\''.esc_attr($file["code"]).'\', '.esc_attr($file["index"]).');" title="'.esc_html__('Include file in plugin\'s database', 'wp-file-upload').'">'.esc_html__('Include File', 'wp-file-upload').'</a>',
+			'<img id="wfu_include_file_'.$file["index"].'_img" src="'.esc_url(WFU_IMAGE_ADMIN_SUBFOLDER_LOADING).'" style="width:12px; display:none;" />',
+			'<input id="wfu_include_file_'.$file["index"].'_inpfail" type="hidden" value="'.esc_html__('File could not be included!', 'wp-file-upload').'" />'
 		)
 	);
 
@@ -687,26 +692,28 @@ function wfu_rename_file_prompt($file_code, $type, $error) {
 
 	$echo_str = "\n".'<div class="wrap">';
 	if ( $error ) {
-		$rename_file = WFU_USVAR('wfu_rename_file');
-		$newname = $rename_file['newname'];
+		$rename_file = ( is_array(WFU_USVAR('wfu_rename_file')) ? WFU_USVAR('wfu_rename_file') : array( 'newname' => '' ) );
+		$newname = sanitize_file_name($rename_file['newname']);
 		$echo_str .= "\n\t".'<div class="error">';
-		$echo_str .= "\n\t\t".'<p>'.WFU_USVAR('wfu_rename_file_error').'</p>';
+		$echo_str .= "\n\t\t".'<p>'.wfu_sanitize_simple_html(WFU_USVAR('wfu_rename_file_error')).'</p>';
 		$echo_str .= "\n\t".'</div>';
 	}
 	$echo_str .= "\n\t".'<div style="margin-top:20px;">';
-	if ( $is_admin ) $echo_str .= "\n\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=file_browser&dir='.$dir_code.'" class="button" title="go back">Go back</a>';
+	if ( $is_admin ) $echo_str .= "\n\t\t".'<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=file_browser&dir='.$dir_code.'&c='.$admin_nonce).'" class="button" title="'.esc_html__('go back', 'wp-file-upload').'">'.esc_html__('Go back', 'wp-file-upload').'</a>';
 	$echo_str .= "\n\t".'</div>';
-	$echo_str .= "\n\t".'<h2 style="margin-bottom: 10px;">Rename '.( $type == 'dir' ? 'Folder' : 'File' ).'</h2>';
-	if ( $is_admin ) $echo_str .= "\n\t".'<form enctype="multipart/form-data" name="renamefile" id="renamefile" method="post" action="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload" class="validate">';
+	$echo_str .= "\n\t".'<h2 style="margin-bottom: 10px;">'.( $type == 'dir' ? esc_html__('Rename Folder', 'wp-file-upload') : esc_html__('Rename File', 'wp-file-upload') ).'</h2>';
+	if ( $is_admin ) $echo_str .= "\n\t".'<form enctype="multipart/form-data" name="renamefile" id="renamefile" method="post" action="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload').'" class="validate">';
 	$echo_str .= "\n\t\t".'<input type="hidden" name="action" value="rename'.( $type == 'dir' ? 'dir' : 'file' ).'">';
-	$echo_str .= "\n\t\t".'<input type="hidden" name="dir" value="'.$dir_code.'">';
-	$echo_str .= "\n\t\t".'<input type="hidden" name="file" value="'.$file_code.'">';
-	if ( $type == 'dir' ) $echo_str .= "\n\t\t".'<label>Enter new name for folder <strong>'.$dec_file.'</strong></label><br/>';
-	elseif ( $is_admin ) $echo_str .= "\n\t\t".'<label>Enter new filename for file <strong>'.$dec_file.'</strong></label><br/>';
-	$echo_str .= "\n\t\t".'<input name="wfu_newname" id="wfu_newname" type="text" value="'.$newname.'" style="width:50%;" />';
+	$echo_str .= "\n\t\t".'<input type="hidden" name="c" value="'.wp_create_nonce('wfu_admin_nonce').'" />';
+	$echo_str .= "\n\t\t".'<input type="hidden" name="nonce" value="'.wp_create_nonce('wfu-rename-page').'" />';
+	$echo_str .= "\n\t\t".'<input type="hidden" name="dir" value="'.esc_attr($dir_code).'">';
+	$echo_str .= "\n\t\t".'<input type="hidden" name="file" value="'.esc_attr($file_code).'">';
+	if ( $type == 'dir' ) $echo_str .= "\n\t\t".'<label>'.esc_html__('Enter new name for folder', 'wp-file-upload').' <strong>'.esc_html($dec_file).'</strong></label><br/>';
+	elseif ( $is_admin ) $echo_str .= "\n\t\t".'<label>'.esc_html__('Enter new filename for file', 'wp-file-upload').' <strong>'.esc_html($dec_file).'</strong></label><br/>';
+	$echo_str .= "\n\t\t".'<input name="wfu_newname" id="wfu_newname" type="text" value="'.esc_html($newname).'" style="width:50%;" />';
 	$echo_str .= "\n\t\t".'<p class="submit">';
-	$echo_str .= "\n\t\t\t".'<input type="submit" class="button-primary" name="submit" value="Rename">';
-	$echo_str .= "\n\t\t\t".'<input type="submit" class="button-primary" name="submit" value="Cancel">';
+	$echo_str .= "\n\t\t\t".'<button class="button-primary" name="submit" value="Rename">'.esc_html__('Rename', 'wp-file-upload').'</button>';
+	$echo_str .= "\n\t\t\t".'<button class="button-primary" name="submit" value="Cancel">'.esc_html__('Cancel', 'wp-file-upload').'</button>';
 	$echo_str .= "\n\t\t".'</p>';
 	$echo_str .= "\n\t".'</form>';
 	$echo_str .= "\n".'</div>';
@@ -756,39 +763,41 @@ function wfu_move_file_prompt($file_code, $error) {
 
 	$echo_str = "\n".'<div class="wrap">';
 	if ( $error ) {
-		$move_file = WFU_USVAR('wfu_move_file');
-		$newpath = $move_file['newpath'];
-		$replacefiles = $move_file['replacefiles'];
+		$move_file = ( is_array(WFU_USVAR('wfu_move_file')) ? WFU_USVAR('wfu_move_file') : array( 'newpath' => '', 'replacefiles' => '' ) );
+		$newpath = sanitize_url($move_file['newpath']);
+		$replacefiles = wfu_sanitize_code($move_file['replacefiles']);
 		$echo_str .= "\n\t".'<div class="error">';
-		$echo_str .= "\n\t\t".'<p>'.WFU_USVAR('wfu_move_file_error').'</p>';
+		$echo_str .= "\n\t\t".'<p>'.wfu_sanitize_simple_html(WFU_USVAR('wfu_move_file_error')).'</p>';
 		$echo_str .= "\n\t".'</div>';
 	}
 	$echo_str .= "\n\t".'<div style="margin-top:20px;">';
-	$echo_str .= "\n\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=file_browser&dir='.$dir_code.'" class="button" title="go back">Go back</a>';
+	$echo_str .= "\n\t\t".'<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=file_browser&dir='.$dir_code.'&c='.$admin_nonce).'" class="button" title="'.esc_html__('go back', 'wp-file-upload').'">'.esc_html__('Go back', 'wp-file-upload').'</a>';
 	$echo_str .= "\n\t".'</div>';
-	$echo_str .= "\n\t".'<h2 style="margin-bottom: 10px;">Move File</h2>';
-	$echo_str .= "\n\t".'<form enctype="multipart/form-data" name="movefile" id="movefile" method="post" action="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload" class="validate">';
+	$echo_str .= "\n\t".'<h2 style="margin-bottom: 10px;">'.esc_html__('Move File', 'wp-file-upload').'</h2>';
+	$echo_str .= "\n\t".'<form enctype="multipart/form-data" name="movefile" id="movefile" method="post" action="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload').'" class="validate">';
 	$echo_str .= "\n\t\t".'<input type="hidden" name="action" value="movefile">';
-	$echo_str .= "\n\t\t".'<input type="hidden" name="dir" value="'.$dir_code.'">';
-	$echo_str .= "\n\t\t".'<input type="hidden" name="file" value="'.$file_code_list.'">';
+	$echo_str .= "\n\t\t".'<input type="hidden" name="c" value="'.wp_create_nonce('wfu_admin_nonce').'" />';
+	$echo_str .= "\n\t\t".'<input type="hidden" name="nonce" value="'.wp_create_nonce('wfu-movefile-page').'" />';
+	$echo_str .= "\n\t\t".'<input type="hidden" name="dir" value="'.esc_attr($dir_code).'">';
+	$echo_str .= "\n\t\t".'<input type="hidden" name="file" value="'.esc_attr($file_code_list).'">';
 	if ( count($names) == 1 )
-		$echo_str .= "\n\t\t".'<label style="display:inline-block; margin-bottom:1em;">Enter destination folder for file <strong>'.$dec_file.'</strong></label><br/>';
+		$echo_str .= "\n\t\t".'<label style="display:inline-block; margin-bottom:1em;">'.esc_html__('Enter destination folder for file', 'wp-file-upload').' <strong>'.esc_html($dec_file).'</strong></label><br/>';
 	else {
-		$echo_str .= "\n\t\t".'<label>Enter destination folder for files:</label><br/>';
+		$echo_str .= "\n\t\t".'<label>'.esc_html__('Enter destination folder for files:', 'wp-file-upload').'</label><br/>';
 		$echo_str .= "\n\t\t".'<ul style="padding-left: 20px; list-style: initial;">';
 		foreach ( $names as $name )
-			$echo_str .= "\n\t\t\t".'<li><strong>'.$name.'</strong></li>';
+			$echo_str .= "\n\t\t\t".'<li><strong>'.esc_html($name).'</strong></li>';
 		$echo_str .= "\n\t\t".'</ul>';
 	}
-	$echo_str .= "\n\t\t".'<input name="wfu_newpath" id="wfu_newpath" type="text" value="'.$newpath.'" style="width:50%;" />';
+	$echo_str .= "\n\t\t".'<input name="wfu_newpath" id="wfu_newpath" type="text" value="'.esc_html($newpath).'" style="width:50%;" />';
 	$echo_str .= "\n\t\t".'<p>';
-	$echo_str .= "\n\t\t\t".'<label>Replace files with the same filename at destination:</label><br />';
-	$echo_str .= "\n\t\t\t".'<input name="wfu_replace" id="wfu_replace_yes" type="radio" value="yes"'.( $replacefiles == "yes" ? ' checked="checked"' : '' ).' /><label for="wfu_replace_yes">Yes</label>';
-	$echo_str .= "\n\t\t\t".'<input name="wfu_replace" id="wfu_replace_no" type="radio" value="no"'.( $replacefiles == "no" ? ' checked="checked"' : '' ).' style="margin-left:1em;" /><label for="wfu_replace_no">No</label>';
+	$echo_str .= "\n\t\t\t".'<label>'.esc_html__('Replace files with the same filename at destination:', 'wp-file-upload').'</label><br />';
+	$echo_str .= "\n\t\t\t".'<input name="wfu_replace" id="wfu_replace_yes" type="radio" value="yes"'.( $replacefiles == "yes" ? ' checked="checked"' : '' ).' /><label for="wfu_replace_yes">'.esc_html__('Yes', 'wp-file-upload').'</label>';
+	$echo_str .= "\n\t\t\t".'<input name="wfu_replace" id="wfu_replace_no" type="radio" value="no"'.( $replacefiles == "no" ? ' checked="checked"' : '' ).' style="margin-left:1em;" /><label for="wfu_replace_no">'.esc_html__('No', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t".'</p>';
 	$echo_str .= "\n\t\t".'<p class="submit">';
-	$echo_str .= "\n\t\t\t".'<input type="button" class="button-primary" name="submitBtn" value="Move" onclick="if (!document.getElementById(\'wfu_replace_yes\').checked && !document.getElementById(\'wfu_replace_no\').checked) alert(\'Please select if files in destination with the same filename will be replaced or not!\'); else this.form.submit();" />';
-	$echo_str .= "\n\t\t\t".'<input type="submit" class="button-primary" name="submitBtn" value="Cancel" />';
+	$echo_str .= "\n\t\t\t".'<button class="button-primary" name="submitBtn" value="Move" onclick="if (!document.getElementById(\'wfu_replace_yes\').checked && !document.getElementById(\'wfu_replace_no\').checked) alert(\''.esc_html__('Please select if files in destination with the same filename will be replaced or not!', 'wp-file-upload').'\'); else this.form.submit();">'.esc_html__('Move', 'wp-file-upload').'</button>';
+	$echo_str .= "\n\t\t\t".'<button class="button-primary" name="submitBtn" value="Cancel">'.esc_html__('Cancel', 'wp-file-upload').'</button>';
 	$echo_str .= "\n\t\t".'</p>';
 	$echo_str .= "\n\t".'</form>';
 	$echo_str .= "\n".'</div>';
@@ -810,6 +819,8 @@ function wfu_move_file_prompt($file_code, $error) {
 function wfu_rename_file($file_code, $type) {
 	if ( $type == 'dir' ) return;
 	
+	if ( !wp_verify_nonce(( isset($_POST['nonce']) ? sanitize_text_field( wp_unslash ( $_POST["nonce"] ) ) : "" ), "wfu-rename-page") ) return;
+
 	$user = wp_get_current_user();
 	$is_admin = current_user_can( 'manage_options' );
 	//check if user is allowed to view file details
@@ -831,17 +842,21 @@ function wfu_rename_file($file_code, $type) {
 	$error = "";
 	if ( isset($_POST['wfu_newname']) && isset($_POST['submit']) ) {
 		if ( $_POST['submit'] == "Rename" && $_POST['wfu_newname'] != $parts['basename'] ) {
-			$new_file = $parts['dirname'].'/'.$_POST['wfu_newname'];
-			if ( $_POST['wfu_newname'] == "" ) $error = 'Error: New '.( $type == 'dir' ? 'folder ' : 'file' ).'name cannot be empty!';
-			elseif ( preg_match("/[^A-Za-z0-9_.#\-$]/", $_POST['wfu_newname']) ) $error = 'Error: name contained invalid characters that were stripped off! Please try again.';
-			elseif ( substr($_POST['wfu_newname'], -1 - strlen($parts['extension'])) != '.'.$parts['extension'] ) $error = 'Error: new and old file name extensions must be identical! Please correct.';
-			elseif ( wfu_file_extension_blacklisted($_POST['wfu_newname']) ) $error = 'Error: the new file name has an extension that is forbidden for security reasons. Please correct.';
-			elseif ( wfu_file_exists($new_file, "wfu_rename_file:2") ) $error = 'Error: The '.( $type == 'dir' ? 'folder' : 'file' ).' <strong>'.$_POST['wfu_newname'].'</strong> already exists! Please choose another one.';
+			$sanitized = sanitize_file_name($_POST['wfu_newname']);
+			$new_file = $parts['dirname'].'/'.$sanitized;
+			if ( $sanitized == "" )
+				$error = ( $type == 'dir' ? __('Error: New folder name cannot be empty!', 'wp-file-upload') : __('Error: New file name cannot be empty!', 'wp-file-upload') );
+			elseif ( substr($sanitized, -1 - strlen($parts['extension'])) != '.'.$parts['extension'] )
+				$error = __('Error: new and old file name extensions must be identical! Please correct.', 'wp-file-upload');
+			elseif ( wfu_file_extension_blacklisted($sanitized) )
+				$error = __('Error: the new file name has an extension that is forbidden for security reasons. Please correct.', 'wp-file-upload');
+			elseif ( wfu_file_exists($new_file, "wfu_rename_file:2") )
+				$error = ( $type == 'dir' ? sprintf(__('Error: The folder %s already exists! Please choose another one.', 'wp-file-upload'), '<strong>'.esc_html($sanitized).'</strong>') : sprintf(__('Error: The file %s already exists! Please choose another one.', 'wp-file-upload'), '<strong>'.esc_html($sanitized).'</strong>') );
 			else {
 				//pre-log rename action
 				if ( $type == 'file' ) $retid = wfu_log_action('rename:'.$new_file, $dec_file, $user->ID, '', 0, 0, '', null);
 				//perform rename action
-				if ( rename($dec_file, $new_file) == false ) $error = 'Error: Rename of '.( $type == 'dir' ? 'folder' : 'file' ).' <strong>'.$parts['basename'].'</strong> failed!';
+				if ( rename($dec_file, $new_file) == false ) $error = ( $type == 'dir' ? sprintf(__('Error: Rename of folder %s failed!', 'wp-file-upload'), '<strong>'.esc_html($parts['basename']).'</strong>') : sprintf(__('Error: Rename of file %s failed!', 'wp-file-upload'), '<strong>'.esc_html($parts['basename']).'</strong>') );
 				//revert log action if file was not renamed
 				if ( $type == 'file' && !wfu_file_exists($new_file, "wfu_rename_file:3") ) wfu_revert_log_action($retid);
 			}
@@ -850,7 +865,7 @@ function wfu_rename_file($file_code, $type) {
 	if ( $error != "" ) {
 		WFU_USVAR_store('wfu_rename_file_error', $error);
 		$rename_file = WFU_USVAR('wfu_rename_file');
-		$rename_file['newname'] = preg_replace("/[^A-Za-z0-9_.#\-$]/", "", $_POST['wfu_newname']);
+		$rename_file['newname'] = preg_replace("/[^A-Za-z0-9_.#\-$]/", "", $sanitized);
 		WFU_USVAR_store('wfu_rename_file', $rename_file);
 	}
 	return ( $error == "" );
@@ -868,6 +883,8 @@ function wfu_rename_file($file_code, $type) {
  * @return bool True if move of file succeeded, false otherwise.
  */
 function wfu_move_file($file_code) {
+	if ( !wp_verify_nonce(( isset($_POST['nonce']) ? sanitize_text_field( wp_unslash ( $_POST["nonce"] ) ) : "" ), "wfu-movefile-page") ) return;
+
 	$user = wp_get_current_user();
 	$is_admin = current_user_can( 'manage_options' );
 	//check if user is allowed to view file details
@@ -893,19 +910,18 @@ function wfu_move_file($file_code) {
 	if ( isset($_POST['wfu_newpath']) && isset($_POST['wfu_replace']) ) {
 		$oldpath = $parts['dirname'];
 		if ( substr($oldpath, -1) != '/' ) $oldpath = $oldpath.'/';
-		$newpath = preg_replace($regex, "", $_POST['wfu_newpath']);
+		$newpath = sanitize_url($_POST['wfu_newpath']);
 		if ( substr($newpath, 0, 1) != '/' ) $newpath = '/'.$newpath;
 		$newpath = realpath(wfu_path_rel2abs($newpath));
 		if ( $newpath !== false && substr($newpath, -1) != '/' ) $newpath = $newpath.'/';
 		$replacefiles = ( $_POST['wfu_replace'] == 'yes' ? 'yes' : ( $_POST['wfu_replace'] == 'no' ? 'no' : '' ) );
-		if ( trim($_POST['wfu_newpath']) == "" ) $error = 'Error: Destination path cannot be empty!';
-		elseif ( $newpath == $oldpath ) $error = 'Error: Destination path is the same as source path!';
-		elseif ( preg_match($regex, $_POST['wfu_newpath']) ) $error = 'Error: path contained invalid characters that were stripped off! Please try again.';
-		elseif ( $newpath === false || !wfu_file_exists($newpath, "wfu_move_file:1") ) $error = 'Error: Destination folder does not exist!';
+		if ( trim($newpath) == "" ) $error = __('Error: Destination path cannot be empty!', 'wp-file-upload');
+		elseif ( $newpath == $oldpath ) $error = __('Error: Destination path is the same as source path!', 'wp-file-upload');
+		elseif ( $newpath === false || !wfu_file_exists($newpath, "wfu_move_file:1") ) $error = __('Error: Destination folder does not exist!', 'wp-file-upload');
 		// added check to forbid moving of files outside root and avoid
 		// directory traversal attacks
-		elseif ( substr($newpath, 0, strlen(ABSPATH)) != ABSPATH ) $error = 'Error: Destination folder cannot be outside the root of the website!';
-		elseif ( $replacefiles == "" ) $error = 'Error: Invalid selection about replacing files with same filename at destination!';
+		elseif ( substr($newpath, 0, strlen(ABSPATH)) != ABSPATH ) $error = __('Error: Destination folder cannot be outside the root of the website!', 'wp-file-upload');
+		elseif ( $replacefiles == "" ) $error = __('Error: Invalid selection about replacing files with same filename at destination!', 'wp-file-upload');
 		else {
 			foreach ( $dec_files as $dec_file ) {
 				if ( wfu_file_exists($dec_file, "wfu_move_file:2") ) {
@@ -925,7 +941,7 @@ function wfu_move_file($file_code) {
 	if ( $error != "" ) {
 		WFU_USVAR_store('wfu_move_file_error', $error);
 		$move_file = ( WFU_USVAR_exists('wfu_move_file') && is_array(WFU_USVAR('wfu_move_file')) ? WFU_USVAR('wfu_move_file') : array() );
-		$move_file['newpath'] = preg_replace($regex, "", $_POST['wfu_newpath']);
+		$move_file['newpath'] = sanitize_url($_POST['wfu_newpath']);
 		$move_file['replacefiles'] = $replacefiles;
 		WFU_USVAR_store('wfu_move_file', $move_file);
 	}
@@ -977,31 +993,34 @@ function wfu_delete_file_prompt($file_code, $type, $referer) {
 	if ( count($file_code) == 0 ) return;
 	$file_code_list = "list:".implode(",", $file_code);
 
-	$referer_url = wfu_get_filepath_from_safe(wfu_sanitize_code($referer));
+	$referer = wfu_sanitize_code($referer);
+	$referer_url = wfu_get_filepath_from_safe($referer);
 	$ret = wfu_extract_sortdata_from_path($referer_url);
 	$referer_url = $ret['path'];
 
 	$echo_str = "\n".'<div class="wrap">';
 	$echo_str .= "\n\t".'<div style="margin-top:20px;">';
-	if ( $is_admin ) $echo_str .= "\n\t\t".'<a href="'.$referer_url.'" class="button" title="go back">Go back</a>';
+	if ( $is_admin ) $echo_str .= "\n\t\t".'<a href="'.esc_url($referer_url).'" class="button" title="'.esc_html__('go back', 'wp-file-upload').'">'.esc_html__('Go back', 'wp-file-upload').'</a>';
 	$echo_str .= "\n\t".'</div>';
-	$echo_str .= "\n\t".'<h2 style="margin-bottom: 10px;">Delete '.( $type == 'dir' ? 'Folder' : 'File'.( count($names) == 1 ? '' : 's' ) ).'</h2>';
-	if ( $is_admin ) $echo_str .= "\n\t".'<form enctype="multipart/form-data" name="deletefile" id="deletefile" method="post" action="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload" class="validate">';
+	$echo_str .= "\n\t".'<h2 style="margin-bottom: 10px;">'.( $type == 'dir' ? esc_html(_n('Delete Folder', 'Delete Folders', count($names), 'wp-file-upload')) : esc_html(_n('Delete File', 'Delete Files', count($names), 'wp-file-upload')) ).'</h2>';
+	if ( $is_admin ) $echo_str .= "\n\t".'<form enctype="multipart/form-data" name="deletefile" id="deletefile" method="post" action="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload').'" class="validate">';
 	$echo_str .= "\n\t\t".'<input type="hidden" name="action" value="delete'.( $type == 'dir' ? 'dir' : 'file' ).'">';
-	$echo_str .= "\n\t\t".'<input type="hidden" name="referer" value="'.$referer.'">';
-	$echo_str .= "\n\t\t".'<input type="hidden" name="file" value="'.$file_code_list.'">';
+	$echo_str .= "\n\t\t".'<input type="hidden" name="nonce" value="'.wp_create_nonce('wfu-deletefile-page').'" />';
+	$echo_str .= "\n\t\t".'<input type="hidden" name="c" value="'.wp_create_nonce('wfu_admin_nonce').'" />';
+	$echo_str .= "\n\t\t".'<input type="hidden" name="referer" value="'.esc_attr($referer).'">';
+	$echo_str .= "\n\t\t".'<input type="hidden" name="file" value="'.esc_attr($file_code_list).'">';
 	if ( count($names) == 1 )
-		$echo_str .= "\n\t\t".'<label>Are you sure that you want to delete '.( $type == 'dir' ? 'folder' : 'file' ).' <strong>'.$names[0].'</strong>?</label><br/>';
+		$echo_str .= "\n\t\t".'<label>'.( $type == 'dir' ? sprintf(esc_html__('Are you sure that you want to delete folder %s?', 'wp-file-upload'), '<strong>'.esc_html($names[0]).'</strong>') : sprintf(esc_html__('Are you sure that you want to delete file %s?', 'wp-file-upload'), '<strong>'.esc_html($names[0]).'</strong>') ).'</label><br/>';
 	else {
-		$echo_str .= "\n\t\t".'<label>Are you sure that you want to delete '.( $type == 'dir' ? 'folder' : 'files' ).':';
+		$echo_str .= "\n\t\t".'<label>'.( $type == 'dir' ? esc_html__('Are you sure that you want to delete folder:', 'wp-file-upload') : esc_html__('Are you sure that you want to delete files:', 'wp-file-upload') );
 		$echo_str .= "\n\t\t".'<ul style="padding-left: 20px; list-style: initial;">';
 		foreach ( $names as $name )
-			$echo_str .= "\n\t\t\t".'<li><strong>'.$name.'</strong></li>';
+			$echo_str .= "\n\t\t\t".'<li><strong>'.esc_html($name).'</strong></li>';
 		$echo_str .= "\n\t\t".'</ul>';
 	}
 	$echo_str .= "\n\t\t".'<p class="submit">';
-	$echo_str .= "\n\t\t\t".'<input type="submit" class="button-primary" name="submit" value="Delete">';
-	$echo_str .= "\n\t\t\t".'<input type="submit" class="button-primary" name="submit" value="Cancel">';
+	$echo_str .= "\n\t\t\t".'<button class="button-primary" name="submit" value="Delete">'.esc_html__('Delete', 'wp-file-upload').'</button>';
+	$echo_str .= "\n\t\t\t".'<button class="button-primary" name="submit" value="Cancel">'.esc_html__('Cancel', 'wp-file-upload').'</button>';
 	$echo_str .= "\n\t\t".'</p>';
 	$echo_str .= "\n\t".'</form>';
 	$echo_str .= "\n".'</div>';
@@ -1022,6 +1041,8 @@ function wfu_delete_file_prompt($file_code, $type, $referer) {
  */
 function wfu_delete_file($file_code, $type) {
 	if ( $type == 'dir' ) return;
+
+	if ( !wp_verify_nonce(( isset($_POST['nonce']) ? sanitize_text_field( wp_unslash ( $_POST["nonce"] ) ) : "" ), "wfu-deletefile-page") ) return;
 	
 	$user = wp_get_current_user();
 	$is_admin = current_user_can( 'manage_options' );
@@ -1087,24 +1108,29 @@ function wfu_create_dir_prompt($dir_code, $error) {
 
 	$echo_str = "\n".'<div class="wrap">';
 	if ( $error ) {
-		$create_dir = WFU_USVAR('wfu_create_dir');
-		$newname = $create_dir['newname'];
+		$create_dir = ( is_array(WFU_USVAR('wfu_create_dir')) ? WFU_USVAR('wfu_create_dir') : array( 'newname' => '' ) );
+		$newname = sanitize_file_name($create_dir['newname']);
 		$echo_str .= "\n\t".'<div class="error">';
-		$echo_str .= "\n\t\t".'<p>'.WFU_USVAR('wfu_create_dir_error').'</p>';
+		$echo_str .= "\n\t\t".'<p>'.wfu_sanitize_simple_html(WFU_USVAR('wfu_create_dir_error')).'</p>';
 		$echo_str .= "\n\t".'</div>';
 	}
 	$echo_str .= "\n\t".'<div style="margin-top:20px;">';
-	$echo_str .= "\n\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=file_browser&dir='.$dir_code.'" class="button" title="go back">Go back</a>';
+	$echo_str .= "\n\t\t".'<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=file_browser&dir='.$dir_code.'&c='.$admin_nonce).'" class="button" title="'.esc_html__('go back', 'wp-file-upload').'">'.esc_html__('Go back', 'wp-file-upload').'</a>';
 	$echo_str .= "\n\t".'</div>';
-	$echo_str .= "\n\t".'<h2 style="margin-bottom: 10px;">Create Folder</h2>';
-	$echo_str .= "\n\t".'<form enctype="multipart/form-data" name="createdir" id="createdir" method="post" action="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload" class="validate">';
+	$echo_str .= "\n\t".'<h2 style="margin-bottom: 10px;">'.esc_html__('Create Folder', 'wp-file-upload').'</h2>';
+	$echo_str .= "\n\t".'<form enctype="multipart/form-data" name="createdir" id="createdir" method="post" action="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload').'" class="validate">';
 	$echo_str .= "\n\t\t".'<input type="hidden" name="action" value="createdir">';
-	$echo_str .= "\n\t\t".'<input type="hidden" name="dir" value="'.$dir_code.'">';
-	$echo_str .= "\n\t\t".'<label>Enter the name of the new folder inside <strong>'.$dec_dir.'</strong></label><br/>';
-	$echo_str .= "\n\t\t".'<input name="wfu_newname" id="wfu_newname" type="text" value="'.$newname.'" style="width:50%;" />';
+	// createdir has been suspended, so admin nonce is not created in order not
+	// to allow this method to execute, even if it is called explicitely
+	//$echo_str .= "\n\t\t".'<input type="hidden" name="c" value="'.wp_create_nonce('wfu_admin_nonce').'" />';
+	$echo_str .= "\n\t\t".'<input type="hidden" name="nonce" value="'.wp_create_nonce('wfu-createdir-page').'" />';
+	$echo_str .= "\n\t\t".'<input type="hidden" name="c" value="'.$admin_nonce.'" />';
+	$echo_str .= "\n\t\t".'<input type="hidden" name="dir" value="'.esc_attr($dir_code).'">';
+	$echo_str .= "\n\t\t".'<label>'.sprintf(esc_html__('Enter the name of the new folder inside %s', 'wp-file-upload'), '<strong>'.esc_html($dec_dir).'</strong>').'</label><br/>';
+	$echo_str .= "\n\t\t".'<input name="wfu_newname" id="wfu_newname" type="text" value="'.esc_html($newname).'" style="width:50%;" />';
 	$echo_str .= "\n\t\t".'<p class="submit">';
-	$echo_str .= "\n\t\t\t".'<input type="submit" class="button-primary" name="submit" value="Create">';
-	$echo_str .= "\n\t\t\t".'<input type="submit" class="button-primary" name="submit" value="Cancel">';
+	$echo_str .= "\n\t\t\t".'<button class="button-primary" name="submit" value="Create">'.esc_html__('Create', 'wp-file-upload').'</button>';
+	$echo_str .= "\n\t\t\t".'<button class="button-primary" name="submit" value="Cancel">'.esc_html__('Cancel', 'wp-file-upload').'</button>';
 	$echo_str .= "\n\t\t".'</p>';
 	$echo_str .= "\n\t".'</form>';
 	$echo_str .= "\n".'</div>';
@@ -1114,7 +1140,8 @@ function wfu_create_dir_prompt($dir_code, $error) {
 /**
  * Execute Creation of Directory.
  *
- * This function creates a new directory.
+ * This function creates a new directory. This function has been currently
+ * discontinued for security reasons.
  *
  * @since 2.2.1
  *
@@ -1127,6 +1154,8 @@ function wfu_create_dir($dir_code) {
 	
 	if ( !current_user_can( 'manage_options' ) ) return;
 
+	if ( !wp_verify_nonce(( isset($_POST['nonce']) ? sanitize_text_field( wp_unslash ( $_POST["nonce"] ) ) : "" ), "wfu-createdir-page") ) return;
+
 	$dir_code = wfu_sanitize_code($dir_code);
 	$dec_dir = wfu_get_filepath_from_safe($dir_code);
 	if ( $dec_dir === false ) return;
@@ -1137,17 +1166,17 @@ function wfu_create_dir($dir_code) {
 	$error = "";
 	if ( isset($_POST['wfu_newname'])  && isset($_POST['submit']) ) {
 		if ( $_POST['submit'] == "Create" ) {
-			$new_dir = $dec_dir.$_POST['wfu_newname'];
-			if ( $_POST['wfu_newname'] == "" ) $error = 'Error: New folder name cannot be empty!';
-			elseif ( preg_match("/[^A-Za-z0-9_.#\-$]/", $_POST['wfu_newname']) ) $error = 'Error: name contained invalid characters that were stripped off! Please try again.';
-			elseif ( wfu_file_exists($new_dir, "wfu_create_dir:2") ) $error = 'Error: The folder <strong>'.$_POST['wfu_newname'].'</strong> already exists! Please choose another one.';
-			elseif ( mkdir($new_dir) == false ) $error = 'Error: Creation of folder <strong>'.$_POST['wfu_newname'].'</strong> failed!';
+			$new_name = sanitize_file_name($_POST['wfu_newname']);
+			$new_dir = $dec_dir.$new_name;
+			if ( $new_name == "" ) $error = __('Error: New folder name cannot be empty!', 'wp-file-upload');
+			elseif ( wfu_file_exists($new_dir, "wfu_create_dir:2") ) $error = sprintf(__('Error: The folder %s already exists! Please choose another one.', 'wp-file-upload'), '<strong>'.$new_name.'</strong>');
+			elseif ( mkdir($new_dir) == false ) $error = 'Error: Creation of folder <strong>'.$new_name.'</strong> failed!';
 		}
 	}
 	if ( $error != "" ) {
 		WFU_USVAR_store('wfu_create_dir_error', $error);
 		$create_dir = WFU_USVAR('wfu_create_dir');
-		$create_dir['newname'] = preg_replace("/[^A-Za-z0-9_.#\-$]/", "", $_POST['wfu_newname']);
+		$create_dir['newname'] = $new_name;
 		WFU_USVAR_store('wfu_create_dir', $create_dir);
 	}
 	return ( $error == "" );
@@ -1190,31 +1219,34 @@ function wfu_include_file_prompt($file_code, $referer) {
 	if ( count($file_code) == 0 ) return;
 	$file_code_list = "list:".implode(",", $file_code);
 
-	$referer_url = wfu_get_filepath_from_safe(wfu_sanitize_code($referer));
+	$referer = wfu_sanitize_code($referer);
+	$referer_url = wfu_get_filepath_from_safe($referer);
 	$ret = wfu_extract_sortdata_from_path($referer_url);
 	$referer_url = $ret['path'];
 
 	$echo_str = "\n".'<div class="wrap">';
 	$echo_str .= "\n\t".'<div style="margin-top:20px;">';
-	$echo_str .= "\n\t\t".'<a href="'.$referer_url.'" class="button" title="go back">Go back</a>';
+	$echo_str .= "\n\t\t".'<a href="'.esc_url($referer_url).'" class="button" title="'.esc_html__('go back', 'wp-file-upload').'">'.esc_html__('Go back', 'wp-file-upload').'</a>';
 	$echo_str .= "\n\t".'</div>';
-	$echo_str .= "\n\t".'<h2 style="margin-bottom: 10px;">Include File'.( count($names) == 1 ? '' : 's' ).'</h2>';
-	$echo_str .= "\n\t".'<form enctype="multipart/form-data" name="includefile" id="includefile" method="post" action="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload" class="validate">';
+	$echo_str .= "\n\t".'<h2 style="margin-bottom: 10px;">'.esc_html(_n('Include File', 'Include Files', count($names), 'wp-file-upload')).'</h2>';
+	$echo_str .= "\n\t".'<form enctype="multipart/form-data" name="includefile" id="includefile" method="post" action="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload').'" class="validate">';
 	$echo_str .= "\n\t\t".'<input type="hidden" name="action" value="includefile">';
-	$echo_str .= "\n\t\t".'<input type="hidden" name="referer" value="'.$referer.'">';
-	$echo_str .= "\n\t\t".'<input type="hidden" name="file" value="'.$file_code_list.'">';
+	$echo_str .= "\n\t\t".'<input type="hidden" name="c" value="'.wp_create_nonce('wfu_admin_nonce').'" />';
+	$echo_str .= "\n\t\t".'<input type="hidden" name="nonce" value="'.wp_create_nonce('wfu-includefile-page').'" />';
+	$echo_str .= "\n\t\t".'<input type="hidden" name="referer" value="'.esc_attr($referer).'">';
+	$echo_str .= "\n\t\t".'<input type="hidden" name="file" value="'.esc_attr($file_code_list).'">';
 	if ( count($names) == 1 )
-		$echo_str .= "\n\t\t".'<label>Are you sure that you want to include file <strong>'.$names[0].'</strong>?</label><br/>';
+		$echo_str .= "\n\t\t".'<label>'.sprintf(esc_html__('Are you sure that you want to include file %s?', 'wp-file-upload'), '<strong>'.esc_html($names[0]).'</strong>').'</label><br/>';
 	else {
-		$echo_str .= "\n\t\t".'<label>Are you sure that you want to include files:';
+		$echo_str .= "\n\t\t".'<label>'.esc_html__('Are you sure that you want to include files:', 'wp-file-upload');
 		$echo_str .= "\n\t\t".'<ul style="padding-left: 20px; list-style: initial;">';
 		foreach ( $names as $name )
-			$echo_str .= "\n\t\t\t".'<li><strong>'.$name.'</strong></li>';
+			$echo_str .= "\n\t\t\t".'<li><strong>'.esc_html($name).'</strong></li>';
 		$echo_str .= "\n\t\t".'</ul>';
 	}
 	$echo_str .= "\n\t\t".'<p class="submit">';
-	$echo_str .= "\n\t\t\t".'<input type="submit" class="button-primary" name="submit" value="Include">';
-	$echo_str .= "\n\t\t\t".'<input type="submit" class="button-primary" name="submit" value="Cancel">';
+	$echo_str .= "\n\t\t\t".'<button class="button-primary" name="submit" value="Include">'.esc_html__('Include', 'wp-file-upload').'</button>';
+	$echo_str .= "\n\t\t\t".'<button class="button-primary" name="submit" value="Cancel">'.esc_html__('Cancel', 'wp-file-upload').'</button>';
 	$echo_str .= "\n\t\t".'</p>';
 	$echo_str .= "\n\t".'</form>';
 	$echo_str .= "\n".'</div>';
@@ -1234,6 +1266,9 @@ function wfu_include_file_prompt($file_code, $referer) {
  */
 function wfu_include_file($file_code) {
 	if ( !current_user_can( 'manage_options' ) ) return;
+
+	if ( !wp_verify_nonce(( isset($_POST['nonce']) ? sanitize_text_field( wp_unslash ( $_POST["nonce"] ) ) : "" ), "wfu-includefile-page") ) return;
+
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
 	if ( $plugin_options['includeotherfiles'] != "1" ) return;
 
@@ -1269,14 +1304,15 @@ function wfu_include_file($file_code) {
  * @since 2.4.1
  *
  * @param string $file_code A code corresponding to the file to be included.
- * @param string $errorstatus Error status. If it has the value 'error' then an
- *        error will be shown on top of the page.
+ * @param string|bool $messagestatus Message status. If it has the value 'error'
+ *        then an error will be shown on top of the page. If it has the value
+ *        'success' then a success message will be shown on top of the page.
  * @param string $invoker Optional. The page URL that initiated file details
  *        page.
  *
  * @return string The HTML code of File Details page.
  */
-function wfu_file_details($file_code, $errorstatus, $invoker = '') {
+function wfu_file_details($file_code, $messagestatus, $invoker = '') {
 	$siteurl = site_url();
 	$allow_obsolete = false;
 	$file_exists = true;
@@ -1294,6 +1330,7 @@ function wfu_file_details($file_code, $errorstatus, $invoker = '') {
 
 	$user = wp_get_current_user();
 	$is_admin = current_user_can( 'manage_options' );
+	$admin_nonce = wp_create_nonce('wfu_admin_nonce');
 	//check if user is allowed to view file details
 	if ( !$is_admin ) {
 		if ( $allow_obsolete ) return;
@@ -1347,53 +1384,60 @@ function wfu_file_details($file_code, $errorstatus, $invoker = '') {
 	}
 
 	$echo_str = '<div class="regev_wrap">';
-	if ( $errorstatus == 'error' ) {
+	if ( $messagestatus == 'error' ) {
 		$echo_str .= "\n\t".'<div class="error">';
-		$echo_str .= "\n\t\t".'<p>'.WFU_USVAR('wfu_filedetails_error').'</p>';
+		$echo_str .= "\n\t\t".'<p>'.wfu_sanitize_simple_html(WFU_USVAR('wfu_filedetails_error')).'</p>';
+		$echo_str .= "\n\t".'</div>';
+	}
+	elseif ( $messagestatus == 'success' ) {
+		$echo_str .= "\n\t".'<div class="updated">';
+		$echo_str .= "\n\t\t".'<p>'.wfu_sanitize_simple_html(WFU_USVAR('wfu_filedetails_success')).'</p>';
 		$echo_str .= "\n\t".'</div>';
 	}
 	//show file details
-	$echo_str .= "\n\t".'<h2>Details of File: '.$parts['basename'].'</h2>';
+	$echo_str .= "\n\t".'<h2>'.esc_html(sprintf(__('Details of File: %s', 'wp-file-upload'), $parts['basename'])).'</h2>';
 	if ( !$file_exists ) {
 		$echo_str .= "\n\t\t".'<div class="notice notice-warning">';
-		$echo_str .= "\n\t\t\t".'<p>File does not exist on the server anymore!</p>';
+		$echo_str .= "\n\t\t\t".'<p>'.esc_html__('File does not exist on the server anymore!', 'wp-file-upload').'</p>';
 		$echo_str .= "\n\t\t".'</div>';
 	}
 	elseif ( !$file_belongs ) {
 		$echo_str .= "\n\t\t".'<div class="notice notice-warning">';
-		$echo_str .= "\n\t\t\t".'<p>This record is old. The file is associated with another record.</p>';
+		$echo_str .= "\n\t\t\t".'<p>'.esc_html__('This record is old. The file is associated with another record.', 'wp-file-upload').'</p>';
 		$echo_str .= "\n\t\t".'</div>';
 	}
 	$echo_str .= "\n\t".'<div style="margin-top:10px;">';
 	if ( $is_admin ) {
+		$invoker = wfu_sanitize_code($invoker);
 		$invoker_action = ( $invoker == '' ? false : wfu_get_browser_params_from_safe($invoker) );
 		$goback_action = ( $invoker_action === false ? 'file_browser&dir='.$dir_code : $invoker_action );
 		if ( substr($goback_action, 0, 18) == "wfu_uploaded_files" )
-			$echo_str .= "\n\t\t".'<a href="'.$siteurl.'/wp-admin/admin.php?page='.$goback_action.'" class="button" title="go back">Go back</a>';
+			$echo_str .= "\n\t\t".'<a href="'.esc_url($siteurl.'/wp-admin/admin.php?page='.$goback_action.'&c='.wp_create_nonce('wfu_uploadedfiles_nonce')).'" class="button" title="'.esc_html__('go back', 'wp-file-upload').'">'.esc_html__('Go back', 'wp-file-upload').'</a>';
 		elseif ( $goback_action != "no_referer" )
-			$echo_str .= "\n\t\t".'<a href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action='.$goback_action.'" class="button" title="go back">Go back</a>';
-		$echo_str .= "\n\t\t".'<form enctype="multipart/form-data" name="editfiledetails" id="editfiledetails" method="post" action="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=edit_filedetails" class="validate">';
+			$echo_str .= "\n\t\t".'<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action='.$goback_action).'&c='.$admin_nonce.'" class="button" title="'.esc_html__('go back', 'wp-file-upload').'">'.esc_html__('Go back', 'wp-file-upload').'</a>';
+		$echo_str .= "\n\t\t".'<form enctype="multipart/form-data" name="editfiledetails" id="editfiledetails" method="post" action="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=edit_filedetails').'" class="validate">';
 	}
-	$echo_str .= "\n\t\t\t".'<h3 style="margin-bottom: 10px; margin-top: 40px;">Upload Details</h3>';
+	$echo_str .= "\n\t\t\t".'<h3 style="margin-bottom: 10px; margin-top: 40px;">'.esc_html__('Upload Details', 'wp-file-upload').'</h3>';
 	$echo_str .= "\n\t\t\t".'<input type="hidden" name="action" value="edit_filedetails" />';
 	$echo_str .= "\n\t\t\t".'<input type="hidden" name="nonce" value="'.wp_create_nonce('wfu-filedetails-page').'" />';
+	$echo_str .= "\n\t\t\t".'<input type="hidden" name="c" value="'.$admin_nonce.'" />';
 	//$echo_str .= "\n\t\t\t".'<input type="hidden" name="dir" value="'.$dir_code.'">';
-	$echo_str .= "\n\t\t\t".'<input type="hidden" name="invoker" value="'.$invoker.'">';
-	$echo_str .= "\n\t\t\t".'<input type="hidden" name="file" value="'.( $allow_obsolete ? 'byID:'.$file_code : $file_code ).'">';
+	$echo_str .= "\n\t\t\t".'<input type="hidden" name="invoker" value="'.esc_attr($invoker).'">';
+	$echo_str .= "\n\t\t\t".'<input type="hidden" name="file" value="'.( $allow_obsolete ? 'byID:'.esc_attr($file_code) : esc_attr($file_code) ).'">';
 	$echo_str .= "\n\t\t\t".'<table class="form-table">';
 	$echo_str .= "\n\t\t\t\t".'<tbody>';
 	if ( $is_admin ) {
 		$echo_str .= "\n\t\t\t\t\t".'<tr>';
 		$echo_str .= "\n\t\t\t\t\t\t".'<th scope="row">';
-		$echo_str .= "\n\t\t\t\t\t\t\t".'<label>Full Path</label>';
+		$echo_str .= "\n\t\t\t\t\t\t\t".'<label>'.esc_html__('Full Path', 'wp-file-upload').'</label>';
 		$echo_str .= "\n\t\t\t\t\t\t".'</th>';
 		$echo_str .= "\n\t\t\t\t\t\t".'<td>';
-		$echo_str .= "\n\t\t\t\t\t\t\t".'<input type="text" value="'.$filepath.'" readonly="readonly" style="width:50%;" />';
+		$echo_str .= "\n\t\t\t\t\t\t\t".'<input type="text" value="'.esc_html($filepath).'" readonly="readonly" style="width:50%;" />';
 		$echo_str .= "\n\t\t\t\t\t\t".'</td>';
 		$echo_str .= "\n\t\t\t\t\t".'</tr>';
 		$echo_str .= "\n\t\t\t\t\t".'<tr>';
 		$echo_str .= "\n\t\t\t\t\t\t".'<th scope="row">';
-		$echo_str .= "\n\t\t\t\t\t\t\t".'<label>Uploaded By User</label>';
+		$echo_str .= "\n\t\t\t\t\t\t\t".'<label>'.esc_html__('Uploaded By User', 'wp-file-upload').'</label>';
 		$echo_str .= "\n\t\t\t\t\t\t".'</th>';
 		$echo_str .= "\n\t\t\t\t\t\t".'<td>';
 		$echo_str .= "\n\t\t\t\t\t\t\t".'<select id="wfu_filedetails_users" disabled="disabled">';
@@ -1417,21 +1461,21 @@ function wfu_file_details($file_code, $errorstatus, $invoker = '') {
 		$args = apply_filters("_wfu_get_users", $args, "edit_file_details");
 		$users = get_users($args);
 		foreach ( $users as $userid => $user )
-			$echo_str .= "\n\t\t\t\t\t\t\t\t".'<option value="'.$user->ID.'"'.( $filerec->uploaduserid == $user->ID ? ' selected="selected"' : '' ).'>'.$user->display_name.' ('.$user->user_login.')</option>';
+			$echo_str .= "\n\t\t\t\t\t\t\t\t".'<option value="'.$user->ID.'"'.( $filerec->uploaduserid == $user->ID ? ' selected="selected"' : '' ).'>'.esc_html($user->display_name.' ('.$user->user_login.')').'</option>';
 		$echo_str .= "\n\t\t\t\t\t\t\t".'</select>';
 		if ( $admin_can_edit ) {
-			$echo_str .= "\n\t\t\t\t\t\t\t".'<a class="button" id="btn_change" href="" onclick="document.getElementById(\'wfu_filedetails_users\').disabled = false; this.style.display = \'none\'; document.getElementById(\'btn_ok\').style.display = \'inline-block\'; document.getElementById(\'btn_cancel\').style.display = \'inline-block\'; return false;"'.( $is_admin ? '' : ' style="display:none;"' ).'>Change User</a>';
-			$echo_str .= "\n\t\t\t\t\t\t\t".'<a class="button" id="btn_ok" href="" onclick="document.getElementById(\'wfu_filedetails_users\').disabled = true; document.getElementById(\'btn_change\').style.display = \'inline-block\'; this.style.display=\'none\'; document.getElementById(\'btn_cancel\').style.display = \'none\'; document.getElementById(\'wfu_filedetails_userid\').value = document.getElementById(\'wfu_filedetails_users\').value; wfu_filedetails_changed(); return false;" style="display:none;">Ok</a>';
-			$echo_str .= "\n\t\t\t\t\t\t\t".'<a class="button" id="btn_cancel" href="" onclick="document.getElementById(\'wfu_filedetails_users\').disabled = true; document.getElementById(\'btn_change\').style.display = \'inline-block\'; this.style.display=\'none\'; document.getElementById(\'btn_ok\').style.display = \'none\'; document.getElementById(\'wfu_filedetails_users\').value = document.getElementById(\'wfu_filedetails_userid\').value; return false;" style="display:none;">Cancel</a>';
-			$echo_str .= "\n\t\t\t\t\t\t\t".'<input type="hidden" id="wfu_filedetails_userid" name="wfu_filedetails_userid" value="'.$filerec->uploaduserid.'" />';
-			$echo_str .= "\n\t\t\t\t\t\t\t".'<input type="hidden" id="wfu_filedetails_userid_default" value="'.$filerec->uploaduserid.'" />';
+			$echo_str .= "\n\t\t\t\t\t\t\t".'<a class="button" id="btn_change" href="" onclick="document.getElementById(\'wfu_filedetails_users\').disabled = false; this.style.display = \'none\'; document.getElementById(\'btn_ok\').style.display = \'inline-block\'; document.getElementById(\'btn_cancel\').style.display = \'inline-block\'; return false;"'.( $is_admin ? '' : ' style="display:none;"' ).'>'.esc_html__('Change User', 'wp-file-upload').'</a>';
+			$echo_str .= "\n\t\t\t\t\t\t\t".'<a class="button" id="btn_ok" href="" onclick="document.getElementById(\'wfu_filedetails_users\').disabled = true; document.getElementById(\'btn_change\').style.display = \'inline-block\'; this.style.display=\'none\'; document.getElementById(\'btn_cancel\').style.display = \'none\'; document.getElementById(\'wfu_filedetails_userid\').value = document.getElementById(\'wfu_filedetails_users\').value; wfu_filedetails_changed(); return false;" style="display:none;">'.esc_html__('Ok', 'wp-file-upload').'</a>';
+			$echo_str .= "\n\t\t\t\t\t\t\t".'<a class="button" id="btn_cancel" href="" onclick="document.getElementById(\'wfu_filedetails_users\').disabled = true; document.getElementById(\'btn_change\').style.display = \'inline-block\'; this.style.display=\'none\'; document.getElementById(\'btn_ok\').style.display = \'none\'; document.getElementById(\'wfu_filedetails_users\').value = document.getElementById(\'wfu_filedetails_userid\').value; return false;" style="display:none;">'.esc_html__('Cancel', 'wp-file-upload').'</a>';
+			$echo_str .= "\n\t\t\t\t\t\t\t".'<input type="hidden" id="wfu_filedetails_userid" name="wfu_filedetails_userid" value="'.esc_attr($filerec->uploaduserid).'" />';
+			$echo_str .= "\n\t\t\t\t\t\t\t".'<input type="hidden" id="wfu_filedetails_userid_default" value="'.esc_attr($filerec->uploaduserid).'" />';
 		}
 		$echo_str .= "\n\t\t\t\t\t\t".'</td>';
 		$echo_str .= "\n\t\t\t\t\t".'</tr>';
 	}
 	$echo_str .= "\n\t\t\t\t\t".'<tr>';
 	$echo_str .= "\n\t\t\t\t\t\t".'<th scope="row">';
-	$echo_str .= "\n\t\t\t\t\t\t\t".'<label>File Size</label>';
+	$echo_str .= "\n\t\t\t\t\t\t\t".'<label>'.esc_html__('File Size', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t\t\t\t\t".'</th>';
 	$echo_str .= "\n\t\t\t\t\t\t".'<td>';
 	$echo_str .= "\n\t\t\t\t\t\t\t".'<input type="text" value="'.$filerec->filesize.'" readonly="readonly" style="width:auto;" />';
@@ -1439,7 +1483,7 @@ function wfu_file_details($file_code, $errorstatus, $invoker = '') {
 	$echo_str .= "\n\t\t\t\t\t".'</tr>';
 	$echo_str .= "\n\t\t\t\t\t".'<tr>';
 	$echo_str .= "\n\t\t\t\t\t\t".'<th scope="row">';
-	$echo_str .= "\n\t\t\t\t\t\t\t".'<label>File Date</label>';
+	$echo_str .= "\n\t\t\t\t\t\t\t".'<label>'.esc_html__('File Date', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t\t\t\t\t".'</th>';
 	$echo_str .= "\n\t\t\t\t\t\t".'<td>';
 	$echo_str .= "\n\t\t\t\t\t\t\t".'<input type="text" value="'.( $file_exists ? get_date_from_gmt(date("Y-m-d H:i:s", $stat['mtime']), "d/m/Y H:i:s") : '' ).'" readonly="readonly" style="width:auto;" />';
@@ -1447,7 +1491,7 @@ function wfu_file_details($file_code, $errorstatus, $invoker = '') {
 	$echo_str .= "\n\t\t\t\t\t".'</tr>';
 	$echo_str .= "\n\t\t\t\t\t".'<tr>';
 	$echo_str .= "\n\t\t\t\t\t\t".'<th scope="row">';
-	$echo_str .= "\n\t\t\t\t\t\t\t".'<label>Uploaded From Page</label>';
+	$echo_str .= "\n\t\t\t\t\t\t\t".'<label>'.esc_html__('Uploaded From Page', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t\t\t\t\t".'</th>';
 	$echo_str .= "\n\t\t\t\t\t\t".'<td>';
 	$echo_str .= "\n\t\t\t\t\t\t\t".'<input type="text" value="'.sanitize_text_field(get_the_title($filerec->pageid)).' ('.$filerec->pageid.')'.'" readonly="readonly" style="width:50%;" />';
@@ -1456,7 +1500,7 @@ function wfu_file_details($file_code, $errorstatus, $invoker = '') {
 	if ( $is_admin ) {
 		$echo_str .= "\n\t\t\t\t\t".'<tr>';
 		$echo_str .= "\n\t\t\t\t\t\t".'<th scope="row">';
-		$echo_str .= "\n\t\t\t\t\t\t\t".'<label>Upload Plugin ID</label>';
+		$echo_str .= "\n\t\t\t\t\t\t\t".'<label>'.esc_html__('Upload Plugin ID', 'wp-file-upload').'</label>';
 		$echo_str .= "\n\t\t\t\t\t\t".'</th>';
 		$echo_str .= "\n\t\t\t\t\t\t".'<td>';
 		$echo_str .= "\n\t\t\t\t\t\t\t".'<input type="text" value="'.$filerec->sid.'" readonly="readonly" style="width:auto;" />';
@@ -1467,7 +1511,7 @@ function wfu_file_details($file_code, $errorstatus, $invoker = '') {
 	$echo_str .= "\n\t\t\t".'</table>';
 	if ( $is_admin ) {
 		//show history details
-		$echo_str .= "\n\t\t\t".'<h3 style="margin-bottom: 10px; margin-top: 40px;">File History</h3>';
+		$echo_str .= "\n\t\t\t".'<h3 style="margin-bottom: 10px; margin-top: 40px;">'.esc_html__('File History', 'wp-file-upload').'</h3>';
 		$echo_str .= "\n\t\t\t".'<table class="form-table">';
 		$echo_str .= "\n\t\t\t\t".'<tbody>';
 		$echo_str .= "\n\t\t\t\t\t".'<tr>';
@@ -1478,7 +1522,7 @@ function wfu_file_details($file_code, $errorstatus, $invoker = '') {
 		//construct history report
 		$rep = wfu_file_details_history($filerec);
 		$echo_str .= "\n\t\t\t\t\t\t\t".'<div style="border:1px solid #dfdfdf; border-radius:3px; width:50%; overflow:scroll; padding:6px; height:100px; background-color:#eee;">';
-		$echo_str .= "\n\t\t\t\t\t\t\t".'<span style="white-space:nowrap;">'.$rep.'</span>';
+		$echo_str .= "\n\t\t\t\t\t\t\t".'<span style="white-space:nowrap;">'.wfu_sanitize_simple_html($rep, 'b,em,strong,br').'</span>';
 		$echo_str .= "\n\t\t\t\t\t\t\t".'</div>';
 		$echo_str .= "\n\t\t\t\t\t\t".'</td>';
 		$echo_str .= "\n\t\t\t\t\t".'</tr>';
@@ -1486,20 +1530,20 @@ function wfu_file_details($file_code, $errorstatus, $invoker = '') {
 		$echo_str .= "\n\t\t\t".'</table>';
 	}
 
-	$echo_str .= "\n\t\t\t".'<h3 style="margin-bottom: 10px; margin-top: 40px;">User Data Details</h3>';
+	$echo_str .= "\n\t\t\t".'<h3 style="margin-bottom: 10px; margin-top: 40px;">'.esc_html__('User Data Details', 'wp-file-upload').'</h3>';
 	$echo_str .= "\n\t\t\t".'<table class="form-table">';
 	$echo_str .= "\n\t\t\t\t".'<tbody>';
 	if ( is_array($filerec->userdata) && count($filerec->userdata) > 0 ) {
 		foreach ( $filerec->userdata as $userdata ) {
 			$echo_str .= "\n\t\t\t\t\t".'<tr>';
 			$echo_str .= "\n\t\t\t\t\t\t".'<th scope="row">';
-			$echo_str .= "\n\t\t\t\t\t\t\t".'<label>'.esc_attr($userdata->property).'</label>';
+			$echo_str .= "\n\t\t\t\t\t\t\t".'<label>'.esc_html($userdata->property).'</label>';
 			$echo_str .= "\n\t\t\t\t\t\t".'</th>';
 			$echo_str .= "\n\t\t\t\t\t\t".'<td>';
 //			$echo_str .= "\n\t\t\t\t\t\t\t".'<input id="wfu_filedetails_userdata_value_'.$userdata->propkey.'" name="wfu_filedetails_userdata" type="text"'.( $is_admin ? '' : ' readonly="readonly"' ).' value="'.$userdata->propvalue.'" />';
-			$echo_str .= "\n\t\t\t\t\t\t\t".'<textarea id="wfu_filedetails_userdata_value_'.$userdata->propkey.'" name="wfu_filedetails_userdata" '.( ($is_admin && $admin_can_edit) ? '' : ' readonly="readonly"' ).' value="'.esc_attr($userdata->propvalue).'">'.esc_attr($userdata->propvalue).'</textarea>';
-			$echo_str .= "\n\t\t\t\t\t\t\t".'<input id="wfu_filedetails_userdata_default_'.$userdata->propkey.'" type="hidden" value="'.esc_attr($userdata->propvalue).'" />';
-			$echo_str .= "\n\t\t\t\t\t\t\t".'<input id="wfu_filedetails_userdata_'.$userdata->propkey.'" name="wfu_filedetails_userdata_'.$userdata->propkey.'" type="hidden" value="'.esc_attr($userdata->propvalue).'" />';
+			$echo_str .= "\n\t\t\t\t\t\t\t".'<textarea id="wfu_filedetails_userdata_value_'.esc_attr($userdata->propkey).'" name="wfu_filedetails_userdata" '.( ($is_admin && $admin_can_edit) ? '' : ' readonly="readonly"' ).' value="'.esc_attr($userdata->propvalue).'">'.esc_textarea($userdata->propvalue).'</textarea>';
+			$echo_str .= "\n\t\t\t\t\t\t\t".'<input id="wfu_filedetails_userdata_default_'.esc_attr($userdata->propkey).'" type="hidden" value="'.esc_attr($userdata->propvalue).'" />';
+			$echo_str .= "\n\t\t\t\t\t\t\t".'<input id="wfu_filedetails_userdata_'.esc_attr($userdata->propkey).'" name="wfu_filedetails_userdata_'.esc_attr($userdata->propkey).'" type="hidden" value="'.esc_attr($userdata->propvalue).'" />';
 			$echo_str .= "\n\t\t\t\t\t\t".'</td>';
 			$echo_str .= "\n\t\t\t\t\t".'</tr>';
 		}
@@ -1507,7 +1551,7 @@ function wfu_file_details($file_code, $errorstatus, $invoker = '') {
 	else {
 		$echo_str .= "\n\t\t\t\t\t".'<tr>';
 		$echo_str .= "\n\t\t\t\t\t\t".'<th scope="row">';
-		$echo_str .= "\n\t\t\t\t\t\t\t".'<label>No user data</label>';
+		$echo_str .= "\n\t\t\t\t\t\t\t".'<label>'.esc_html__('No user data', 'wp-file-upload').'</label>';
 		$echo_str .= "\n\t\t\t\t\t\t".'</th>';
 		$echo_str .= "\n\t\t\t\t\t\t".'<td></td>';
 		$echo_str .= "\n\t\t\t\t\t".'</tr>';
@@ -1516,7 +1560,7 @@ function wfu_file_details($file_code, $errorstatus, $invoker = '') {
 	$echo_str .= "\n\t\t\t".'</table>';
 	if ( ($is_admin && $admin_can_edit) ) {
 		$echo_str .= "\n\t\t\t".'<p class="submit">';
-		$echo_str .= "\n\t\t\t\t".'<input id="dp_filedetails_submit_fields" type="submit" class="button-primary" name="submit" value="Update" disabled="disabled" />';
+		$echo_str .= "\n\t\t\t\t".'<button id="dp_filedetails_submit_fields" class="button-primary" name="submit" value="Update" disabled="disabled">'.esc_html__('Update', 'wp-file-upload').'</button>';
 		$echo_str .= "\n\t\t\t".'</p>';
 	}
 	$echo_str .= "\n\t\t".'</form>';
@@ -1551,21 +1595,21 @@ function wfu_file_details_history($filerec) {
 		$rep_item = '';
 		
 		if ( $rec->action == 'upload' )
-			$rep_item = 'File uploaded at <strong>'.$fileparts['dirname'].'</strong> with name <strong>'.$fileparts['basename'].'</strong> by user <strong>'.$username.'</strong>';
+			$rep_item = sprintf(__('File uploaded at %s with name %s by user %s', 'wp-file-upload'), '<strong>'.$fileparts['dirname'].'</strong>', '<strong>'.$fileparts['basename'].'</strong>', '<strong>'.$username.'</strong>');
 		elseif ( $rec->action == 'include' )
-			$rep_item = 'File included in database at <strong>'.$fileparts['dirname'].'</strong> with name <strong>'.$fileparts['basename'].'</strong> by user <strong>'.$username.'</strong>';
+			$rep_item = sprintf(__('File included in database at %s with name %s by user %s', 'wp-file-upload'), '<strong>'.$fileparts['dirname'].'</strong>', '<strong>'.$fileparts['basename'].'</strong>', '<strong>'.$username.'</strong>');
 		elseif ( $rec->action == 'download' )
-			$rep_item = 'File downloaded by user <strong>'.$username.'</strong>';
+			$rep_item = sprintf(__('File downloaded by user %s', 'wp-file-upload'), '<strong>'.$username.'</strong>');
 		elseif ( $rec->action == 'rename' )
-			$rep_item = 'File renamed to <strong>'.$fileparts['basename'].'</strong> by user <strong>'.$username.'</strong>';
+			$rep_item = sprintf(__('File renamed to %s by user %s', 'wp-file-upload'), '<strong>'.$fileparts['basename'].'</strong>', '<strong>'.$username.'</strong>');
 		elseif ( $rec->action == 'move' )
-			$rep_item = 'File moved to <strong>'.$fileparts['dirname'].'</strong> by user <strong>'.$username.'</strong>';
+			$rep_item = sprintf(__('File moved to %s by user %s', 'wp-file-upload'), '<strong>'.$fileparts['dirname'].'</strong>', '<strong>'.$username.'</strong>');
 		elseif ( $rec->action == 'delete' )
-			$rep_item = 'File deleted by user <strong>'.$username.'</strong>';
+			$rep_item = sprintf(__('File deleted by user %s', 'wp-file-upload'), '<strong>'.$username.'</strong>');
 		elseif ( $rec->action == 'modify' )
-			$rep_item = 'File userdata modified by user <strong>'.$username.'</strong>';
+			$rep_item = sprintf(__('File userdata modified by user %s', 'wp-file-upload'), '<strong>'.$username.'</strong>');
 		elseif ( $rec->action == 'changeuser' )
-			$rep_item = 'File upload user modified by user <strong>'.$username.'</strong>';
+			$rep_item = sprintf(__('File upload user modified by user %s', 'wp-file-upload'), '<strong>'.$username.'</strong>');
 		
 		$rep_item = apply_filters("_wfu_file_details_history_item", $rep_item, $rec);
 		$rep .= $rep_item;
@@ -1591,7 +1635,7 @@ function wfu_edit_filedetails($file_code) {
 	$table_name2 = $wpdb->prefix . "wfu_userdata";
 	$allow_obsolete = false;
 	
-	if ( !wp_verify_nonce(( isset($_POST['nonce']) ? $_POST["nonce"] : "" ), "wfu-filedetails-page") ) return;
+	if ( !wp_verify_nonce(( isset($_POST['nonce']) ? sanitize_text_field( wp_unslash ( $_POST["nonce"] ) ) : "" ), "wfu-filedetails-page") ) return;
 
 	if ( substr($file_code, 0, 5) == "byID:" ) {
 		$allow_obsolete = true;
@@ -1667,7 +1711,7 @@ function wfu_edit_filedetails($file_code) {
 							'uploadid' 	=> $userdata->uploadid,
 							'property' 	=> $userdata->property,
 							'propkey' 	=> $userdata->propkey,
-							'propvalue' 	=> $_POST['wfu_filedetails_userdata_'.$userdata->propkey],
+							'propvalue' 	=> wp_strip_all_tags($_POST['wfu_filedetails_userdata_'.$userdata->propkey]),
 							'date_from' 	=> $now_date,
 							'date_to' 	=> 0
 						),
@@ -1684,9 +1728,10 @@ function wfu_edit_filedetails($file_code) {
 				if ( $userdata_count > 0 ) wfu_log_action('modify:'.$now_date, $filepath, $user->ID, '', 0, 0, '', null);
 			}
 			if ( isset($_POST['wfu_filedetails_userid']) && $_POST['wfu_filedetails_userid'] != $filerec->uploaduserid ) {
-				wfu_log_action('changeuser:'.$_POST['wfu_filedetails_userid'], $filepath, $user->ID, '', 0, 0, '', null);
+				wfu_log_action('changeuser:'.wfu_sanitize_int($_POST['wfu_filedetails_userid']), $filepath, $user->ID, '', 0, 0, '', null);
 			}
 		}
 	}
+	WFU_USVAR_store('wfu_filedetails_success', __('File details updated successfully!', 'wp-file-upload'));
 	return true;
 }

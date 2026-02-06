@@ -8,10 +8,12 @@
  *
  * @link /lib/wfu_blocks.php
  *
- * @package WordPress File Upload Plugin
+ * @package Iptanus File Upload Plugin
  * @subpackage Core Components
  * @since 2.1.2
  */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
  * Prepare the Upload Form Generic Element.
@@ -307,6 +309,7 @@ function wfu_prepare_uploadform_block($params, $additional_params, $occurrence_i
 	$data["filename"] = "uploadedfile_".$data["ID"];
 	$data["hidden_elements"] = array(
 		array( "id" => "wfu_uploader_nonce_".$data["ID"], "name" => "wfu_uploader_nonce", "value" => wp_create_nonce("wfu-uploader-nonce") ),
+		array( "id" => "wfu_uploader_editor_nonce_".$data["ID"], "name" => "wfu_uploader_editor_nonce", "value" => wp_create_nonce("wfu-shortcode-editor-nonce") ),
 		array( "id" => "hiddeninput_".$data["ID"], "name" => "hiddeninput_".$data["ID"], "value" => "" ),
 		array( "id" => "uniqueuploadid_".$data["ID"], "name" => "uniqueuploadid_".$data["ID"], "value" => "" ),
 		array( "id" => "nofileupload_".$data["ID"], "name" => "nofileupload_".$data["ID"], "value" => "0" ),
