@@ -3,7 +3,7 @@
 /*
 Plugin URI: https://www.iptanus.com/support/wordpress-file-upload
 Description: <strong>This is former Wordpress File Upload plugin.</strong> It provides a simple, yet powerful, interface to upload files from a page or post.
-Version: 5.1.7
+Version: 5.1.9
 Requires at least: 3.0
 Author: Nickolas Bossinas
 Author URI: https://www.iptanus.com/nickolas

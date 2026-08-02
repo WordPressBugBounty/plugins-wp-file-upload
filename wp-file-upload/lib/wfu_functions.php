@@ -1967,6 +1967,7 @@ function wfu_compare_versions($current, $latest) {
  * @since 4.24.14
  */
 function wfu_execute_daily_tasks() {
+	wfu_store_current_day();
 	wfu_remove_waste_items_from_options();
 	wfu_cleanup_reserved_files();
 }
@@ -4719,7 +4720,7 @@ function wfu_get_userdata_from_rec($filerec) {
 function wfu_get_userdata_from_uploadid($uploadid) {
 	global $wpdb;
 	$table_name2 = $wpdb->prefix . "wfu_userdata";
-	$userdata = $wpdb->get_results('SELECT * FROM '.$table_name2.' WHERE uploadid = \''.$uploadid.'\' AND date_to = 0 ORDER BY propkey');
+	$userdata = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name2 WHERE uploadid = %s AND date_to = 0 ORDER BY propkey", $uploadid));
 
 	return $userdata;
 }
@@ -5215,6 +5216,30 @@ function wfu_get_filtered_recs($filter) {
 	}
 	
 	return $out;
+}
+
+/**
+ * Get Option ID By Name.
+ *
+ * This function gets the option ID of an option by its name.
+ *
+ * @since 5.1.9
+ *
+ * @global object $wpdb The Wordpress database object.
+ *
+ * @param string $option The option name to retrieve its ID.
+ *
+ * @return integer The ID of the option.
+ */
+function wfu_get_option_id_by_name($option) {
+	global $wpdb;
+	
+	$option_id = $wpdb->get_var( $wpdb->prepare("SELECT option_id FROM {$wpdb->options} WHERE option_name = %s", $option) );
+	if ( $option_id !== null ) {
+		$option_id = (int) $option_id;
+	}
+	
+	return $option_id;
 }
 
 /**
@@ -5806,6 +5831,8 @@ function wfu_get_all_plugin_options() {
 		"wfu_params" => array( "wfu_params_*", "db", true, false, false ),
 		//stored advanced environment variables
 		"wfu_environment_variables" => array( "wfu_environment_variables", "db", true, true, true ),
+		//stored UNIX day
+		"wfu_day" => array( "wfu_day_*", "db", true, false, false ),
 		//stored global tokens
 		"wfu_gst" => array( "wfu_gst_*", "db", true, false, false ),
 		//stored upload queue data

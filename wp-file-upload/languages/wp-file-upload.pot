@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iptanus File Upload\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-17 16:47+0200\n"
+"POT-Creation-Date: 2026-08-02 13:12+0300\n"
 "PO-Revision-Date: 2018-12-22 19:37+0200\n"
 "Last-Translator: nickboss <info@iptanus.com>\n"
 "Language-Team: Iptanus Team <info@iptanus.com>\n"
@@ -155,7 +155,7 @@ msgstr ""
 #: extensions/wfu_onedrive/wfu_onedrive_attributes.php:67
 #: extensions/wfu_quarantine/wfu_quarantine_exceptions_tab.php:78
 #: extensions/wfu_quarantine/wfu_quarantine_exceptions_tab.php:144
-#: lib/wfu_admin.php:1777 lib/wfu_admin.php:2013 lib/wfu_admin_browser.php:568
+#: lib/wfu_admin.php:1784 lib/wfu_admin.php:2020 lib/wfu_admin_browser.php:568
 #: lib/wfu_admin_browser.php:1108 lib/wfu_admin_hooks.php:70
 #: lib/wfu_admin_hooks.php:121 lib/wfu_admin_hooks.php:566
 #: lib/wfu_admin_notifications.php:305 lib/wfu_admin_notifications.php:374
@@ -1571,7 +1571,7 @@ msgstr ""
 msgid "Expires On"
 msgstr ""
 
-#: extensions/wfu_licensing/wfu_licensing_tab.php:166 lib/wfu_admin.php:1402
+#: extensions/wfu_licensing/wfu_licensing_tab.php:166 lib/wfu_admin.php:1409
 msgid "Extensions"
 msgstr ""
 
@@ -2164,7 +2164,7 @@ msgid "Description"
 msgstr ""
 
 #: extensions/wfu_quarantine/wfu_quarantine_exceptions_tab.php:137
-#: extensions/wfu_quarantine/wfu_quarantine_tab.php:145 lib/wfu_admin.php:1780
+#: extensions/wfu_quarantine/wfu_quarantine_tab.php:145 lib/wfu_admin.php:1787
 #: lib/wfu_admin_advanced.php:78 lib/wfu_admin_browser.php:437
 #: lib/wfu_admin_browser.php:505 lib/wfu_admin_extensions.php:154
 #: lib/wfu_admin_hooks.php:128 lib/wfu_admin_log.php:158
@@ -2337,7 +2337,7 @@ msgid "Completed quarantined files cleanup."
 msgstr ""
 
 #: extensions/wfu_quarantine/wfu_quarantine_maintenance.php:49
-#: lib/wfu_admin_maintenance.php:833
+#: lib/wfu_admin_maintenance.php:921
 msgid "Plugin maintenance."
 msgstr ""
 
@@ -2428,7 +2428,7 @@ msgstr ""
 msgid "Quarantined file %s has been rejected."
 msgstr ""
 
-#: extensions/wfu_quarantine/wfu_quarantine_tab.php:316 lib/wfu_admin.php:2004
+#: extensions/wfu_quarantine/wfu_quarantine_tab.php:316 lib/wfu_admin.php:2011
 #: lib/wfu_admin_browser.php:774 lib/wfu_admin_browser.php:775
 #: lib/wfu_admin_browser.php:849 lib/wfu_admin_browser.php:1087
 #: lib/wfu_admin_browser.php:1088 lib/wfu_admin_browser.php:1227
@@ -2436,8 +2436,9 @@ msgstr ""
 #: lib/wfu_admin_browser.php:1464 lib/wfu_admin_browser.php:1696
 #: lib/wfu_admin_browser.php:1698 lib/wfu_admin_browser.php:1703
 #: lib/wfu_admin_composer.php:165 lib/wfu_admin_hooks.php:206
-#: lib/wfu_admin_hooks.php:550 lib/wfu_admin_maintenance.php:403
-#: lib/wfu_admin_maintenance.php:555 lib/wfu_admin_remotefiles.php:440
+#: lib/wfu_admin_hooks.php:550 lib/wfu_admin_maintenance.php:439
+#: lib/wfu_admin_maintenance.php:596 lib/wfu_admin_maintenance.php:644
+#: lib/wfu_admin_remotefiles.php:440
 msgid "go back"
 msgstr ""
 
@@ -2449,8 +2450,8 @@ msgstr ""
 #: lib/wfu_admin_browser.php:1464 lib/wfu_admin_browser.php:1696
 #: lib/wfu_admin_browser.php:1698 lib/wfu_admin_browser.php:1703
 #: lib/wfu_admin_hooks.php:206 lib/wfu_admin_hooks.php:550
-#: lib/wfu_admin_maintenance.php:403 lib/wfu_admin_maintenance.php:555
-#: lib/wfu_admin_remotefiles.php:440
+#: lib/wfu_admin_maintenance.php:439 lib/wfu_admin_maintenance.php:596
+#: lib/wfu_admin_maintenance.php:644 lib/wfu_admin_remotefiles.php:440
 msgid "Go back"
 msgstr ""
 
@@ -2482,14 +2483,15 @@ msgstr ""
 msgid "Accept and Add Exception"
 msgstr ""
 
-#: extensions/wfu_quarantine/wfu_quarantine_tab.php:354 lib/wfu_admin.php:1728
-#: lib/wfu_admin.php:2014 lib/wfu_admin_browser.php:791
+#: extensions/wfu_quarantine/wfu_quarantine_tab.php:354 lib/wfu_admin.php:1735
+#: lib/wfu_admin.php:2021 lib/wfu_admin_browser.php:791
 #: lib/wfu_admin_browser.php:875 lib/wfu_admin_browser.php:1109
 #: lib/wfu_admin_browser.php:1252 lib/wfu_admin_browser.php:1368
 #: lib/wfu_admin_browser.php:1484 lib/wfu_admin_browser.php:1756
 #: lib/wfu_admin_composer.php:487 lib/wfu_admin_hooks.php:283
-#: lib/wfu_admin_hooks.php:567 lib/wfu_admin_maintenance.php:458
-#: lib/wfu_admin_maintenance.php:569 lib/wfu_admin_remotefiles.php:460
+#: lib/wfu_admin_hooks.php:567 lib/wfu_admin_maintenance.php:494
+#: lib/wfu_admin_maintenance.php:614 lib/wfu_admin_maintenance.php:658
+#: lib/wfu_admin_remotefiles.php:460
 msgid "Cancel"
 msgstr ""
 
@@ -2531,12 +2533,12 @@ msgstr ""
 msgid "Uploaded Files"
 msgstr ""
 
-#: lib/wfu_admin.php:625 lib/wfu_admin.php:1015
+#: lib/wfu_admin.php:625 lib/wfu_admin.php:1022
 #: lib/wfu_admin_uploadedfiles.php:40 lib/wfu_backend_browser.php:35
 msgid "Not allowed!"
 msgstr ""
 
-#: lib/wfu_admin.php:1093 lib/wfu_admin_extensions.php:115
+#: lib/wfu_admin.php:1100 lib/wfu_admin_extensions.php:115
 #: lib/wfu_admin_extensions.php:162 lib/wfu_admin_hooks.php:91
 #: lib/wfu_admin_hooks.php:133 lib/wfu_admin_hooks.php:266
 #: lib/wfu_admin_notifications.php:337 lib/wfu_admin_notifications.php:382
@@ -2544,338 +2546,339 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#: lib/wfu_admin.php:1125
+#: lib/wfu_admin.php:1132
 msgid "Edition"
 msgstr ""
 
-#: lib/wfu_admin.php:1140
+#: lib/wfu_admin.php:1147
 msgid "Consider :upgrading: to the Professional Version."
 msgstr ""
 
-#: lib/wfu_admin.php:1141 lib/wfu_admin_maintenance.php:119
+#: lib/wfu_admin.php:1148 lib/wfu_admin_maintenance.php:125
+#: lib/wfu_admin_maintenance.php:157
 msgid "Close"
 msgstr ""
 
-#: lib/wfu_admin.php:1141
+#: lib/wfu_admin.php:1148
 msgid "See why"
 msgstr ""
 
-#: lib/wfu_admin.php:1182
+#: lib/wfu_admin.php:1189
 msgid "Feature"
 msgstr ""
 
-#: lib/wfu_admin.php:1183
+#: lib/wfu_admin.php:1190
 msgid "Free"
 msgstr ""
 
-#: lib/wfu_admin.php:1184
+#: lib/wfu_admin.php:1191
 msgid "Pro"
 msgstr ""
 
-#: lib/wfu_admin.php:1194
+#: lib/wfu_admin.php:1201
 msgid "Go for the PRO version"
 msgstr ""
 
-#: lib/wfu_admin.php:1203 lib/wfu_admin_extensions.php:108
+#: lib/wfu_admin.php:1210 lib/wfu_admin_extensions.php:108
 #: lib/wfu_admin_extensions.php:156
 msgid "Version"
 msgstr ""
 
-#: lib/wfu_admin.php:1215
+#: lib/wfu_admin.php:1222
 msgid "Iptanus Services Server Unreachable Error of WFU Plugin"
 msgstr ""
 
-#: lib/wfu_admin.php:1223
+#: lib/wfu_admin.php:1230
 #, php-format
 msgid ""
 "Version %s of the plugin is available. Press :here: to login to your Iptanus "
 "account and download it."
 msgstr ""
 
-#: lib/wfu_admin.php:1227
+#: lib/wfu_admin.php:1234
 #, php-format
 msgid ""
 "Version %s of the plugin is available. Go to Plugins page of your Dashboard "
 "to update to the latest version."
 msgstr ""
 
-#: lib/wfu_admin.php:1230
+#: lib/wfu_admin.php:1237
 msgid ""
 "Please note that you are using a custom version of the plugin. If you "
 "upgrade to the newest version, custom changes will be lost."
 msgstr ""
 
-#: lib/wfu_admin.php:1235
+#: lib/wfu_admin.php:1242
 msgid "You have the latest version."
 msgstr ""
 
-#: lib/wfu_admin.php:1236
+#: lib/wfu_admin.php:1243
 msgid "(Please note that your version is custom)"
 msgstr ""
 
-#: lib/wfu_admin.php:1245
+#: lib/wfu_admin.php:1252
 msgid "Server Environment"
 msgstr ""
 
-#: lib/wfu_admin.php:1248
+#: lib/wfu_admin.php:1255
 msgid "(Your server supports files up to 1 Exabyte, practically unlimited)"
 msgstr ""
 
-#: lib/wfu_admin.php:1249
+#: lib/wfu_admin.php:1256
 msgid "(Your server does not support files larger than 2GB)"
 msgstr ""
 
-#: lib/wfu_admin.php:1250
+#: lib/wfu_admin.php:1257
 msgid "Unknown"
 msgstr ""
 
-#: lib/wfu_admin.php:1250
+#: lib/wfu_admin.php:1257
 msgid "(The maximum file size supported by the server cannot be determined)"
 msgstr ""
 
-#: lib/wfu_admin.php:1255
+#: lib/wfu_admin.php:1262
 msgid "PHP Version"
 msgstr ""
 
-#: lib/wfu_admin.php:1267
+#: lib/wfu_admin.php:1274
 msgid ""
 "You have an old PHP version. Some captcha features may not work. Please "
 "consider upgrading your PHP version."
 msgstr ""
 
-#: lib/wfu_admin.php:1276
+#: lib/wfu_admin.php:1283
 msgid "Home Domain"
 msgstr ""
 
-#: lib/wfu_admin.php:1284
+#: lib/wfu_admin.php:1291
 msgid "Release Notes"
 msgstr ""
 
-#: lib/wfu_admin.php:1328
+#: lib/wfu_admin.php:1335
 msgid ""
 "This menu item exists to show the plugin's shortcode composer when editing "
 "pages or posts."
 msgstr ""
 
-#: lib/wfu_admin.php:1376
+#: lib/wfu_admin.php:1383
 msgid "Main"
 msgstr ""
 
-#: lib/wfu_admin.php:1377
+#: lib/wfu_admin.php:1384
 msgid "Settings"
 msgstr ""
 
-#: lib/wfu_admin.php:1385
+#: lib/wfu_admin.php:1392
 #, php-format
 msgid "You have %s unread notification"
 msgstr ""
 
-#: lib/wfu_admin.php:1386 lib/wfu_admin.php:1388
+#: lib/wfu_admin.php:1393 lib/wfu_admin.php:1395
 #: lib/wfu_admin_notifications.php:295 lib/wfu_attributes.php:202
 msgid "Notifications"
 msgstr ""
 
-#: lib/wfu_admin.php:1389
+#: lib/wfu_admin.php:1396
 msgid "File Browser"
 msgstr ""
 
-#: lib/wfu_admin.php:1389
+#: lib/wfu_admin.php:1396
 msgid "File browser"
 msgstr ""
 
-#: lib/wfu_admin.php:1390
+#: lib/wfu_admin.php:1397
 msgid "View Log"
 msgstr ""
 
-#: lib/wfu_admin.php:1390
+#: lib/wfu_admin.php:1397
 msgid "View log"
 msgstr ""
 
-#: lib/wfu_admin.php:1392 lib/wfu_admin_settings.php:235
+#: lib/wfu_admin.php:1399 lib/wfu_admin_settings.php:235
 #: lib/wfu_attributes.php:208
 msgid "Personal Data"
 msgstr ""
 
-#: lib/wfu_admin.php:1392
+#: lib/wfu_admin.php:1399
 msgid "Personal data"
 msgstr ""
 
-#: lib/wfu_admin.php:1394
+#: lib/wfu_admin.php:1401
 msgid "Maintenance Actions"
 msgstr ""
 
-#: lib/wfu_admin.php:1394
+#: lib/wfu_admin.php:1401
 msgid "Maintenance actions"
 msgstr ""
 
-#: lib/wfu_admin.php:1398
+#: lib/wfu_admin.php:1405
 msgid "Hooks"
 msgstr ""
 
-#: lib/wfu_admin.php:1399
+#: lib/wfu_admin.php:1406
 msgid "Advanced"
 msgstr ""
 
-#: lib/wfu_admin.php:1400
+#: lib/wfu_admin.php:1407
 msgid "File Transfers"
 msgstr ""
 
-#: lib/wfu_admin.php:1400
+#: lib/wfu_admin.php:1407
 msgid "File transfers"
 msgstr ""
 
-#: lib/wfu_admin.php:1401 lib/wfu_admin_remotefiles.php:173
+#: lib/wfu_admin.php:1408 lib/wfu_admin_remotefiles.php:173
 msgid "Remote Files"
 msgstr ""
 
-#: lib/wfu_admin.php:1401
+#: lib/wfu_admin.php:1408
 msgid "Remote files"
 msgstr ""
 
-#: lib/wfu_admin.php:1402
+#: lib/wfu_admin.php:1409
 msgid "Manage extensions"
 msgstr ""
 
-#: lib/wfu_admin.php:1405
+#: lib/wfu_admin.php:1412
 msgid "Development Operations"
 msgstr ""
 
-#: lib/wfu_admin.php:1405
+#: lib/wfu_admin.php:1412
 msgid "Development operations"
 msgstr ""
 
-#: lib/wfu_admin.php:1406
+#: lib/wfu_admin.php:1413
 msgid "Test Function"
 msgstr ""
 
-#: lib/wfu_admin.php:1457
+#: lib/wfu_admin.php:1464
 msgid "Debug Logging is ON"
 msgstr ""
 
-#: lib/wfu_admin.php:1473
+#: lib/wfu_admin.php:1480
 msgid "Click to review it."
 msgstr ""
 
-#: lib/wfu_admin.php:1476
+#: lib/wfu_admin.php:1483
 msgid "error"
 msgstr ""
 
-#: lib/wfu_admin.php:1477
+#: lib/wfu_admin.php:1484
 msgid "warning"
 msgstr ""
 
-#: lib/wfu_admin.php:1478
+#: lib/wfu_admin.php:1485
 #, php-format
 msgid "You have unread %s notifications. Click to review them."
 msgstr ""
 
-#: lib/wfu_admin.php:1493
+#: lib/wfu_admin.php:1500
 msgid "Iptanus File Upload Control Panel"
 msgstr ""
 
-#: lib/wfu_admin.php:1619
+#: lib/wfu_admin.php:1626
 msgid "Uploader Instances"
 msgstr ""
 
-#: lib/wfu_admin.php:1623
+#: lib/wfu_admin.php:1630
 msgid "Uploaded File List Instances"
 msgstr ""
 
-#: lib/wfu_admin.php:1706
+#: lib/wfu_admin.php:1713
 msgid "Press"
 msgstr ""
 
-#: lib/wfu_admin.php:1707
+#: lib/wfu_admin.php:1714
 #, php-format
 msgid "to get started and add the %s in a page"
 msgstr ""
 
-#: lib/wfu_admin.php:1708
+#: lib/wfu_admin.php:1715
 msgid "Add Plugin Instance"
 msgstr ""
 
-#: lib/wfu_admin.php:1708
+#: lib/wfu_admin.php:1715
 msgid "here"
 msgstr ""
 
-#: lib/wfu_admin.php:1712
+#: lib/wfu_admin.php:1719
 msgid "please wait..."
 msgstr ""
 
-#: lib/wfu_admin.php:1714
+#: lib/wfu_admin.php:1721
 #, php-format
 msgid "Add %s to"
 msgstr ""
 
-#: lib/wfu_admin.php:1714 lib/wfu_constants.php:61 lib/wfu_constants.php:250
+#: lib/wfu_admin.php:1721 lib/wfu_constants.php:61 lib/wfu_constants.php:250
 msgid "Page"
 msgstr ""
 
-#: lib/wfu_admin.php:1714
+#: lib/wfu_admin.php:1721
 msgid "Post"
 msgstr ""
 
-#: lib/wfu_admin.php:1727 lib/wfu_admin_browser.php:1755
+#: lib/wfu_admin.php:1734 lib/wfu_admin_browser.php:1755
 msgid "Ok"
 msgstr ""
 
-#: lib/wfu_admin.php:1734
+#: lib/wfu_admin.php:1741
 msgid "ID"
 msgstr ""
 
-#: lib/wfu_admin.php:1740 lib/wfu_admin.php:1783
+#: lib/wfu_admin.php:1747 lib/wfu_admin.php:1790
 msgid "Contained In"
 msgstr ""
 
-#: lib/wfu_admin.php:1743 lib/wfu_admin.php:1784
+#: lib/wfu_admin.php:1750 lib/wfu_admin.php:1791
 msgid "Page/Post Title"
 msgstr ""
 
-#: lib/wfu_admin.php:1746 lib/wfu_admin.php:1785
+#: lib/wfu_admin.php:1753 lib/wfu_admin.php:1792
 msgid "Shortcode"
 msgstr ""
 
-#: lib/wfu_admin.php:1759
+#: lib/wfu_admin.php:1766
 #, php-format
 msgid "ID: %s"
 msgstr ""
 
-#: lib/wfu_admin.php:1762
+#: lib/wfu_admin.php:1769
 msgid "Sidebar"
 msgstr ""
 
-#: lib/wfu_admin.php:1770
+#: lib/wfu_admin.php:1777
 #, php-format
 msgid "Instance #%s"
 msgstr ""
 
-#: lib/wfu_admin.php:1773
+#: lib/wfu_admin.php:1780
 msgid "Edit this shortcode"
 msgstr ""
 
-#: lib/wfu_admin.php:1773 lib/wfu_admin_composer.php:407
+#: lib/wfu_admin.php:1780 lib/wfu_admin_composer.php:407
 #: lib/wfu_admin_hooks.php:117
 msgid "Edit"
 msgstr ""
 
-#: lib/wfu_admin.php:1777
+#: lib/wfu_admin.php:1784
 msgid "Delete this shortcode"
 msgstr ""
 
-#: lib/wfu_admin.php:2004 lib/wfu_admin_composer.php:165
+#: lib/wfu_admin.php:2011 lib/wfu_admin_composer.php:165
 msgid "Go to Main Menu"
 msgstr ""
 
-#: lib/wfu_admin.php:2006
+#: lib/wfu_admin.php:2013
 msgid "Delete Shortcode"
 msgstr ""
 
-#: lib/wfu_admin.php:2011
+#: lib/wfu_admin.php:2018
 #, php-format
 msgid "Are you sure that you want to delete shortcode for %s ?\""
 msgstr ""
 
-#: lib/wfu_admin.php:2011
+#: lib/wfu_admin.php:2018
 msgid "Position"
 msgstr ""
 
@@ -3018,9 +3021,10 @@ msgstr ""
 msgid "Replace files with the same filename at destination:"
 msgstr ""
 
-#: lib/wfu_admin_browser.php:870 lib/wfu_admin_maintenance.php:457
-#: lib/wfu_admin_maintenance.php:568 lib/wfu_admin_settings.php:156
-#: lib/wfu_attributes.php:1903 lib/wfu_constants.php:54
+#: lib/wfu_admin_browser.php:870 lib/wfu_admin_maintenance.php:493
+#: lib/wfu_admin_maintenance.php:613 lib/wfu_admin_maintenance.php:657
+#: lib/wfu_admin_settings.php:156 lib/wfu_attributes.php:1903
+#: lib/wfu_constants.php:54
 msgid "Yes"
 msgstr ""
 
@@ -3633,7 +3637,7 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_admin_hooks.php:69 lib/wfu_attributes.php:2664
-#: lib/wfu_constants.php:248 lib/wfu_functions.php:7036
+#: lib/wfu_constants.php:248 lib/wfu_functions.php:7175
 msgid "Bulk Actions"
 msgstr ""
 
@@ -3646,7 +3650,7 @@ msgid "Deactivate"
 msgstr ""
 
 #: lib/wfu_admin_hooks.php:74 lib/wfu_constants.php:249
-#: lib/wfu_functions.php:7040
+#: lib/wfu_functions.php:7179
 msgid "Apply"
 msgstr ""
 
@@ -3829,268 +3833,309 @@ msgstr ""
 msgid "Transfer tο %s aborted:"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:63
+#: lib/wfu_admin_maintenance.php:69
 msgid "Database Actions"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:70
+#: lib/wfu_admin_maintenance.php:76
 msgid "Update database to reflect current status of files"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:70
+#: lib/wfu_admin_maintenance.php:76
 msgid "Sync Database"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:73
+#: lib/wfu_admin_maintenance.php:79
 msgid "Update database to reflect current status of files."
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:78
+#: lib/wfu_admin_maintenance.php:84
 msgid "Clean database log"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:78
+#: lib/wfu_admin_maintenance.php:84
 msgid "Clean Log"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:81
+#: lib/wfu_admin_maintenance.php:87
 msgid ""
 "Clean-up database log, either all or of specific period, including file "
 "information, user data and optionally the files."
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:88
+#: lib/wfu_admin_maintenance.php:94
 msgid "Select Clean-Up Period"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:90
+#: lib/wfu_admin_maintenance.php:96
 msgid "Clean-up log older than date"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:91
+#: lib/wfu_admin_maintenance.php:97
 msgid "Clean-up log older than period"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:92
+#: lib/wfu_admin_maintenance.php:98
 msgid "Clean-up log between dates"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:93
+#: lib/wfu_admin_maintenance.php:99
 msgid "Clean-up all log"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:96
+#: lib/wfu_admin_maintenance.php:102
 msgid "Select date"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:100
+#: lib/wfu_admin_maintenance.php:106
 msgid "Select period"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:103
+#: lib/wfu_admin_maintenance.php:109
 msgid "days"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:104
+#: lib/wfu_admin_maintenance.php:110
 msgid "months"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:105
+#: lib/wfu_admin_maintenance.php:111
 msgid "years"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:109
+#: lib/wfu_admin_maintenance.php:115
 msgid "Select period from"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:111
+#: lib/wfu_admin_maintenance.php:117
 msgid "back to"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:115
+#: lib/wfu_admin_maintenance.php:121
 msgid "Clean-up also affected files"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:120
+#: lib/wfu_admin_maintenance.php:126
 msgid "Proceed to log clean-up"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:120
+#: lib/wfu_admin_maintenance.php:126
 msgid "Proceed"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:121 lib/wfu_admin_notifications.php:86
+#: lib/wfu_admin_maintenance.php:127 lib/wfu_admin_notifications.php:86
 msgid "Error"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:129
+#: lib/wfu_admin_maintenance.php:135
+msgid "Manage transient options"
+msgstr ""
+
+#: lib/wfu_admin_maintenance.php:135
+msgid "Transient Options"
+msgstr ""
+
+#: lib/wfu_admin_maintenance.php:138
+msgid "View and clean-up transient plugin options."
+msgstr ""
+
+#: lib/wfu_admin_maintenance.php:145
+#, php-format
+msgid "Transient Options (%d):"
+msgstr ""
+
+#: lib/wfu_admin_maintenance.php:148
+msgid "Shortcode Parameters"
+msgstr ""
+
+#: lib/wfu_admin_maintenance.php:150
+msgid "Global Tokens"
+msgstr ""
+
+#: lib/wfu_admin_maintenance.php:152
+msgid "Upload Queue Data"
+msgstr ""
+
+#: lib/wfu_admin_maintenance.php:154
+msgid "User State Data"
+msgstr ""
+
+#: lib/wfu_admin_maintenance.php:158
+msgid "Clean-up transient options"
+msgstr ""
+
+#: lib/wfu_admin_maintenance.php:158
+msgid "Clean-Up"
+msgstr ""
+
+#: lib/wfu_admin_maintenance.php:165
 msgid "Remove all plugin data from website"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:129 lib/wfu_admin_maintenance.php:557
+#: lib/wfu_admin_maintenance.php:165 lib/wfu_admin_maintenance.php:646
 msgid "Purge All Data"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:132
+#: lib/wfu_admin_maintenance.php:168
 msgid ""
 "Purge all plugin options and tables from database, as well as any session "
 "data. The plugin will be deactivated after this action."
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:140
+#: lib/wfu_admin_maintenance.php:176
 msgid "Export Actions"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:145
+#: lib/wfu_admin_maintenance.php:181
 msgid "Export uploaded file data"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:145
+#: lib/wfu_admin_maintenance.php:181
 msgid "Export Uploaded File Data"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:149 lib/wfu_personaldata.php:94
+#: lib/wfu_admin_maintenance.php:185 lib/wfu_personaldata.php:94
 msgid ""
 "Export uploaded valid file data, together with any userdata fields, to a "
 "comma-separated text file."
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:158
+#: lib/wfu_admin_maintenance.php:194
 msgid "Debugging"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:163
+#: lib/wfu_admin_maintenance.php:199
 msgid "Deactivate debug logging"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:163
+#: lib/wfu_admin_maintenance.php:199
 msgid "Activate debug logging"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:163
+#: lib/wfu_admin_maintenance.php:199
 msgid "Deactivate Debug Logging"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:163
+#: lib/wfu_admin_maintenance.php:199
 msgid "Activate Debug Logging"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:167
+#: lib/wfu_admin_maintenance.php:203
 msgid "Debug logging is active. Debug data are logged."
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:169
+#: lib/wfu_admin_maintenance.php:205
 msgid ""
 "Debug logging is not active. Activate it, so that debug data are logged."
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:176
+#: lib/wfu_admin_maintenance.php:212
 msgid "Download debug log data"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:176
+#: lib/wfu_admin_maintenance.php:212
 msgid "Download Debug Log Data"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:179
+#: lib/wfu_admin_maintenance.php:215
 msgid "Download the file containing the debug logging data."
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:184
+#: lib/wfu_admin_maintenance.php:220
 msgid "Reset debug log data"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:184
+#: lib/wfu_admin_maintenance.php:220
 msgid "Reset Debug Log Data"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:187
+#: lib/wfu_admin_maintenance.php:223
 #, php-format
 msgid "Clear the debug log file data. The file currently has %s."
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:197
+#: lib/wfu_admin_maintenance.php:233
 msgid "Thumbnail Actions"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:202
+#: lib/wfu_admin_maintenance.php:238
 msgid "Update all thumbnails"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:202
+#: lib/wfu_admin_maintenance.php:238
 msgid "Update All Thumbnails"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:205
+#: lib/wfu_admin_maintenance.php:241
 msgid ""
 "Regenerate the thumbnails of all uploaded images and remove any unnecessary "
 "ones."
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:210
+#: lib/wfu_admin_maintenance.php:246
 msgid "Delete all thumbnails"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:210
+#: lib/wfu_admin_maintenance.php:246
 msgid "Delete All Thumbnails"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:213
+#: lib/wfu_admin_maintenance.php:249
 msgid "Delete all thumbnails."
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:218
+#: lib/wfu_admin_maintenance.php:254
 msgid "Clean invalid thumbnails"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:218
+#: lib/wfu_admin_maintenance.php:254
 msgid "Clean Invalid Thumbnails"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:221
+#: lib/wfu_admin_maintenance.php:257
 msgid "Delete any thumbnails that do not correspond to valid uploaded images."
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:228
+#: lib/wfu_admin_maintenance.php:264
 msgid "File Transfer Actions"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:233
+#: lib/wfu_admin_maintenance.php:269
 msgid "Reset All File Transfers"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:236
+#: lib/wfu_admin_maintenance.php:272
 msgid ""
 "Reset all file transfers so that they start over again, in case they are "
 "stuck."
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:241
+#: lib/wfu_admin_maintenance.php:277
 msgid ""
 "You are about to clear all pending file transfers. Are you sure you want to "
 "continue?"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:241
+#: lib/wfu_admin_maintenance.php:277
 msgid "Clear All File Transfers"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:244
+#: lib/wfu_admin_maintenance.php:280
 msgid "Remove all file transfers."
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:405
+#: lib/wfu_admin_maintenance.php:441
 msgid "Clean Database Log"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:416
+#: lib/wfu_admin_maintenance.php:452
 #, php-format
 msgid ""
 "This will erase all files uploaded <b>before %s</b> together with associated "
 "records kept by the plugin in the database (like file metadata and userdata)."
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:418
+#: lib/wfu_admin_maintenance.php:454
 #, php-format
 msgid ""
 "This will erase all files uploaded <b>%s ago or older</b> together with "
@@ -4098,7 +4143,7 @@ msgid ""
 "and userdata)."
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:420
+#: lib/wfu_admin_maintenance.php:456
 #, php-format
 msgid ""
 "This will erase all files uploaded <b>between %s and %s</b> together with "
@@ -4106,30 +4151,30 @@ msgid ""
 "and userdata)."
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:422
+#: lib/wfu_admin_maintenance.php:458
 msgid ""
 "This will erase <b>ALL</b> files and associated records kept by the plugin "
 "in the database (like file metadata and userdata)."
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:427
+#: lib/wfu_admin_maintenance.php:463
 #, php-format
 msgid "<b>%s</b> files will be deleted"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:438
+#: lib/wfu_admin_maintenance.php:474
 msgid "Are you sure that you want to continue?"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:440
+#: lib/wfu_admin_maintenance.php:476
 msgid "Click to see affected files"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:441
+#: lib/wfu_admin_maintenance.php:477
 msgid "Close list"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:448
+#: lib/wfu_admin_maintenance.php:484
 #, php-format
 msgid ""
 "This will erase all records <b>before %s</b> kept by the plugin in the "
@@ -4137,7 +4182,7 @@ msgid ""
 "plugin will be maintained). Are you sure that you want to continue?"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:450
+#: lib/wfu_admin_maintenance.php:486
 #, php-format
 msgid ""
 "This will erase all records <b>older than %s</b> kept by the plugin in the "
@@ -4145,7 +4190,7 @@ msgid ""
 "plugin will be maintained). Are you sure that you want to continue?"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:452
+#: lib/wfu_admin_maintenance.php:488
 #, php-format
 msgid ""
 "This will erase all records <b>between %s and %s</b> kept by the plugin in "
@@ -4153,34 +4198,48 @@ msgid ""
 "plugin will be maintained). Are you sure that you want to continue?"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:454
+#: lib/wfu_admin_maintenance.php:490
 msgid ""
 "This will erase <b>ALL</b> records kept by the plugin in the database (like "
 "file metadata and userdata, however files uploaded by the plugin will be "
 "maintained). Are you sure that you want to continue?"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:565
+#: lib/wfu_admin_maintenance.php:598
+msgid "Clean-Up Transient Options"
+msgstr ""
+
+#: lib/wfu_admin_maintenance.php:606
+msgid "This action will remove all transient plugin options from the database."
+msgstr ""
+
+#: lib/wfu_admin_maintenance.php:608
+msgid ""
+"Please note that if there are any file upload operations running they will "
+"be interrupted."
+msgstr ""
+
+#: lib/wfu_admin_maintenance.php:611 lib/wfu_admin_maintenance.php:655
+msgid "Are you sure you want to continue?"
+msgstr ""
+
+#: lib/wfu_admin_maintenance.php:654
 msgid ""
 "This action will remove all plugin options and records from database, data "
 "stored in session and will dectivate the plugin. Use it only if you want to "
 "entirely remove the plugin from the website."
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:566
-msgid "Are you sure you want to continue?"
-msgstr ""
-
-#: lib/wfu_admin_maintenance.php:832
+#: lib/wfu_admin_maintenance.php:920
 msgid "No items affected"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:832
+#: lib/wfu_admin_maintenance.php:920
 #, php-format
 msgid "%s item affected"
 msgstr ""
 
-#: lib/wfu_admin_maintenance.php:833
+#: lib/wfu_admin_maintenance.php:921
 msgid "Completed cleaning database periodic action."
 msgstr ""
 
@@ -4666,39 +4725,39 @@ msgstr ""
 msgid "Files per page"
 msgstr ""
 
-#: lib/wfu_ajaxactions.php:386
+#: lib/wfu_ajaxactions.php:427
 msgid "Session failed!"
 msgstr ""
 
-#: lib/wfu_ajaxactions.php:386
+#: lib/wfu_ajaxactions.php:427
 msgid "Session Data:"
 msgstr ""
 
-#: lib/wfu_ajaxactions.php:388 lib/wfu_ajaxactions.php:410
+#: lib/wfu_ajaxactions.php:429 lib/wfu_ajaxactions.php:451
 msgid "Post Data:"
 msgstr ""
 
-#: lib/wfu_ajaxactions.php:408
+#: lib/wfu_ajaxactions.php:449
 msgid "User failed!"
 msgstr ""
 
-#: lib/wfu_ajaxactions.php:408
+#: lib/wfu_ajaxactions.php:449
 msgid "User Data:"
 msgstr ""
 
-#: lib/wfu_ajaxactions.php:412
+#: lib/wfu_ajaxactions.php:453
 msgid "Params Data:"
 msgstr ""
 
-#: lib/wfu_ajaxactions.php:952
+#: lib/wfu_ajaxactions.php:993
 msgid "Parent folder is not valid! Cannot retrieve subfolder list."
 msgstr ""
 
-#: lib/wfu_ajaxactions.php:1165 lib/wfu_constants.php:184
+#: lib/wfu_ajaxactions.php:1206 lib/wfu_constants.php:184
 msgid "File does not exist!"
 msgstr ""
 
-#: lib/wfu_ajaxactions.php:1166 lib/wfu_constants.php:185
+#: lib/wfu_ajaxactions.php:1207 lib/wfu_constants.php:185
 msgid "Could not download file!"
 msgstr ""
 
@@ -9668,162 +9727,170 @@ msgid ""
 msgstr ""
 
 #: lib/wfu_constants.php:519
-msgid "Process Upload Waste Items After"
+msgid "Waste Options"
 msgstr ""
 
 #: lib/wfu_constants.php:519
-msgid ""
-"Defines the time, in days, after which waste items related to uploads will "
-"be processed."
+msgid "Defines the plugin options that should be wasted after some time."
 msgstr ""
 
 #: lib/wfu_constants.php:520
+msgid "Process Upload Waste Items After"
+msgstr ""
+
+#: lib/wfu_constants.php:520
+msgid ""
+"Defines the time, in days, after which waste items related to uploads will "
+"be discarded."
+msgstr ""
+
+#: lib/wfu_constants.php:521
 msgid "Waste Items Batch Size"
 msgstr ""
 
-#: lib/wfu_constants.php:520
+#: lib/wfu_constants.php:521
 msgid "Defines how many waste items will be stored for processing every time."
 msgstr ""
 
-#: lib/wfu_constants.php:521
+#: lib/wfu_constants.php:522
 msgid "Personal Data Visible Operation Levels"
 msgstr ""
 
-#: lib/wfu_constants.php:521
+#: lib/wfu_constants.php:522
 msgid ""
 "Defines how deep administrators can go into personal data operation details. "
 "A value of -1 denotes that there is no limit."
 msgstr ""
 
-#: lib/wfu_constants.php:522
+#: lib/wfu_constants.php:523
 msgid "Personal Data Visible Permission Levels"
 msgstr ""
 
-#: lib/wfu_constants.php:522
+#: lib/wfu_constants.php:523
 msgid ""
 "Defines how deep administrators can go into personal data permission "
 "details. A value of -1 denotes that there is no limit."
 msgstr ""
 
-#: lib/wfu_constants.php:523
+#: lib/wfu_constants.php:524
 msgid "Personal Data Visible Log Action Levels"
 msgstr ""
 
-#: lib/wfu_constants.php:523
+#: lib/wfu_constants.php:524
 msgid ""
 "Defines how deep administrators can go into personal data log action "
 "details. A value of -1 denotes that there is no limit."
 msgstr ""
 
-#: lib/wfu_constants.php:524
+#: lib/wfu_constants.php:525
 msgid "Uploaded Files Menu State"
 msgstr ""
 
-#: lib/wfu_constants.php:524
+#: lib/wfu_constants.php:525
 msgid ""
 "Defines whether the Uploaded Files Dashboard menu item will be shown or not. "
 "It can be 'true' or 'false'."
 msgstr ""
 
-#: lib/wfu_constants.php:525
+#: lib/wfu_constants.php:526
 msgid "Uploaded Files Default Action"
 msgstr ""
 
-#: lib/wfu_constants.php:525
+#: lib/wfu_constants.php:526
 msgid ""
 "Defines the default action that will be executed when a file link is pressed "
 "in Uploaded Files page. It can be 'details', 'adminbrowser', 'historylog', "
 "'link', 'download' and 'none'."
 msgstr ""
 
-#: lib/wfu_constants.php:526
+#: lib/wfu_constants.php:527
 msgid "Uploaded Files Columns"
 msgstr ""
 
-#: lib/wfu_constants.php:526
+#: lib/wfu_constants.php:527
 msgid ""
 "Defines the visible columns of the Uploaded Files list as well as their "
 "order. It is noted that 'File' column is always visible and it is the second "
 "column if '#' column is visible, or the first one if '#' column is hidden."
 msgstr ""
 
-#: lib/wfu_constants.php:527
+#: lib/wfu_constants.php:528
 msgid "Uploaded Files Actions"
 msgstr ""
 
-#: lib/wfu_constants.php:527
+#: lib/wfu_constants.php:528
 msgid ""
 "Defines the allowable actions and their order for each file in Uploaded "
 "Files list. It is noted that the actions shown for each file depend on its "
 "properties."
 msgstr ""
 
-#: lib/wfu_constants.php:528
+#: lib/wfu_constants.php:529
 msgid "Hide Invalid Uploaded Files"
 msgstr ""
 
-#: lib/wfu_constants.php:528
+#: lib/wfu_constants.php:529
 msgid ""
 "Defines whether all uploaded file records will be shown in Uploaded File "
 "menu or only the valid ones. Invalid are the records who are obsolete or "
 "their files do not exist anymore."
 msgstr ""
 
-#: lib/wfu_constants.php:529
+#: lib/wfu_constants.php:530
 msgid "Uploaded Files Reset Time"
 msgstr ""
 
-#: lib/wfu_constants.php:529
+#: lib/wfu_constants.php:530
 msgid ""
 "Defines the interval in seconds before the unread uploaded files can be "
 "marked as read. A value of -1 denotes that there is no interval."
 msgstr ""
 
-#: lib/wfu_constants.php:530
+#: lib/wfu_constants.php:531
 msgid "Uploaded Files Toolbar Menu State"
 msgstr ""
 
-#: lib/wfu_constants.php:530
+#: lib/wfu_constants.php:531
 msgid ""
 "Defines whether the Uploaded Files Toolbar (Admin Bar) menu item will be "
 "shown or not. It can be 'true' or 'false'."
 msgstr ""
 
-#: lib/wfu_constants.php:531
+#: lib/wfu_constants.php:532
 msgid "Uploaded Files Auto-Hide on Toolbar"
 msgstr ""
 
-#: lib/wfu_constants.php:531
+#: lib/wfu_constants.php:532
 msgid ""
 "Defines whether the Uploaded Files Toolbar (Admin Bar) menu item will be "
 "hidden when there are no new uploads. It can be 'true' or 'false'."
 msgstr ""
 
-#: lib/wfu_constants.php:532
+#: lib/wfu_constants.php:533
 msgid "Show Shortcode Composer to Non-Admins"
 msgstr ""
 
-#: lib/wfu_constants.php:532
+#: lib/wfu_constants.php:533
 msgid ""
 "Defines whether the shortcode composer will be visible to non-admin users "
 "who can edit posts or pages. It can be 'true' or 'false'."
 msgstr ""
 
-#: lib/wfu_constants.php:533
+#: lib/wfu_constants.php:534
 msgid "Ignore FTP Path in File Operations"
 msgstr ""
 
-#: lib/wfu_constants.php:533
+#: lib/wfu_constants.php:534
 msgid ""
 "Defines whether file functions, such as file_exists(), stat() etc. will be "
 "ignored for FTP paths. It can be 'true' or 'false'."
 msgstr ""
 
-#: lib/wfu_constants.php:534
+#: lib/wfu_constants.php:535
 msgid "Default Value of File Exists for FTP Paths"
 msgstr ""
 
-#: lib/wfu_constants.php:534
+#: lib/wfu_constants.php:535
 msgid ""
 "Defines the default value that will be returned when file_exists() function "
 "is executed on an FTP path. It can be '*true', '*false', '*calc', 'true' or "
@@ -9831,11 +9898,11 @@ msgid ""
 "over the more general WFU_FILEOPERATION_IGNOREFTP."
 msgstr ""
 
-#: lib/wfu_constants.php:535
+#: lib/wfu_constants.php:536
 msgid "Default Value of Stat for FTP Paths"
 msgstr ""
 
-#: lib/wfu_constants.php:535
+#: lib/wfu_constants.php:536
 msgid ""
 "Defines the default value that will be returned when stat() function is "
 "executed on an FTP path. It can be '*empty', '*calc' or 'empty'. If it "
@@ -9843,11 +9910,11 @@ msgid ""
 "general WFU_FILEOPERATION_IGNOREFTP."
 msgstr ""
 
-#: lib/wfu_constants.php:536
+#: lib/wfu_constants.php:537
 msgid "Default Value of Filesize for FTP Paths"
 msgstr ""
 
-#: lib/wfu_constants.php:536
+#: lib/wfu_constants.php:537
 msgid ""
 "Defines the default value that will be returned when filesize() function is "
 "executed on an FTP path. It can be '*empty', '*calc' or 'empty'. If it "
@@ -9855,11 +9922,11 @@ msgid ""
 "general WFU_FILEOPERATION_IGNOREFTP."
 msgstr ""
 
-#: lib/wfu_constants.php:537
+#: lib/wfu_constants.php:538
 msgid "Default Value of Fopen for FTP Paths"
 msgstr ""
 
-#: lib/wfu_constants.php:537
+#: lib/wfu_constants.php:538
 msgid ""
 "Defines the default value that will be returned when fopen() function is "
 "executed on an FTP path. It can be '*empty', '*calc' or 'empty'. If it "
@@ -9867,11 +9934,11 @@ msgid ""
 "general WFU_FILEOPERATION_IGNOREFTP."
 msgstr ""
 
-#: lib/wfu_constants.php:538
+#: lib/wfu_constants.php:539
 msgid "Default Value of File Get Contents for FTP Paths"
 msgstr ""
 
-#: lib/wfu_constants.php:538
+#: lib/wfu_constants.php:539
 msgid ""
 "Defines the default value that will be returned when file_get_contents() "
 "function is executed on an FTP path. It can be '*empty', '*calc' or 'empty'. "
@@ -9879,11 +9946,11 @@ msgid ""
 "more general WFU_FILEOPERATION_IGNOREFTP."
 msgstr ""
 
-#: lib/wfu_constants.php:539
+#: lib/wfu_constants.php:540
 msgid "Default Value of MD5 File for FTP Paths"
 msgstr ""
 
-#: lib/wfu_constants.php:539
+#: lib/wfu_constants.php:540
 msgid ""
 "Defines the default value that will be returned when md5_file() function is "
 "executed on an FTP path. It can be '*empty', '*calc' or 'empty'. If it "
@@ -9891,11 +9958,11 @@ msgid ""
 "general WFU_FILEOPERATION_IGNOREFTP."
 msgstr ""
 
-#: lib/wfu_constants.php:540
+#: lib/wfu_constants.php:541
 msgid "Default Value of Unlink for FTP Paths"
 msgstr ""
 
-#: lib/wfu_constants.php:540
+#: lib/wfu_constants.php:541
 msgid ""
 "Defines the default value that will be returned when unlink() function is "
 "executed on an FTP path. It can be '*empty', '*calc' or 'empty'. If it "
@@ -9903,21 +9970,21 @@ msgid ""
 "general WFU_FILEOPERATION_IGNOREFTP."
 msgstr ""
 
-#: lib/wfu_constants.php:541
+#: lib/wfu_constants.php:542
 msgid "Ignore SFTP Path in File Operations"
 msgstr ""
 
-#: lib/wfu_constants.php:541
+#: lib/wfu_constants.php:542
 msgid ""
 "Defines whether file functions, such as file_exists(), stat() etc. will be "
 "ignored for SFTP paths. It can be 'true' or 'false'."
 msgstr ""
 
-#: lib/wfu_constants.php:542
+#: lib/wfu_constants.php:543
 msgid "Default Value of File Exists for SFTP Paths"
 msgstr ""
 
-#: lib/wfu_constants.php:542
+#: lib/wfu_constants.php:543
 msgid ""
 "Defines the default value that will be returned when file_exists() function "
 "is executed on an SFTP path. It can be '*true', '*false', '*calc', 'true' or "
@@ -9925,11 +9992,11 @@ msgid ""
 "over the more general WFU_FILEOPERATION_IGNORESFTP."
 msgstr ""
 
-#: lib/wfu_constants.php:543
+#: lib/wfu_constants.php:544
 msgid "Default Value of Stat for SFTP Paths"
 msgstr ""
 
-#: lib/wfu_constants.php:543
+#: lib/wfu_constants.php:544
 msgid ""
 "Defines the default value that will be returned when stat() function is "
 "executed on an SFTP path. It can be '*empty', '*calc' or 'empty'. If it "
@@ -9937,11 +10004,11 @@ msgid ""
 "general WFU_FILEOPERATION_IGNORESFTP."
 msgstr ""
 
-#: lib/wfu_constants.php:544
+#: lib/wfu_constants.php:545
 msgid "Default Value of Filesize for SFTP Paths"
 msgstr ""
 
-#: lib/wfu_constants.php:544
+#: lib/wfu_constants.php:545
 msgid ""
 "Defines the default value that will be returned when filesize() function is "
 "executed on an SFTP path. It can be '*empty', '*calc' or 'empty'. If it "
@@ -9949,11 +10016,11 @@ msgid ""
 "general WFU_FILEOPERATION_IGNORESFTP."
 msgstr ""
 
-#: lib/wfu_constants.php:545
+#: lib/wfu_constants.php:546
 msgid "Default Value of Fopen for SFTP Paths"
 msgstr ""
 
-#: lib/wfu_constants.php:545
+#: lib/wfu_constants.php:546
 msgid ""
 "Defines the default value that will be returned when fopen() function is "
 "executed on an SFTP path. It can be '*empty', '*calc' or 'empty'. If it "
@@ -9961,11 +10028,11 @@ msgid ""
 "general WFU_FILEOPERATION_IGNORESFTP."
 msgstr ""
 
-#: lib/wfu_constants.php:546
+#: lib/wfu_constants.php:547
 msgid "Default Value of File Get Contents for SFTP Paths"
 msgstr ""
 
-#: lib/wfu_constants.php:546
+#: lib/wfu_constants.php:547
 msgid ""
 "Defines the default value that will be returned when file_get_contents() "
 "function is executed on an SFTP path. It can be '*empty', '*calc' or "
@@ -9973,11 +10040,11 @@ msgid ""
 "over the more general WFU_FILEOPERATION_IGNORESFTP."
 msgstr ""
 
-#: lib/wfu_constants.php:547
+#: lib/wfu_constants.php:548
 msgid "Default Value of MD5 File for SFTP Paths"
 msgstr ""
 
-#: lib/wfu_constants.php:547
+#: lib/wfu_constants.php:548
 msgid ""
 "Defines the default value that will be returned when md5_file() function is "
 "executed on an SFTP path. It can be '*empty', '*calc' or 'empty'. If it "
@@ -9985,11 +10052,11 @@ msgid ""
 "general WFU_FILEOPERATION_IGNORESFTP."
 msgstr ""
 
-#: lib/wfu_constants.php:548
+#: lib/wfu_constants.php:549
 msgid "Default Value of Unlink for SFTP Paths"
 msgstr ""
 
-#: lib/wfu_constants.php:548
+#: lib/wfu_constants.php:549
 msgid ""
 "Defines the default value that will be returned when unlink() function is "
 "executed on an SFTP path. It can be '*empty', '*calc' or 'empty'. If it "
@@ -9997,21 +10064,21 @@ msgid ""
 "general WFU_FILEOPERATION_IGNORESFTP."
 msgstr ""
 
-#: lib/wfu_constants.php:549
+#: lib/wfu_constants.php:550
 msgid "Ignore FTPS Path in File Operations"
 msgstr ""
 
-#: lib/wfu_constants.php:549
+#: lib/wfu_constants.php:550
 msgid ""
 "Defines whether file functions, such as file_exists(), stat() etc. will be "
 "ignored for FTPS paths. It can be 'true' or 'false'."
 msgstr ""
 
-#: lib/wfu_constants.php:550
+#: lib/wfu_constants.php:551
 msgid "Default Value of File Exists for FTPS Paths"
 msgstr ""
 
-#: lib/wfu_constants.php:550
+#: lib/wfu_constants.php:551
 msgid ""
 "Defines the default value that will be returned when file_exists() function "
 "is executed on an FTPS path. It can be '*true', '*false', '*calc', 'true' or "
@@ -10019,11 +10086,11 @@ msgid ""
 "over the more general WFU_FILEOPERATION_IGNOREFTPS."
 msgstr ""
 
-#: lib/wfu_constants.php:551
+#: lib/wfu_constants.php:552
 msgid "Default Value of Stat for FTPS Paths"
 msgstr ""
 
-#: lib/wfu_constants.php:551
+#: lib/wfu_constants.php:552
 msgid ""
 "Defines the default value that will be returned when stat() function is "
 "executed on an FTPS path. It can be '*empty', '*calc' or 'empty'. If it "
@@ -10031,11 +10098,11 @@ msgid ""
 "general WFU_FILEOPERATION_IGNOREFTPS."
 msgstr ""
 
-#: lib/wfu_constants.php:552
+#: lib/wfu_constants.php:553
 msgid "Default Value of Filesize for FTPS Paths"
 msgstr ""
 
-#: lib/wfu_constants.php:552
+#: lib/wfu_constants.php:553
 msgid ""
 "Defines the default value that will be returned when filesize() function is "
 "executed on an FTPS path. It can be '*empty', '*calc' or 'empty'. If it "
@@ -10043,11 +10110,11 @@ msgid ""
 "general WFU_FILEOPERATION_IGNOREFTPS."
 msgstr ""
 
-#: lib/wfu_constants.php:553
+#: lib/wfu_constants.php:554
 msgid "Default Value of Fopen for FTPS Paths"
 msgstr ""
 
-#: lib/wfu_constants.php:553
+#: lib/wfu_constants.php:554
 msgid ""
 "Defines the default value that will be returned when fopen() function is "
 "executed on an FTPS path. It can be '*empty', '*calc' or 'empty'. If it "
@@ -10055,11 +10122,11 @@ msgid ""
 "general WFU_FILEOPERATION_IGNOREFTPS."
 msgstr ""
 
-#: lib/wfu_constants.php:554
+#: lib/wfu_constants.php:555
 msgid "Default Value of File Get Contents for FTPS Paths"
 msgstr ""
 
-#: lib/wfu_constants.php:554
+#: lib/wfu_constants.php:555
 msgid ""
 "Defines the default value that will be returned when file_get_contents() "
 "function is executed on an FTPS path. It can be '*empty', '*calc' or "
@@ -10067,11 +10134,11 @@ msgid ""
 "over the more general WFU_FILEOPERATION_IGNOREFTPS."
 msgstr ""
 
-#: lib/wfu_constants.php:555
+#: lib/wfu_constants.php:556
 msgid "Default Value of MD5 File for FTPS Paths"
 msgstr ""
 
-#: lib/wfu_constants.php:555
+#: lib/wfu_constants.php:556
 msgid ""
 "Defines the default value that will be returned when md5_file() function is "
 "executed on an FTPS path. It can be '*empty', '*calc' or 'empty'. If it "
@@ -10079,11 +10146,11 @@ msgid ""
 "general WFU_FILEOPERATION_IGNOREFTPS."
 msgstr ""
 
-#: lib/wfu_constants.php:556
+#: lib/wfu_constants.php:557
 msgid "Default Value of Unlink for FTPS Paths"
 msgstr ""
 
-#: lib/wfu_constants.php:556
+#: lib/wfu_constants.php:557
 msgid ""
 "Defines the default value that will be returned when unlink() function is "
 "executed on an FTPS path. It can be '*empty', '*calc' or 'empty'. If it "
@@ -10091,49 +10158,49 @@ msgid ""
 "general WFU_FILEOPERATION_IGNOREFTPS."
 msgstr ""
 
-#: lib/wfu_constants.php:557
+#: lib/wfu_constants.php:558
 msgid "FTPS Connection Timeout"
 msgstr ""
 
-#: lib/wfu_constants.php:557
+#: lib/wfu_constants.php:558
 msgid "Defines the timeout (in seconds) for an FTPS connection."
 msgstr ""
 
-#: lib/wfu_constants.php:558
+#: lib/wfu_constants.php:559
 msgid "Use Passive Mode for FTPS"
 msgstr ""
 
-#: lib/wfu_constants.php:558
+#: lib/wfu_constants.php:559
 msgid ""
 "Defines whether PHP will use passive mode for FTPS operations like "
 "file_exists, file_stat, file_size etc. It can be 'true' or 'false'."
 msgstr ""
 
-#: lib/wfu_constants.php:559
+#: lib/wfu_constants.php:560
 msgid "Force Use Passive Address for FTPS"
 msgstr ""
 
-#: lib/wfu_constants.php:559
+#: lib/wfu_constants.php:560
 msgid ""
 "Defines whether PHP will use the passive address for FTPS uploads when in "
 "passive mode. It can be 'true' or 'false'."
 msgstr ""
 
-#: lib/wfu_constants.php:560
+#: lib/wfu_constants.php:561
 msgid "Ignore Remote Path in File Operations"
 msgstr ""
 
-#: lib/wfu_constants.php:560
+#: lib/wfu_constants.php:561
 msgid ""
 "Defines whether file functions, such as file_exists(), stat() etc. will be "
 "ignored for remote (cloud) paths. It can be 'true' or 'false'."
 msgstr ""
 
-#: lib/wfu_constants.php:561
+#: lib/wfu_constants.php:562
 msgid "Default Value of File Exists for Remote Paths"
 msgstr ""
 
-#: lib/wfu_constants.php:561
+#: lib/wfu_constants.php:562
 msgid ""
 "Defines the default value that will be returned when file_exists() function "
 "is executed on a remote (cloud) path. It can be '*true', '*false', '*calc', "
@@ -10141,11 +10208,11 @@ msgid ""
 "precedence over the more general WFU_FILEOPERATION_IGNOREREMOTE."
 msgstr ""
 
-#: lib/wfu_constants.php:562
+#: lib/wfu_constants.php:563
 msgid "Default Value of Stat for Remote Paths"
 msgstr ""
 
-#: lib/wfu_constants.php:562
+#: lib/wfu_constants.php:563
 msgid ""
 "Defines the default value that will be returned when stat() function is "
 "executed on a remote (cloud) path. It can be '*empty', '*calc' or 'empty'. "
@@ -10153,11 +10220,11 @@ msgid ""
 "more general WFU_FILEOPERATION_IGNOREREMOTE."
 msgstr ""
 
-#: lib/wfu_constants.php:563
+#: lib/wfu_constants.php:564
 msgid "Default Value of Filesize for Remote Paths"
 msgstr ""
 
-#: lib/wfu_constants.php:563
+#: lib/wfu_constants.php:564
 msgid ""
 "Defines the default value that will be returned when filesize() function is "
 "executed on a remote (cloud) path. It can be '*empty', '*calc' or 'empty'. "
@@ -10165,11 +10232,11 @@ msgid ""
 "more general WFU_FILEOPERATION_IGNOREREMOTE."
 msgstr ""
 
-#: lib/wfu_constants.php:564
+#: lib/wfu_constants.php:565
 msgid "Default Value of Fopen for Remote Paths"
 msgstr ""
 
-#: lib/wfu_constants.php:564
+#: lib/wfu_constants.php:565
 msgid ""
 "Defines the default value that will be returned when fopen() function is "
 "executed on a remote (cloud) path. It can be '*empty', '*calc' or 'empty'. "
@@ -10177,11 +10244,11 @@ msgid ""
 "more general WFU_FILEOPERATION_IGNOREREMOTE."
 msgstr ""
 
-#: lib/wfu_constants.php:565
+#: lib/wfu_constants.php:566
 msgid "Default Value of File Get Contents for Remote Paths"
 msgstr ""
 
-#: lib/wfu_constants.php:565
+#: lib/wfu_constants.php:566
 msgid ""
 "Defines the default value that will be returned when file_get_contents() "
 "function is executed on a remote path. It can be '*empty', '*calc' or "
@@ -10189,11 +10256,11 @@ msgid ""
 "over the more general WFU_FILEOPERATION_IGNOREREMOTE."
 msgstr ""
 
-#: lib/wfu_constants.php:566
+#: lib/wfu_constants.php:567
 msgid "Default Value of MD5 File for Remote Paths"
 msgstr ""
 
-#: lib/wfu_constants.php:566
+#: lib/wfu_constants.php:567
 msgid ""
 "Defines the default value that will be returned when md5_file() function is "
 "executed on a remote (cloud) path. It can be '*empty', '*calc' or 'empty'. "
@@ -10201,11 +10268,11 @@ msgid ""
 "more general WFU_FILEOPERATION_IGNOREREMOTE."
 msgstr ""
 
-#: lib/wfu_constants.php:567
+#: lib/wfu_constants.php:568
 msgid "Default Value of Unlink for Remote Paths"
 msgstr ""
 
-#: lib/wfu_constants.php:567
+#: lib/wfu_constants.php:568
 msgid ""
 "Defines the default value that will be returned when unlink() function is "
 "executed on a remote (cloud) path. It can be '*empty', '*calc' or 'empty'. "
@@ -10213,41 +10280,41 @@ msgid ""
 "more general WFU_FILEOPERATION_IGNOREREMOTE."
 msgstr ""
 
-#: lib/wfu_constants.php:568
+#: lib/wfu_constants.php:569
 msgid "Admin Notifications Rows Per Page"
 msgstr ""
 
-#: lib/wfu_constants.php:568
+#: lib/wfu_constants.php:569
 msgid ""
 "The number of rows per page of the admin notifications. A value equal to "
 "zero or less denotes no pagination."
 msgstr ""
 
-#: lib/wfu_constants.php:569
+#: lib/wfu_constants.php:570
 msgid "Notifications Toolbar Menu State"
 msgstr ""
 
-#: lib/wfu_constants.php:569
+#: lib/wfu_constants.php:570
 msgid ""
 "Defines whether the Notifications Toolbar (Admin Bar) menu item will be "
 "shown or not. It can be 'true' or 'false'."
 msgstr ""
 
-#: lib/wfu_constants.php:570
+#: lib/wfu_constants.php:571
 msgid "Notifications Non-Repeating Threshold"
 msgstr ""
 
-#: lib/wfu_constants.php:570
+#: lib/wfu_constants.php:571
 msgid ""
 "Defines the time in seconds, after which a non-repeating notification can be "
 "added again."
 msgstr ""
 
-#: lib/wfu_constants.php:571
+#: lib/wfu_constants.php:572
 msgid "Material UI HTML Font Size"
 msgstr ""
 
-#: lib/wfu_constants.php:571
+#: lib/wfu_constants.php:572
 msgid ""
 "Defines the HTML font size, based on which the Material UI components' rem "
 "value is calculated. It can be 'adjust' (React will try to adjust the HTML "
@@ -10255,287 +10322,306 @@ msgid ""
 "a font size in pixels."
 msgstr ""
 
-#: lib/wfu_constants.php:572
+#: lib/wfu_constants.php:573
 msgid "Webcam Switch Camera Mode"
 msgstr ""
 
-#: lib/wfu_constants.php:572
+#: lib/wfu_constants.php:573
 msgid ""
 "Defines the switch camera mode. It can be 'side' (switch between front and "
 "rear camera) or 'device' (switch between available video devices)."
 msgstr ""
 
-#: lib/wfu_constants.php:573
+#: lib/wfu_constants.php:574
 msgid "Webcam MediaRecorder MIME Type"
 msgstr ""
 
-#: lib/wfu_constants.php:573
+#: lib/wfu_constants.php:574
 msgid ""
 "Defines the webcam MediaRecorder MIME Type. If it is empty then it will be "
 "auto-selected."
 msgstr ""
 
-#: lib/wfu_constants.php:579
+#: lib/wfu_constants.php:575
+msgid "File Reservation Status"
+msgstr ""
+
+#: lib/wfu_constants.php:575
+msgid ""
+"Defines whether file reservation is active. It can be 'true' or 'false'."
+msgstr ""
+
+#: lib/wfu_constants.php:576
+msgid "File Reservation Life"
+msgstr ""
+
+#: lib/wfu_constants.php:576
+msgid ""
+"Defines the life (in seconds) of a file reservation. It can be a positive "
+"integer."
+msgstr ""
+
+#: lib/wfu_constants.php:582
 msgid "Alternative Captcha Server"
 msgstr ""
 
-#: lib/wfu_constants.php:579
+#: lib/wfu_constants.php:582
 msgid ""
 "If the alternative Iptanus server is used and this variable is not empty, "
 "then it will be used as the alternative Captcha Server URL."
 msgstr ""
 
-#: lib/wfu_constants.php:580
+#: lib/wfu_constants.php:583
 msgid "Google ReCaptchaV2 Host"
 msgstr ""
 
-#: lib/wfu_constants.php:580
+#: lib/wfu_constants.php:583
 msgid ""
 "It defines the Google ReCaptchaV2 host. The default is 'www.google.com', but "
 "there is an alternative one, 'www.recaptcha.net' that works also in China."
 msgstr ""
 
-#: lib/wfu_constants.php:581
+#: lib/wfu_constants.php:584
 msgid "User-Permissions Table Rows Per Page"
 msgstr ""
 
-#: lib/wfu_constants.php:581
+#: lib/wfu_constants.php:584
 msgid "The number of rows per page of the User Permissions table."
 msgstr ""
 
-#: lib/wfu_constants.php:582
+#: lib/wfu_constants.php:585
 msgid "Remote Files Browser Rows Per Page"
 msgstr ""
 
-#: lib/wfu_constants.php:582
+#: lib/wfu_constants.php:585
 msgid "The number of rows per page of the remote files browser."
 msgstr ""
 
-#: lib/wfu_constants.php:583
+#: lib/wfu_constants.php:586
 msgid "Back-end Browser Rows Per Page"
 msgstr ""
 
-#: lib/wfu_constants.php:583
+#: lib/wfu_constants.php:586
 msgid "The number of rows per page of the back-end browser."
 msgstr ""
 
-#: lib/wfu_constants.php:584
+#: lib/wfu_constants.php:587
 msgid "Back-end Browser Show Remote Files"
 msgstr ""
 
-#: lib/wfu_constants.php:584
+#: lib/wfu_constants.php:587
 msgid ""
 "Show remote files (uploaded files that have been transferred in a cloud "
 "service and they no longer exist in the website) in the back-end browser. It "
 "can be 'true' or 'false'."
 msgstr ""
 
-#: lib/wfu_constants.php:585
+#: lib/wfu_constants.php:588
 msgid "Front-end Browser Column Definitions"
 msgstr ""
 
-#: lib/wfu_constants.php:585
+#: lib/wfu_constants.php:588
 msgid "The column definitions of the front-end browser."
 msgstr ""
 
-#: lib/wfu_constants.php:586
+#: lib/wfu_constants.php:589
 msgid "File Transfers Refresh Interval"
 msgstr ""
 
-#: lib/wfu_constants.php:586
+#: lib/wfu_constants.php:589
 msgid ""
 "The time in seconds to refresh the status of File Transfers page. If it is "
 "-1 then no refresh will happen."
 msgstr ""
 
-#: lib/wfu_constants.php:587
+#: lib/wfu_constants.php:590
 msgid "Force Captcha API to Always Load"
 msgstr ""
 
-#: lib/wfu_constants.php:587
+#: lib/wfu_constants.php:590
 msgid ""
 "Force the Google javascript files of Recaptcha API to load anyway. It can be "
 "'true' or 'false'."
 msgstr ""
 
-#: lib/wfu_constants.php:588
+#: lib/wfu_constants.php:591
 msgid "File Chunk Size"
 msgstr ""
 
-#: lib/wfu_constants.php:588
+#: lib/wfu_constants.php:591
 msgid "The size of a file chunk, in bytes."
 msgstr ""
 
-#: lib/wfu_constants.php:589
+#: lib/wfu_constants.php:592
 msgid "Max Concurrent Connections to Server"
 msgstr ""
 
-#: lib/wfu_constants.php:589
+#: lib/wfu_constants.php:592
 msgid ""
 "The number of maximum allowable concurrent connections to the server. A "
 "value of -1 denotes that there is no limit."
 msgstr ""
 
-#: lib/wfu_constants.php:590
+#: lib/wfu_constants.php:593
 msgid "Max Concurrent Chunks"
 msgstr ""
 
-#: lib/wfu_constants.php:590
+#: lib/wfu_constants.php:593
 msgid ""
 "The number of maximum allowable concurrent chunks per file. A value of -1 "
 "denotes that all chunks will be uploaded at the same time."
 msgstr ""
 
-#: lib/wfu_constants.php:591
+#: lib/wfu_constants.php:594
 msgid "Max Concurrent Files"
 msgstr ""
 
-#: lib/wfu_constants.php:591
+#: lib/wfu_constants.php:594
 msgid ""
 "The number of maximum allowable concurrent files uploading. A value of -1 "
 "denotes that all files will be uploaded at the same time."
 msgstr ""
 
-#: lib/wfu_constants.php:592
+#: lib/wfu_constants.php:595
 msgid "Max Chunk Retries"
 msgstr ""
 
-#: lib/wfu_constants.php:592
+#: lib/wfu_constants.php:595
 msgid ""
 "The number of times a chunk will be retried before the file is rejected. A "
 "value of -1 denotes that the chunk will be retried forever."
 msgstr ""
 
-#: lib/wfu_constants.php:593
+#: lib/wfu_constants.php:596
 msgid "Max Inactivity Period of Chunk"
 msgstr ""
 
-#: lib/wfu_constants.php:593
+#: lib/wfu_constants.php:596
 msgid ""
 "The maximum time that a chunk is allowed to be inactive before it is reset, "
 "in seconds. A value of -1 denotes that there is no limit."
 msgstr ""
 
-#: lib/wfu_constants.php:594
+#: lib/wfu_constants.php:597
 msgid "Max Inactivity Period of File"
 msgstr ""
 
-#: lib/wfu_constants.php:594
+#: lib/wfu_constants.php:597
 msgid ""
 "The maximum time that an unfinished file will be resumed, in seconds. A "
 "value of -1 denotes that there is no limit."
 msgstr ""
 
-#: lib/wfu_constants.php:595
+#: lib/wfu_constants.php:598
 msgid "Recheck for Unfinished Files Interval"
 msgstr ""
 
-#: lib/wfu_constants.php:595
+#: lib/wfu_constants.php:598
 msgid "The interval for checking of unfinished files, in seconds."
 msgstr ""
 
-#: lib/wfu_constants.php:596
+#: lib/wfu_constants.php:599
 msgid "Max Size of Temporary Partial File"
 msgstr ""
 
-#: lib/wfu_constants.php:596
+#: lib/wfu_constants.php:599
 msgid "The maximum size of the temporary server partial files, in bytes."
 msgstr ""
 
-#: lib/wfu_constants.php:597
+#: lib/wfu_constants.php:600
 msgid "Max Concurrent File Transfer Jobs"
 msgstr ""
 
-#: lib/wfu_constants.php:597
+#: lib/wfu_constants.php:600
 msgid ""
 "The number of maximum allowable concurrent transfer jobs to service accounts."
 msgstr ""
 
-#: lib/wfu_constants.php:598
+#: lib/wfu_constants.php:601
 msgid "File Transfer Manager Max Runtime"
 msgstr ""
 
-#: lib/wfu_constants.php:598
+#: lib/wfu_constants.php:601
 msgid ""
 "The maximum time that transfer manager can run, in seconds. A value of -1 "
 "denotes no limit."
 msgstr ""
 
-#: lib/wfu_constants.php:599
+#: lib/wfu_constants.php:602
 msgid "File Transfer Jobs Recheck Interval"
 msgstr ""
 
-#: lib/wfu_constants.php:599
+#: lib/wfu_constants.php:602
 msgid ""
 "The interval for checking if there are pending service transfer jobs, in "
 "seconds."
 msgstr ""
 
-#: lib/wfu_constants.php:600
+#: lib/wfu_constants.php:603
 msgid "File Transfer Timeout"
 msgstr ""
 
-#: lib/wfu_constants.php:600
+#: lib/wfu_constants.php:603
 msgid ""
 "The timeout of a single file transfer, in seconds. A value of -1 denotes no "
 "limit."
 msgstr ""
 
-#: lib/wfu_constants.php:601
+#: lib/wfu_constants.php:604
 msgid "Max File Transfer Retry Time"
 msgstr ""
 
-#: lib/wfu_constants.php:601
+#: lib/wfu_constants.php:604
 msgid ""
 "The maximum time that a file transfer will be retried, in seconds. A value "
 "of -1 denotes no limit."
 msgstr ""
 
-#: lib/wfu_constants.php:602
+#: lib/wfu_constants.php:605
 msgid "File Transfer Retries"
 msgstr ""
 
-#: lib/wfu_constants.php:602
+#: lib/wfu_constants.php:605
 msgid ""
 "The number of consecutive retries of a file transfer. A value of -1 denotes "
 "no limit."
 msgstr ""
 
-#: lib/wfu_constants.php:603
+#: lib/wfu_constants.php:606
 msgid "Max File Transfer Retries"
 msgstr ""
 
-#: lib/wfu_constants.php:603
+#: lib/wfu_constants.php:606
 msgid ""
 "The number of maximum retries of a file transfer. After this limit file will "
 "be marked as failed. A value of -1 denotes no limit."
 msgstr ""
 
-#: lib/wfu_constants.php:604
+#: lib/wfu_constants.php:607
 msgid "Keep Failed Transferred Files"
 msgstr ""
 
-#: lib/wfu_constants.php:604
+#: lib/wfu_constants.php:607
 msgid ""
 "Keep or delete from the list files that failed to be transferred. It can be "
 "'true' or 'false'."
 msgstr ""
 
-#: lib/wfu_constants.php:605
+#: lib/wfu_constants.php:608
 msgid "Asynchronous Caller Timeout"
 msgstr ""
 
-#: lib/wfu_constants.php:605
+#: lib/wfu_constants.php:608
 msgid ""
 "The time limit an asynchronous call of a function is expected to be "
 "executed. A value of -1 denotes no limit."
 msgstr ""
 
-#: lib/wfu_constants.php:606
+#: lib/wfu_constants.php:609
 msgid "Thumbnail Path"
 msgstr ""
 
-#: lib/wfu_constants.php:606
+#: lib/wfu_constants.php:609
 msgid ""
 "Defines the path where thumbnails will be stored. The path is relative to "
 "uploads folder of the website. If the path starts with '../' then it will be "
@@ -10543,308 +10629,308 @@ msgid ""
 "will be relative to the root folder of the website."
 msgstr ""
 
-#: lib/wfu_constants.php:607
+#: lib/wfu_constants.php:610
 msgid "Thumbnail Update Interval"
 msgstr ""
 
-#: lib/wfu_constants.php:607
+#: lib/wfu_constants.php:610
 msgid ""
 "Defines the time in seconds a file can update its thumbnails after its last "
 "update. If it is set to -1 then the file will be updated no matter how much "
 "time has passed after the last update."
 msgstr ""
 
-#: lib/wfu_constants.php:608
+#: lib/wfu_constants.php:611
 msgid "Force Use PHPSECLIB for SFTP"
 msgstr ""
 
-#: lib/wfu_constants.php:608
+#: lib/wfu_constants.php:611
 msgid ""
 "Defines whether PHP will use PHPSECLIB functions for SFTP instead of SSH2. "
 "It can be 'true' or 'false'."
 msgstr ""
 
-#: lib/wfu_constants.php:609
+#: lib/wfu_constants.php:612
 msgid "Ignore User State Check for Hooks"
 msgstr ""
 
-#: lib/wfu_constants.php:609
+#: lib/wfu_constants.php:612
 msgid ""
 "Defines whether the plugin will generate warnings in case User State handler "
 "is set to Cookies/DB but there are hooks using session. It can be 'true' or "
 "'false'."
 msgstr ""
 
-#: lib/wfu_constants.php:610
+#: lib/wfu_constants.php:613
 msgid "Disable Image Type Library Check"
 msgstr ""
 
-#: lib/wfu_constants.php:610
+#: lib/wfu_constants.php:613
 msgid ""
 "Defines whether the plugin will check the file contents based on Image Type "
 "Library. It can be 'true' or 'false'."
 msgstr ""
 
-#: lib/wfu_constants.php:625
+#: lib/wfu_constants.php:628
 msgid "Colors for Message in Test Mode"
 msgstr ""
 
-#: lib/wfu_constants.php:625
+#: lib/wfu_constants.php:628
 msgid ""
 "The color triplet (text, background and border colors) of message in Test "
 "mode of the uploader shortcode."
 msgstr ""
 
-#: lib/wfu_constants.php:626
+#: lib/wfu_constants.php:629
 msgid "Defaults Message Colors"
 msgstr ""
 
-#: lib/wfu_constants.php:626
+#: lib/wfu_constants.php:629
 msgid ""
 "The default color triplet (text, background and border colors) of message of "
 "the uploader shortcode."
 msgstr ""
 
-#: lib/wfu_constants.php:627
+#: lib/wfu_constants.php:630
 msgid "State 0 Message Colors"
 msgstr ""
 
-#: lib/wfu_constants.php:627
+#: lib/wfu_constants.php:630
 msgid ""
 "The color triplet (text, background and border colors) of message of upload "
 "state 0 (upload in progress with no messages) of the uploader shortcode."
 msgstr ""
 
-#: lib/wfu_constants.php:628
+#: lib/wfu_constants.php:631
 msgid "State 1 Message Colors"
 msgstr ""
 
-#: lib/wfu_constants.php:628
+#: lib/wfu_constants.php:631
 msgid ""
 "The color triplet (text, background and border colors) of message of upload "
 "state 1 (upload in progress with messages) of the uploader shortcode."
 msgstr ""
 
-#: lib/wfu_constants.php:629
+#: lib/wfu_constants.php:632
 msgid "State 2 Message Colors"
 msgstr ""
 
-#: lib/wfu_constants.php:629
+#: lib/wfu_constants.php:632
 msgid ""
 "The color triplet (text, background and border colors) of message of upload "
 "state 2 (upload in progress with some files not uploaded) of the uploader "
 "shortcode."
 msgstr ""
 
-#: lib/wfu_constants.php:630
+#: lib/wfu_constants.php:633
 msgid "State 3 Message Colors"
 msgstr ""
 
-#: lib/wfu_constants.php:630
+#: lib/wfu_constants.php:633
 msgid ""
 "The color triplet (text, background and border colors) of message of upload "
 "state 3 (upload in progress with no files uploaded so far) of the uploader "
 "shortcode."
 msgstr ""
 
-#: lib/wfu_constants.php:631
+#: lib/wfu_constants.php:634
 msgid "State 4 Message Colors"
 msgstr ""
 
-#: lib/wfu_constants.php:631
+#: lib/wfu_constants.php:634
 msgid ""
 "The color triplet (text, background and border colors) of message of upload "
 "state 4 (all files uploaded) of the uploader shortcode."
 msgstr ""
 
-#: lib/wfu_constants.php:632
+#: lib/wfu_constants.php:635
 msgid "State 5 Message Colors"
 msgstr ""
 
-#: lib/wfu_constants.php:632
+#: lib/wfu_constants.php:635
 msgid ""
 "The color triplet (text, background and border colors) of message of upload "
 "state 5 (all files uploaded with messages) of the uploader shortcode."
 msgstr ""
 
-#: lib/wfu_constants.php:633
+#: lib/wfu_constants.php:636
 msgid "State 6 Message Colors"
 msgstr ""
 
-#: lib/wfu_constants.php:633
+#: lib/wfu_constants.php:636
 msgid ""
 "The color triplet (text, background and border colors) of message of upload "
 "state 6 (some files not uploaded) of the uploader shortcode."
 msgstr ""
 
-#: lib/wfu_constants.php:634
+#: lib/wfu_constants.php:637
 msgid "State 7 Message Colors"
 msgstr ""
 
-#: lib/wfu_constants.php:634
+#: lib/wfu_constants.php:637
 msgid ""
 "The color triplet (text, background and border colors) of message of upload "
 "state 7 (no files uploaded) of the uploader shortcode."
 msgstr ""
 
-#: lib/wfu_constants.php:635
+#: lib/wfu_constants.php:638
 msgid "State 8 Message Colors"
 msgstr ""
 
-#: lib/wfu_constants.php:635
+#: lib/wfu_constants.php:638
 msgid ""
 "The color triplet (text, background and border colors) of message of upload "
 "state 8 (there are no files to upload) of the uploader shortcode."
 msgstr ""
 
-#: lib/wfu_constants.php:636
+#: lib/wfu_constants.php:639
 msgid "State 9 Message Colors"
 msgstr ""
 
-#: lib/wfu_constants.php:636
+#: lib/wfu_constants.php:639
 msgid ""
 "The color triplet (text, background and border colors) of message of upload "
 "state 9 (test state) of the uploader shortcode."
 msgstr ""
 
-#: lib/wfu_constants.php:637
+#: lib/wfu_constants.php:640
 msgid "State 10 Message Colors"
 msgstr ""
 
-#: lib/wfu_constants.php:637
+#: lib/wfu_constants.php:640
 msgid ""
 "The color triplet (text, background and border colors) of message of upload "
 "state 10 (JSON parse error) of the uploader shortcode."
 msgstr ""
 
-#: lib/wfu_constants.php:638
+#: lib/wfu_constants.php:641
 msgid "State 11 Message Colors"
 msgstr ""
 
-#: lib/wfu_constants.php:638
+#: lib/wfu_constants.php:641
 msgid ""
 "The color triplet (text, background and border colors) of message of upload "
 "state 11 (redirecting) of the uploader shortcode."
 msgstr ""
 
-#: lib/wfu_constants.php:639
+#: lib/wfu_constants.php:642
 msgid "State 12 Message Colors"
 msgstr ""
 
-#: lib/wfu_constants.php:639
+#: lib/wfu_constants.php:642
 msgid ""
 "The color triplet (text, background and border colors) of message of upload "
 "state 12 (upload failed) of the uploader shortcode."
 msgstr ""
 
-#: lib/wfu_constants.php:640
+#: lib/wfu_constants.php:643
 msgid "State 13 Message Colors"
 msgstr ""
 
-#: lib/wfu_constants.php:640
+#: lib/wfu_constants.php:643
 msgid ""
 "The color triplet (text, background and border colors) of message of upload "
 "state 13 (sending data) of the uploader shortcode."
 msgstr ""
 
-#: lib/wfu_constants.php:641
+#: lib/wfu_constants.php:644
 msgid "State 14 Message Colors"
 msgstr ""
 
-#: lib/wfu_constants.php:641
+#: lib/wfu_constants.php:644
 msgid ""
 "The color triplet (text, background and border colors) of message of upload "
 "state 14 (data submit succeeded) of the uploader shortcode."
 msgstr ""
 
-#: lib/wfu_constants.php:642
+#: lib/wfu_constants.php:645
 msgid "State 15 Message Colors"
 msgstr ""
 
-#: lib/wfu_constants.php:642
+#: lib/wfu_constants.php:645
 msgid ""
 "The color triplet (text, background and border colors) of message of upload "
 "state 15 (data submit failed) of the uploader shortcode."
 msgstr ""
 
-#: lib/wfu_constants.php:643
+#: lib/wfu_constants.php:646
 msgid "State 16 Message Colors"
 msgstr ""
 
-#: lib/wfu_constants.php:643
+#: lib/wfu_constants.php:646
 msgid ""
 "The color triplet (text, background and border colors) of message of upload "
 "state 16 (cancelling upload) of the uploader shortcode."
 msgstr ""
 
-#: lib/wfu_constants.php:644
+#: lib/wfu_constants.php:647
 msgid "State 17 Message Colors"
 msgstr ""
 
-#: lib/wfu_constants.php:644
+#: lib/wfu_constants.php:647
 msgid ""
 "The color triplet (text, background and border colors) of message of upload "
 "state 17 (upload cancelled) of the uploader shortcode."
 msgstr ""
 
-#: lib/wfu_constants.php:645
+#: lib/wfu_constants.php:648
 msgid "State 18 Message Colors"
 msgstr ""
 
-#: lib/wfu_constants.php:645
+#: lib/wfu_constants.php:648
 msgid ""
 "The color triplet (text, background and border colors) of message of upload "
 "state 18 (upload succeeded) of the uploader shortcode."
 msgstr ""
 
-#: lib/wfu_constants.php:646
+#: lib/wfu_constants.php:649
 msgid "State 19 Message Colors"
 msgstr ""
 
-#: lib/wfu_constants.php:646
+#: lib/wfu_constants.php:649
 msgid ""
 "The color triplet (text, background and border colors) of message of upload "
 "state 19 (upload completed but no files were saved due to personal data "
 "policy) of the uploader shortcode."
 msgstr ""
 
-#: lib/wfu_functions.php:8955
+#: lib/wfu_functions.php:9096
 msgid "Iptanus File Upload Consent Status"
 msgstr ""
 
-#: lib/wfu_functions.php:8958
+#: lib/wfu_functions.php:9099
 msgid "Consent Status"
 msgstr ""
 
-#: lib/wfu_functions.php:8960
+#: lib/wfu_functions.php:9101
 msgid "You have given your consent to store personal data."
 msgstr ""
 
-#: lib/wfu_functions.php:8960
+#: lib/wfu_functions.php:9101
 msgid "You have denied to store personal data."
 msgstr ""
 
-#: lib/wfu_functions.php:8960
+#: lib/wfu_functions.php:9101
 msgid "You have not answered to consent yet."
 msgstr ""
 
-#: lib/wfu_functions.php:8966
+#: lib/wfu_functions.php:9107
 msgid "Change status to"
 msgstr ""
 
-#: lib/wfu_functions.php:8968
+#: lib/wfu_functions.php:9109
 msgid "No change"
 msgstr ""
 
-#: lib/wfu_functions.php:8970 lib/wfu_functions.php:8978
+#: lib/wfu_functions.php:9111 lib/wfu_functions.php:9119
 msgid "Revoke Consent"
 msgstr ""
 
-#: lib/wfu_functions.php:8971 lib/wfu_functions.php:8975
+#: lib/wfu_functions.php:9112 lib/wfu_functions.php:9116
 msgid "Clear Consent"
 msgstr ""
 
-#: lib/wfu_functions.php:8974 lib/wfu_functions.php:8979
+#: lib/wfu_functions.php:9115 lib/wfu_functions.php:9120
 msgid "Give Consent"
 msgstr ""
 

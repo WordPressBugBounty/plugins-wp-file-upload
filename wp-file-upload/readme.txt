@@ -3,8 +3,8 @@ Contributors: nickboss
 Donate link: http://www.iptanus.com/support/wordpress-file-upload
 Tags: file, upload, ajax, form, page
 Requires at least: 3.0
-Tested up to: 6.9
-Stable tag: 5.1.7
+Tested up to: 7.0
+Stable tag: 5.1.9
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -153,6 +153,15 @@ There is an option in plugin's settings in Dashboard to relax the CSS rules, so 
 8. A screenshot of the file browser.
 
 == Changelog ==
+
+= 5.1.9 =
+* verified compatibility with latest 7.0 Wordpress version
+* added uploadid length check in wfu_ajax_action_send_email_notification()
+* added wfu_params_*, wfu_gst_* and wfu_userstate_* in periodical cleanup
+* added Transient Options section in Maintenance Actions tab
+
+= 5.1.8 =
+* fixed SQL injection issue CVSS 9.3 from Patchstack
 
 = 5.1.7 =
 * fixed File Overwrite Race Condition when uploading files with the same filename concurrently
@@ -1124,6 +1133,12 @@ Added the option to allow anyone to upload files, by setting the attribute uploa
 Initial version.
 
 == Upgrade Notice ==
+
+= 5.1.9 =
+Regular update to introduce some improvements.
+
+= 5.1.8 =
+Minor update to fix some security issues.
 
 = 5.1.7 =
 Regular update to fix some security issues.

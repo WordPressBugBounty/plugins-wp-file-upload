@@ -97,6 +97,7 @@ add_action( 'show_user_profile', 'wfu_show_consent_profile_fields' );
 add_action( 'edit_user_profile', 'wfu_show_consent_profile_fields' );
 add_action( 'personal_options_update', 'wfu_update_consent_profile_fields' );
 add_action( 'edit_user_profile_update', 'wfu_update_consent_profile_fields' );
+//periodic actions
 add_action( 'wfu_daily_scheduled_events', 'wfu_execute_daily_tasks' );
 //Media editor custom properties
 if ( is_admin() ) add_action( 'attachment_submitbox_misc_actions', 'wfu_media_editor_properties', 11 );

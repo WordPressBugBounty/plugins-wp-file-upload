@@ -36,6 +36,12 @@ function wfu_maintenance_actions($message = '') {
 	
 	$maintenance_options = get_option( "wfu_maintenance_options", array() );
 	
+	$waste_options_data = wfu_read_waste_options();
+	$waste_options_count = 0;
+	foreach ( $waste_options_data["waste_options"] as $waste_option_count ) {
+		$waste_options_count += $waste_option_count;
+	}
+	
 	$echo_str = '<div class="wrap wfu-maintenance-page">';
 	$echo_str .= wfu_generate_dashboard_menu_title("\n\t");
 	if ( $message != '' ) {
@@ -106,6 +112,36 @@ function wfu_maintenance_actions($message = '') {
 	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<a href="" class="button wfu_cleanlog_proceed" title="'.esc_html__('Proceed to log clean-up', 'wp-file-upload').'" onclick="if (wfu_cleanlog_selector_checkproceed()) return true; else return false; ">'.esc_html__('Proceed', 'wp-file-upload').'</a>';
 	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<span class="wfu_cleanlog_error hidden">'.esc_html__('Error', 'wp-file-upload').'</span>';
 	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<input id="wfu_cleanlog_href" type="hidden" value="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=clean_log_ask&amp;nonce='.$wfu_maintenance_nonce.'&amp;c='.$admin_nonce).'" />';
+	$echo_str .= "\n\t\t\t\t\t\t\t".'</div>';
+	$echo_str .= "\n\t\t\t\t\t\t".'</div>';
+	$echo_str .= "\n\t\t\t\t\t".'</td>';
+	$echo_str .= "\n\t\t\t\t".'</tr>';
+	$echo_str .= "\n\t\t\t\t".'<tr>';
+	$echo_str .= "\n\t\t\t\t\t".'<th scope="row">';
+	$echo_str .= "\n\t\t\t\t\t\t".'<a href="" class="button'.( empty($waste_options_data["waste_options"]) ? ' disabled' : '' ).'" title="'.esc_html__('Manage transient options', 'wp-file-upload').'" onclick="wfu_waste_selector_toggle(true); return false;">'.esc_html__('Transient Options', 'wp-file-upload').'</a>';
+	$echo_str .= "\n\t\t\t\t\t".'</th>';
+	$echo_str .= "\n\t\t\t\t\t".'<td>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<label>'.esc_html__('View and clean-up transient plugin options.', 'wp-file-upload').'</label>';
+	$echo_str .= "\n\t\t\t\t\t".'</td>';
+	$echo_str .= "\n\t\t\t\t".'</tr>';
+	$echo_str .= "\n\t\t\t\t".'<tr class="wfu_waste_tr">';
+	$echo_str .= "\n\t\t\t\t\t".'<th scope="row"></th>';
+	$echo_str .= "\n\t\t\t\t\t".'<td>';
+	$echo_str .= "\n\t\t\t\t\t\t".'<div class="wfu-waste-list">';
+	$echo_str .= "\n\t\t\t\t\t\t\t".'<label>'.esc_html(sprintf(__('Transient Options (%d):', 'wp-file-upload'), $waste_options_count)).'</label>';
+	$echo_str .= "\n\t\t\t\t\t\t\t".'<div class="wfu-waste-list-items">';
+	if ( isset($waste_options_data["waste_options"]["wfu_params_"]) )
+		$echo_str .= "\n\t\t\t\t\t\t\t\t".'<div class="wfu-waste-list-item wfu_params_" data-title="'.esc_html__('Shortcode Parameters', 'wp-file-upload').'">'.esc_attr($waste_options_data["waste_options"]["wfu_params_"]).'</div>';
+	if ( isset($waste_options_data["waste_options"]["wfu_gst_"]) )
+		$echo_str .= "\n\t\t\t\t\t\t\t\t".'<div class="wfu-waste-list-item wfu_gst_" data-title="'.esc_html__('Global Tokens', 'wp-file-upload').'">'.esc_attr($waste_options_data["waste_options"]["wfu_gst_"]).'</div>';
+	if ( isset($waste_options_data["waste_options"]["wfu_queue_"]) )
+		$echo_str .= "\n\t\t\t\t\t\t\t\t".'<div class="wfu-waste-list-item wfu_queue_" data-title="'.esc_html__('Upload Queue Data', 'wp-file-upload').'">'.esc_attr($waste_options_data["waste_options"]["wfu_queue_"]).'</div>';
+	if ( isset($waste_options_data["waste_options"]["wfu_userstate_"]) )
+		$echo_str .= "\n\t\t\t\t\t\t\t\t".'<div class="wfu-waste-list-item wfu_userstate_" data-title="'.esc_html__('User State Data', 'wp-file-upload').'">'.esc_attr($waste_options_data["waste_options"]["wfu_userstate_"]).'</div>';
+	$echo_str .= "\n\t\t\t\t\t\t\t".'</div>';
+	$echo_str .= "\n\t\t\t\t\t\t\t".'<div class="wfu_buttons_container">';
+	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<a href="" class="button" title="'.esc_html__('Close', 'wp-file-upload').'" onclick="wfu_waste_selector_toggle(false); return false;">'.esc_html__('Close', 'wp-file-upload').'</a>';
+	$echo_str .= "\n\t\t\t\t\t\t\t\t".'<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=clean_waste_ask&amp;nonce='.$wfu_maintenance_nonce.'&amp;c='.$admin_nonce).'" class="button wfu_waste_cleanup'.( $waste_options_count == 0 ? ' disabled' : '' ).'" title="'.esc_html__('Clean-up transient options', 'wp-file-upload').'">'.esc_html__('Clean-Up', 'wp-file-upload').'</a>';
 	$echo_str .= "\n\t\t\t\t\t\t\t".'</div>';
 	$echo_str .= "\n\t\t\t\t\t\t".'</div>';
 	$echo_str .= "\n\t\t\t\t\t".'</td>';
@@ -442,7 +478,60 @@ function wfu_clean_log() {
 	return array( "recs_count" => $recs_count, "files_count" => $files_count );
 }
 
+/**
+ * Confirm Cleaning-Up of Waste Options Operation.
+ *
+ * This function shows a page to confirm cleaning-up of waste options operation.
+ * Clean-up operation deletes all waste options from the database, older than a
+ * marker day.
+ *
+ * @since 5.9.1
+ *
+ * @param string $nonce A string that verifies that the request came from
+ *        Maintenance Actions page.
+ *
+ * @return string The HTML code of the confirmation page.
+ */
+function wfu_clean_waste_prompt($nonce) {
+	$siteurl = site_url();
 
+	$nonce = sanitize_text_field( wp_unslash ( $nonce ) );
+	if ( !current_user_can( 'manage_options' ) || !wp_verify_nonce($nonce, 'wfu_maintenance_actions') ) return wfu_maintenance_actions();
+	
+	$admin_nonce = wp_create_nonce('wfu_admin_nonce');
+
+	$waste_options_data = wfu_read_waste_options();
+	$waste_options_count = 0;
+	foreach ( $waste_options_data["waste_options"] as $waste_option_count ) {
+		$waste_options_count += $waste_option_count;
+	}
+
+	$echo_str = "\n".'<div class="wrap">';
+	$echo_str .= "\n\t".'<div style="margin-top:20px;">';
+	$echo_str .= "\n\t\t".'<a href="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&amp;action=maintenance_actions&amp;c='.$admin_nonce).'" class="button" title="'.esc_html__('go back', 'wp-file-upload').'">'.esc_html__('Go back', 'wp-file-upload').'</a>';
+	$echo_str .= "\n\t".'</div>';
+	$echo_str .= "\n\t".'<h2 style="margin-bottom: 10px;">'.esc_html__('Clean-Up Transient Options', 'wp-file-upload').'</h2>';
+	$echo_str .= "\n\t".'<form enctype="multipart/form-data" name="clean_waste_options" id="clean_waste_options" method="post" action="'.esc_url($siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload').'" class="validate">';
+	$nonce = wp_nonce_field('wfu_clean_waste', '_wpnonce', false, false);
+	$nonce_ref = wp_referer_field(false);
+	$echo_str .= "\n\t\t".$nonce;
+	$echo_str .= "\n\t\t".$nonce_ref;
+	$echo_str .= "\n\t\t".'<input type="hidden" name="c" value="'.$admin_nonce.'" />';
+	$echo_str .= "\n\t\t".'<input type="hidden" name="action" value="clean_waste_options">';
+	$echo_str .= "\n\t\t".'<label>'.esc_html__('This action will remove all transient plugin options from the database.', 'wp-file-upload').'</label>';
+	if ( $waste_options_data["no_marker"] ) {
+		$echo_str .= "\n\t\t".'<label style="margin-left: 1ch;">'.esc_html__('Please note that if there are any file upload operations running they will be interrupted.', 'wp-file-upload').'</label>';
+	}
+	$echo_str .= "\n\t\t".'<br/>';
+	$echo_str .= "\n\t\t".'<br/><label>'.esc_html__('Are you sure you want to continue?', 'wp-file-upload').'</label><br/>';
+	$echo_str .= "\n\t\t".'<p class="submit">';
+	$echo_str .= "\n\t\t\t".'<button class="button-primary" name="submit" value="Yes">'.esc_html__('Yes', 'wp-file-upload').'</button>';
+	$echo_str .= "\n\t\t\t".'<button class="button-primary" name="submit" value="Cancel">'.esc_html__('Cancel', 'wp-file-upload').'</button>';
+	$echo_str .= "\n\t\t".'</p>';
+	$echo_str .= "\n\t".'</form>';
+	$echo_str .= "\n".'</div>';
+	return $echo_str;
+}
 
 /**
  * Confirm Purge of Data Operation.
@@ -676,8 +765,7 @@ function wfu_reset_debuglog_data($nonce) {
  */
 function wfu_remove_waste_items_from_options() {
 	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
-	$waste = wfu_update_waste_options();
-	$affected = wfu_process_waste($waste);
+	$affected = wfu_process_discard_waste();
 	$message = ( $affected <= 0 ? __('No items affected', 'wp-file-upload') : sprintf(_n('%s item affected', '%s items affected', $affected, 'wp-file-upload'), $affected) );
 	wfu_add_admin_notification(__('Completed cleaning database periodic action.', 'wp-file-upload').' '.$message, 'info', 'db_cleaning', __('Plugin maintenance.', 'wp-file-upload'), null, true);
 }
@@ -697,6 +785,7 @@ function wfu_remove_waste_items_from_options() {
  * list and we remove them.
  *
  * @since 4.24.14
+ * @deprecated 5.1.9
  *
  * @redeclarable
  *
@@ -737,7 +826,7 @@ function wfu_update_waste_options() {
 		$limit = ( $limit == 0 ? 500 : $limit );
 		$items = $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT GROUP_CONCAT(option_id ORDER BY option_id SEPARATOR ',') FROM $table_name1 WHERE option_name LIKE 'wfu_queue_%' LIMIT %d",
+				"SELECT GROUP_CONCAT(option_id ORDER BY option_id SEPARATOR ',') FROM $table_name1 WHERE option_name LIKE 'wfu_queue_%%' LIMIT %d",
 				$limit
 			)
 		);
@@ -764,6 +853,7 @@ function wfu_update_waste_options() {
  * This function removes a list of waste items from the database.
  *
  * @since 4.24.14
+ * @deprecated 5.1.9 Use wfu_process_discard_waste() instead.
  *
  * @redeclarable
  *
@@ -789,4 +879,166 @@ function wfu_process_waste($waste) {
 	}
 	
 	return $affected;
+}
+
+/**
+ * Read Waste Options.
+ *
+ * This function returns the number of waste options. It finds all waste options
+ * that can be safely deleted, that is those before a marker day. However, if
+ * the marker day does not exist in the database, it returns the number of all
+ * waste options.
+ *
+ * @since 5.9.1
+ *
+ * @redeclarable
+ *
+ * @return array An array of waste options and their db count, as well as a flag
+ *         denoting whether the marker day exists or not.
+ */
+function wfu_read_waste_options() {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	global $wpdb;
+
+	$waste_options = WFU_VAR("WFU_WASTE_OPTIONS");
+	$prefixes = array_filter( array_map( 'trim', explode( ',', $waste_options ) ) );
+	
+	$ret = array( "waste_options" => array(), "no_marker" => false );
+
+	if ( empty( $prefixes ) ) return $ret;
+
+	// calculate the day before which waste options should be discarded
+	$current_day_number = floor( time() / 86400 );
+	$process_after = intval(WFU_VAR("WFU_UPLOADWASTE_PROCESSAFTER"));
+	$process_after = ( $process_after == 0 ? 4 : $process_after );
+	$marker_day_number = $current_day_number - $process_after - 1;
+	// locate the option ID of the marker day in options, if it exists
+	$option_name = 'wfu_day_' . $marker_day_number;
+	$option_id = wfu_get_option_id_by_name($option_name);
+	// store that the marker was not found
+	$ret["no_marker"] = ( $option_id === null );
+	
+	// if the marker day does not exist in options table, which can happen the
+	// first few days after this update, then get all waste options, otherwise
+	// get only those before the marker day
+	$basic_query = "SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE %s";
+	foreach ( $prefixes as $prefix ) {
+		$option_name = $prefix . '%';
+		$count = $wpdb->get_var(
+			$option_id === null
+			? $wpdb->prepare( $basic_query, $option_name )
+			: $wpdb->prepare( $basic_query . " AND option_id < %d", $option_name, $option_id )
+		);
+		$ret["waste_options"][$prefix] = (int) $count;
+	}
+	
+	return $ret;
+}
+
+/**
+ * Process and Discard Waste Items By Admin.
+ *
+ * This function removes a list of waste items from the database, initiated by
+ * an admin.
+ *
+ * @since 5.1.9
+ *
+ * @return integer The number of items removed from the database.
+ */
+function wfu_process_discard_waste_admin() {
+	if ( !current_user_can( 'manage_options' ) ) return;
+	if ( !check_admin_referer('wfu_clean_waste') ) return;
+	
+	return wfu_process_discard_waste(false);
+}
+
+/**
+ * Process and Discard Waste Items.
+ *
+ * This function removes a list of waste items from the database. It may delete
+ * all of them, or only those before a marker day, depending on input params.
+ *
+ * @since 5.1.9
+ *
+ * @redeclarable
+ *
+ * @global object $wpdb The database object.
+ *
+ * @param bool $marker_must_exist Optional. If true, the marker day must exist
+ *             in the database and only those waste options that are before the
+ *             marker will be deleted. If false, all waste options will be
+ *             deleted.
+ * @return integer The number of items removed from the database.
+ */
+function wfu_process_discard_waste($marker_must_exist = true) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	global $wpdb;
+	
+	$waste_options = WFU_VAR("WFU_WASTE_OPTIONS");
+	$prefixes = array_filter( array_map( 'trim', explode( ',', $waste_options ) ) );
+	
+	if ( empty( $prefixes ) ) return 0;
+	
+	// calculate the day before which waste options should be discarded
+	$current_day_number = floor( time() / 86400 );
+	$process_after = intval(WFU_VAR("WFU_UPLOADWASTE_PROCESSAFTER"));
+	$process_after = ( $process_after == 0 ? 4 : $process_after );
+	$marker_day_number = $current_day_number - $process_after - 1;
+	// locate the option ID of the marker day in options, if it exists
+	$option_name = 'wfu_day_' . $marker_day_number;
+	$option_id = wfu_get_option_id_by_name($option_name);
+	
+	// if there is no such marker day recorded yet and $marker_must_exist is
+	// true then return
+	if ( $option_id === null && $marker_must_exist ) return 0;
+
+	$where_clauses = [];
+	$prepare_args  = [];
+
+	// construct the query based on the waste options
+	foreach ( $prefixes as $prefix ) {
+		$where_clauses[] = "option_name LIKE %s";
+		$prepare_args[]  = $prefix . '%';
+	}
+
+	$combined_likes = '(' . implode( ' OR ', $where_clauses ) . ')';
+
+	$query = "DELETE FROM {$wpdb->options} WHERE {$combined_likes}";
+	
+	// if marker day exists then delete only the previous waste options
+	if ( $option_id !== null ) {
+		$query .= " AND option_id < %d";
+		$prepare_args[] = $option_id;
+	}
+	
+	array_unshift( $prepare_args, $query );
+	
+	$prepared_query = call_user_func_array( array( $wpdb, 'prepare' ), $prepare_args );
+
+	// execute the query to discard the waste options
+	$total_deleted = 0;
+	if ( $prepared_query ) {
+		$total_deleted = $wpdb->query( $prepared_query );
+    }
+
+	wp_cache_flush_group( 'options' );
+	
+	return $total_deleted;
+}
+
+/**
+ * Store Current Day.
+ *
+ * This function stores the current UNIX day in the db options table. This is a
+ * marker option. All options that were stored before the previous day marker
+ * are definitely older that this day. This is a simple way of knowing which
+ * plugin variable options, like wfu_params_*, wfu_gst* and others are older
+ * than a specific day, so that they can be safely deleted.
+ *
+ * @since 5.1.9
+ */
+function wfu_store_current_day() {
+	$current_day_number = floor( time() / 86400 );
+	$option_name = 'wfu_day_' . $current_day_number;
+	wfu_update_option($option_name, '', false, true, 'wfu_day_*');
 }

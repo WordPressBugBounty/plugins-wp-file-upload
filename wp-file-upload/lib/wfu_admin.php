@@ -594,6 +594,13 @@ function wordpress_file_upload_manage_dashboard() {
 		if ( $ret["recs_count"] <= -1 && $ret["files_count"] ) $echo_str = wfu_maintenance_actions();
 		else $echo_str = wfu_maintenance_actions('Database cleaned. '.$ret["recs_count"].' records and '.$ret["files_count"].' files where deleted.');
 	}
+	elseif ( $action == 'clean_waste_ask' && $nonce != "" ) {
+		$echo_str = wfu_clean_waste_prompt($nonce);
+	}
+	elseif ( $action == 'clean_waste_options' ) {
+		wfu_process_discard_waste_admin();
+		$echo_str = wfu_maintenance_actions();
+	}
 	elseif ( $action == 'purge_data_ask' && $nonce != "" ) {
 		$echo_str = wfu_purge_data_prompt($nonce);
 	}

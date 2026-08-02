@@ -69,8 +69,8 @@ function wfu_ajax_action_send_email_notification() {
 	if ( $params["notify"] != "true" ) die();
 	
 	$uniqueid = ( isset($_POST['uniqueuploadid_'.$sid]) ? sanitize_text_field($_POST['uniqueuploadid_'.$sid]) : "" );
-	//uniqueid cannot be empty and cannot be "no-ajax"
-	if ( $uniqueid == "" || $uniqueid == "no-ajax" ) die();
+	//uniqueid cannot have other than 10 characters and cannot be "no-ajax"
+	if ( strlen($unique_id) != 10 || $uniqueid == "no-ajax" ) die();
 
 	//retrieve the list of uploaded files from session
 	$target_path_list = array();
