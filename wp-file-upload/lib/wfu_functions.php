@@ -442,6 +442,7 @@ function wfu_html_output($output) {
  * @return string The sanitized code.
  */
 function wfu_sanitize_code($code) {
+	if ( !is_string($code) ) return "";
 	return preg_replace("/[^A-Za-z0-9]/", "", $code);
 }
 
@@ -1578,25 +1579,19 @@ function wfu_minify_code($lang, $code) {
 	$unsupported = ( $ret['status'] && $ret['result'] == 'lower' );
 	if ( !$unsupported ) {
 		$path = ABSWPFILEUPLOAD_DIR;
-		if ( !class_exists('MatthiasMullie\Minify\Minify') ) {
-			include_once $path.'vendor/minifier/minify/src/Minify.php';
-			include_once $path.'vendor/minifier/minify/src/CSS.php';
-			include_once $path.'vendor/minifier/minify/src/JS.php';
-			include_once $path.'vendor/minifier/minify/src/Exception.php';
-			include_once $path.'vendor/minifier/minify/src/Exceptions/BasicException.php';
-			include_once $path.'vendor/minifier/minify/src/Exceptions/FileImportException.php';
-			include_once $path.'vendor/minifier/minify/src/Exceptions/IOException.php';
-		}
-		if ( !class_exists('MatthiasMullie\PathConverter\Converter') ) {
-			include_once $path.'vendor/minifier/path-converter/src/ConverterInterface.php';
-			include_once $path.'vendor/minifier/path-converter/src/Converter.php';
+		// The minifier is namespace-prefixed by the WFU build, like every bundled
+		// library, so it can never collide with another plugin's copy. The
+		// prefixed build ships its own Composer autoloader - the old flat copy had
+		// none, which is why this used to include each source file by hand.
+		if ( !class_exists('Iptanus\WFU\Minifier\Vendor\MatthiasMullie\Minify\Minify') ) {
+			include_once $path.'vendor/minifier/autoload.php';
 		}
 		$minifier = null;
 		if ( strtoupper($lang) === 'JS' ) {
-			$minifier = new MatthiasMullie\Minify\JS($code);
+			$minifier = new \Iptanus\WFU\Minifier\Vendor\MatthiasMullie\Minify\JS($code);
 		}
 		elseif ( strtoupper($lang) === 'CSS' ) {
-			$minifier = new MatthiasMullie\Minify\CSS($code);
+			$minifier = new \Iptanus\WFU\Minifier\Vendor\MatthiasMullie\Minify\CSS($code);
 		}
 		if ( $minifier !== null ) {
 			$ret["result"] = true;
@@ -1884,6 +1879,13 @@ function WFU_VAR($varname) {
  * @return string The plugin's version.
  */
 function wfu_get_plugin_version() {
+	// get_plugin_data() lives in wp-admin/includes/plugin.php, which is not
+	// loaded on front-end requests. This function is now called from the
+	// license verification, which runs on _wfu_load_pre_actions and therefore
+	// on the front end too, so load it on demand. require_once is a no-op in
+	// admin, where the file is already included.
+	if ( !function_exists('get_plugin_data') )
+		require_once ABSPATH.'wp-admin/includes/plugin.php';
 	$plugin_data = get_plugin_data(WPFILEUPLOAD_PLUGINFILE);
 	return $plugin_data['Version'];
 }
@@ -1955,7 +1957,40 @@ function wfu_compare_versions($current, $latest) {
 		return array( 'status' => true, 'custom' => $custom, 'result' => 'lower' );
 	elseif ( intval($cur_data[3]) > intval($lat_data[3]) )
 		return array( 'status' => false, 'custom' => $custom, 'result' => 'current version invalid' );
-	return array( 'status' => true, 'custom' => $custom, 'result' => 'equal' );	
+	return array( 'status' => true, 'custom' => $custom, 'result' => 'equal' );
+}
+
+/**
+ * Normalize a Version String.
+ *
+ * Pads a version to a fixed number of sections so that two versions written
+ * with different precision can be compared as equal. "5.6" and "5.6.0" mean the
+ * same PHP version, but they are not the same string.
+ *
+ * This is needed because the "Requires PHP" header of an extension is written
+ * with two sections ("5.6", "8.1"), while Iptanus server always answers with
+ * three ("5.6.0", "8.1.0"). Comparing them raw would never match, so the
+ * extension would be re-downloaded on every license check.
+ *
+ * wfu_compare_versions() cannot be used here: it requires BOTH arguments to
+ * already have three sections, and it reports "current higher than latest" as
+ * an invalid version rather than as a comparison result.
+ *
+ * @since 5.2.0
+ *
+ * @param string $version The version to normalize.
+ * @param int $sections Optional. How many sections the result must have.
+ * @return string The normalized version, or '' if nothing usable was given.
+ */
+function wfu_normalize_version($version, $sections = 3) {
+	$version = trim((string)$version);
+	if ( $version === '' ) return '';
+	//keep only the numeric part, so suffixes like "8.1-dev" do not break it
+	$parts = explode('.', preg_replace('/[^0-9.].*$/', '', $version));
+	$out = array();
+	for ( $i = 0; $i < $sections; $i++ )
+		$out[] = ( isset($parts[$i]) && $parts[$i] !== '' ? (string)intval($parts[$i]) : '0' );
+	return implode('.', $out);
 }
 
 /**
@@ -3895,7 +3930,7 @@ function wfu_log_action($action, $filepath, $userid, $uploadid, $pageid, $blogid
 			// if new log record has been created, also create user data records
 			if ( $userdata != null && $uploadid != '' ) {
 				foreach ( $userdata as $userdata_key => $userdata_field ) {
-					$existing = $wpdb->get_row('SELECT * FROM '.$table_name2.' WHERE uploadid = \''.$uploadid.'\' AND property = \''.esc_sql($userdata_field['label']).'\' AND date_to = 0');
+					$existing = $wpdb->get_row($wpdb->prepare('SELECT * FROM '.$table_name2.' WHERE uploadid = %s AND property = %s AND date_to = 0', $uploadid, $userdata_field['label']));
 					if ($existing == null)
 						$wpdb->insert($table_name2,
 							array(
@@ -4334,7 +4369,7 @@ function wfu_get_file_rec($filepath, $include_userdata) {
 	if ( $filerec != null && $include_userdata ) {
 		$filerec->userdata = null;
 		if ( $filerec->uploadid != '' ) {
-			$filerec->userdata = $wpdb->get_results('SELECT * FROM '.$table_name2.' WHERE uploadid = \''.$filerec->uploadid.'\' AND date_to = 0 ORDER BY propkey');
+			$filerec->userdata = $wpdb->get_results($wpdb->prepare('SELECT * FROM '.$table_name2.' WHERE uploadid = %s AND date_to = 0 ORDER BY propkey', $filerec->uploadid));
 		}
 	}
 	return $filerec;
@@ -4393,7 +4428,7 @@ function wfu_get_file_rec_from_id($idlog, $include_userdata = false) {
 	if ( $filerec != null && $include_userdata ) {
 		$filerec->userdata = null;
 		if ( $filerec->uploadid != '' ) {
-			$filerec->userdata = $wpdb->get_results('SELECT * FROM '.$table_name2.' WHERE uploadid = \''.$filerec->uploadid.'\' AND date_to = 0 ORDER BY propkey');
+			$filerec->userdata = $wpdb->get_results($wpdb->prepare('SELECT * FROM '.$table_name2.' WHERE uploadid = %s AND date_to = 0 ORDER BY propkey', $filerec->uploadid));
 		}
 	}
 
@@ -4455,7 +4490,7 @@ function wfu_get_userdata_from_id($idlog) {
 function wfu_get_oldestrec_from_uniqueid($uniqueid) {
 	global $wpdb;
 	$table_name1 = $wpdb->prefix . "wfu_log";
-	$filerecs = $wpdb->get_results('SELECT * FROM '.$table_name1.' WHERE idlog IN (SELECT MIN(idlog) FROM '.$table_name1.' WHERE uploadid = \''.$uniqueid.'\')');
+	$filerecs = $wpdb->get_results($wpdb->prepare('SELECT * FROM '.$table_name1.' WHERE idlog IN (SELECT MIN(idlog) FROM '.$table_name1.' WHERE uploadid = %s)', $uniqueid));
 	if ( $filerecs == null ) return null;
 	if ( count($filerecs) > 0 ) return $filerecs[0];
 	else return null;
@@ -4693,7 +4728,7 @@ function wfu_get_userdata_from_rec($filerec) {
 
 	$userdata = array();
 	if ( $filerec->uploadid != '' ) {
-		$filerec->userdata = $wpdb->get_results('SELECT * FROM '.$table_name2.' WHERE uploadid = \''.$filerec->uploadid.'\' AND date_to = 0 ORDER BY propkey');
+		$filerec->userdata = $wpdb->get_results($wpdb->prepare('SELECT * FROM '.$table_name2.' WHERE uploadid = %s AND date_to = 0 ORDER BY propkey', $filerec->uploadid));
 		if ( $filerec->userdata != null )
 			foreach ( $filerec->userdata as $item ) {
 				array_push($userdata, $item);
@@ -5018,7 +5053,7 @@ function wfu_get_recs_of_user($userid) {
 		else {
 			$filerec->userdata = null;
 			if ( $filerec->uploadid != '' ) 
-				$filerec->userdata = $wpdb->get_results('SELECT * FROM '.$table_name2.' WHERE uploadid = \''.$filerec->uploadid.'\' AND date_to = 0 ORDER BY propkey');
+				$filerec->userdata = $wpdb->get_results($wpdb->prepare('SELECT * FROM '.$table_name2.' WHERE uploadid = %s AND date_to = 0 ORDER BY propkey', $filerec->uploadid));
 			array_push($out, $filerec);
 		}
 	}
@@ -5752,7 +5787,7 @@ function wfu_export_uploaded_files($params) {
 		if ( !$obsolete || $includeall ) {
 			$filepath = wfu_hide_credentials_from_ftpurl($filerec->filepath);
 			$username = wfu_get_username_by_id($filerec->uploaduserid);
-			$filerec->userdata = $wpdb->get_results('SELECT * FROM '.$table_name2.' WHERE uploadid = \''.$filerec->uploadid.'\' AND date_to = 0 ORDER BY propkey');
+			$filerec->userdata = $wpdb->get_results($wpdb->prepare('SELECT * FROM '.$table_name2.' WHERE uploadid = %s AND date_to = 0 ORDER BY propkey', $filerec->uploadid));
 			$line = ( $filerec->action == 'datasubmit' ? 'datasubmit' : wfu_basename($filepath) );
 			$line .= $sep.( $filerec->action == 'datasubmit' ? '' :  wfu_basedir($filepath) );
 			$line .= $sep.$username;
@@ -8366,4 +8401,146 @@ function wfu_curl_read_response_header($curl, $header) {
 	global $wfu_http_response_header;
 	array_push( $wfu_http_response_header, trim($header) );
 	return strlen($header);
+}
+
+/**
+ * Professional Version URL With Campaign Parameters.
+ *
+ * Returns the address of the Professional version, tagged so that we can tell
+ * which link a visitor followed. Without this every visit looks the same and
+ * there is no way to know whether a purchase started from the wordpress.org
+ * listing, from the plugin's settings page or from a notice.
+ *
+ * @since 5.2.0
+ *
+ * @param string $medium Identifies the individual link, e.g. 'settings' or
+ *        'notice_storage'.
+ * @return string The URL.
+ */
+function wfu_pro_url($medium) {
+	return add_query_arg(
+		array( 'utm_source' => 'plugin', 'utm_medium' => $medium ),
+		WFU_PRO_VERSION_URL
+	);
+}
+
+/**
+ * Read The Notice State.
+ *
+ * Notice state is kept in its own option rather than in
+ * wordpress_file_upload_options, because everything in that array is exposed as
+ * an editable setting in the Dashboard and this is bookkeeping, not a setting.
+ *
+ * @since 5.2.0
+ *
+ * @return array The notice state, with all keys guaranteed present.
+ */
+function wfu_get_notice_state() {
+	$state = get_option( "wordpress_file_upload_notices", array() );
+	if ( !is_array($state) ) $state = array();
+	return array(
+		//timestamp of activation; absent on installs that predate this feature
+		"installed"  => ( isset($state["installed"]) ? intval($state["installed"]) : 0 ),
+		//timestamp of the last notice shown, of any kind
+		"last_shown" => ( isset($state["last_shown"]) ? intval($state["last_shown"]) : 0 ),
+		//notice ids the user has dismissed, permanently
+		"dismissed"  => ( isset($state["dismissed"]) && is_array($state["dismissed"]) ? $state["dismissed"] : array() )
+	);
+}
+
+/**
+ * Store The Notice State.
+ *
+ * @since 5.2.0
+ *
+ * @param array $state The notice state.
+ */
+function wfu_set_notice_state($state) {
+	update_option( "wordpress_file_upload_notices", $state );
+}
+
+/**
+ * Check Whether A Notice May Be Shown.
+ *
+ * A notice that appears at the wrong moment costs more than it earns, so the
+ * rules are deliberately restrictive:
+ *
+ *  - nothing during the first week after activation, so the plugin is judged on
+ *    its own before anything is suggested;
+ *  - a dismissed notice never returns - it is not "remind me later";
+ *  - at most one notice in any 30 day period, across all notices, so declining
+ *    one does not simply produce the next one tomorrow;
+ *  - administrators only, because nobody else can act on it.
+ *
+ * An install with no recorded activation date predates this feature and is
+ * therefore old enough by definition.
+ *
+ * @since 5.2.0
+ *
+ * @param string $id The notice id.
+ * @return bool True if the notice may be shown.
+ */
+function wfu_notice_allowed($id) {
+	if ( !current_user_can( 'manage_options' ) ) return false;
+	$state = wfu_get_notice_state();
+	if ( isset($state["dismissed"][$id]) ) return false;
+	if ( $state["installed"] > 0 && time() - $state["installed"] < WFU_NOTICE_GRACE_PERIOD ) return false;
+	if ( $state["last_shown"] > 0 && time() - $state["last_shown"] < WFU_NOTICE_MIN_INTERVAL ) return false;
+	return true;
+}
+
+/**
+ * Record That A Notice Was Shown.
+ *
+ * @since 5.2.0
+ *
+ * @param string $id The notice id.
+ */
+function wfu_notice_shown($id) {
+	$state = wfu_get_notice_state();
+	$state["last_shown"] = time();
+	wfu_set_notice_state($state);
+}
+
+/**
+ * Record That A Notice Was Dismissed.
+ *
+ * @since 5.2.0
+ *
+ * @param string $id The notice id.
+ */
+function wfu_notice_dismiss($id) {
+	$state = wfu_get_notice_state();
+	$state["dismissed"][$id] = true;
+	wfu_set_notice_state($state);
+}
+
+/**
+ * Render An Inline Notice.
+ *
+ * Uses WordPress's own inline notice markup so that it reads as part of the
+ * Dashboard rather than as an advertisement inserted into it, and so that it
+ * follows the admin colour scheme without any styling of its own.
+ *
+ * Returns an empty string when the notice may not be shown, so callers can
+ * simply concatenate the result.
+ *
+ * @since 5.2.0
+ *
+ * @param string $id The notice id.
+ * @param string $text The message. Must contain :word: marking the link text.
+ * @param string $href The link target.
+ * @return string The notice HTML, or an empty string.
+ */
+function wfu_render_notice($id, $text, $href) {
+	if ( !wfu_notice_allowed($id) ) return "";
+	wfu_notice_shown($id);
+	$nonce = wp_create_nonce( 'wfu_dismiss_notice_'.$id );
+	return
+		'<div class="notice notice-info inline wfu-notice" data-wfu-notice="'.esc_attr($id).'" data-wfu-nonce="'.esc_attr($nonce).'">'.
+		'<p>'.wfu_esc_html_a($text, $href).'</p>'.
+		'<button type="button" class="notice-dismiss wfu-notice-dismiss">'.
+		'<span class="screen-reader-text">'.esc_html__('Dismiss this notice.', 'wp-file-upload').'</span>'.
+		'</button>'.
+		'</div>';
 }

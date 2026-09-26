@@ -68,7 +68,7 @@ function wfu_ajax_action_send_email_notification() {
 	//check whether email notifications are activated
 	if ( $params["notify"] != "true" ) die();
 	
-	$uniqueid = ( isset($_POST['uniqueuploadid_'.$sid]) ? sanitize_text_field($_POST['uniqueuploadid_'.$sid]) : "" );
+	$uniqueid = ( isset($_POST['uniqueuploadid_'.$sid]) ? wfu_sanitize_code($_POST['uniqueuploadid_'.$sid]) : "" );
 	//uniqueid cannot have other than 10 characters and cannot be "no-ajax"
 	if ( strlen($uniqueid) != 10 || $uniqueid == "no-ajax" ) die();
 
@@ -487,7 +487,7 @@ function wfu_ajax_action_callback() {
 	}
 	
 	//get the unique id of the upload
-	$unique_id = ( isset($_POST['uniqueuploadid_'.$sid]) ? sanitize_text_field($_POST['uniqueuploadid_'.$sid]) : "" );
+	$unique_id = ( isset($_POST['uniqueuploadid_'.$sid]) ? wfu_sanitize_code($_POST['uniqueuploadid_'.$sid]) : "" );
 	if ( strlen($unique_id) != 10 ) {
 		/**
 		 * Customise Output on Unique ID Fail.
@@ -1449,3 +1449,25 @@ function wfu_ajax_action_pdusers_get_users() {
 	die(esc_html("pdusers_get_users:".wfu_encode_array_to_string($users)));
 }
 
+/**
+ * Dismiss A Notice.
+ *
+ * Records that the user has dismissed a notice. The dismissal is permanent -
+ * the notice is never shown again on this site - because a prompt that keeps
+ * returning after being declined is the kind that earns a one star review.
+ *
+ * @since 5.2.0
+ */
+function wfu_ajax_action_dismiss_notice() {
+	if ( !isset($_POST['notice']) || !isset($_POST['token']) ) die();
+
+	$notice = wfu_sanitize_tag($_POST['notice']);
+	check_ajax_referer( 'wfu_dismiss_notice_'.$notice, 'token' );
+	//the nonce already binds this to a logged-in user, but the capability is
+	//what actually decides who may write the option
+	if ( !current_user_can( 'manage_options' ) ) die();
+
+	wfu_notice_dismiss($notice);
+
+	die("dismiss_notice:ok");
+}

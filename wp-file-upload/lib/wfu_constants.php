@@ -524,7 +524,17 @@ DEFINE("WFU_VERSION_SERVER_ALT_URL", WFU_SERVICES_SERVER_ALT_URL.'/wp-admin/admi
 DEFINE("WFU_MUI_REACTVER", '18.2.0');
 DEFINE("WFU_MUI_MUIVER", '5.13.0');
 DEFINE("WFU_MUI_BABELVER", '6.26.0');
-DEFINE("WFU_PRO_VERSION_URL", 'https://www.iptanus.com/product/wordpress-file-upload-pro/');
+/* The old /product/wordpress-file-upload-pro/ path only 302-redirects here
+   since the site rebuild; linking to the final URL keeps the tracking
+   parameters intact through the hop. Callers should not use this constant
+   directly - wfu_pro_url() appends the campaign parameters that tell us which
+   link a visitor came from. */
+DEFINE("WFU_PRO_VERSION_URL", 'https://www.iptanus.com/product/iptanus-file-upload-pro/');
+//no notice at all during the first week after activation, so the plugin is
+//judged on its own before anything is suggested
+DEFINE("WFU_NOTICE_GRACE_PERIOD", 7 * 24 * 3600);
+//at most one notice in this period, across all notices
+DEFINE("WFU_NOTICE_MIN_INTERVAL", 30 * 24 * 3600);
 //define images
 DEFINE("WFU_IMAGE_ADMIN_HELP", WPFILEUPLOAD_DIR.'images/help_16.png');
 DEFINE("WFU_IMAGE_ADMIN_RESTOREDEFAULT", WPFILEUPLOAD_DIR.'images/restore_16.png');

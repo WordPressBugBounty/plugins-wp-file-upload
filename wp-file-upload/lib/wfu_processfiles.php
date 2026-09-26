@@ -18,7 +18,7 @@ function wfu_process_files_queue($params, $method) {
 	check_ajax_referer( 'wfu-uploader-nonce', 'wfu_uploader_nonce' );
 	
 	$sid = $params["uploadid"];
-	$unique_id = ( isset($_POST['uniqueuploadid_'.$sid]) ? sanitize_text_field($_POST['uniqueuploadid_'.$sid]) : '' );
+	$unique_id = ( isset($_POST['uniqueuploadid_'.$sid]) ? wfu_sanitize_code($_POST['uniqueuploadid_'.$sid]) : '' );
 	$queue = "wfu_queue_".$unique_id;
 	if ( $unique_id != "" ) {
 		$queue_id = wfu_create_random_string(16);
@@ -64,7 +64,7 @@ function wfu_process_files($params, $method) {
 		$is_admin = current_user_can('manage_options');
 	}
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
-	$unique_id = ( isset($_POST['uniqueuploadid_'.$sid]) ? sanitize_text_field($_POST['uniqueuploadid_'.$sid]) : '' );
+	$unique_id = ( isset($_POST['uniqueuploadid_'.$sid]) ? wfu_sanitize_code($_POST['uniqueuploadid_'.$sid]) : '' );
 	// determine if this routine is only for checking the file
 	$only_check = ( isset($_POST['only_check']) ? ( $_POST['only_check'] == "1" ) : false );
 	// determine if this is an upload without a file

@@ -298,6 +298,14 @@ function wordpress_file_upload_install() {
 	 */
 	do_action("_wfu_install_pre_actions");
 	wordpress_file_upload_install_actions();
+	//record when the plugin was first activated, so that notices can stay quiet
+	//during the first week. Only set once: reactivating an old install must not
+	//reset the clock and start the notices over.
+	$state = wfu_get_notice_state();
+	if ( $state["installed"] == 0 ) {
+		$state["installed"] = time();
+		wfu_set_notice_state($state);
+	}
 }
 
 /**
@@ -834,7 +842,7 @@ function wfu_manage_mainmenu($message = '') {
 	$echo_str .= "\n\t\t\t\t\t".'</td>';
 	$echo_str .= "\n\t\t\t\t\t".'<td>';
 	$echo_str .= "\n\t\t\t\t\t\t".'<div style="display:inline-block; background-color:bisque; padding:0 0 0 4px; border-left:3px solid lightcoral;">';
-	$echo_str .= "\n\t\t\t\t\t\t\t".'<label style="cursor:default;">'.wfu_esc_html_a(__('Consider :upgrading: to the Professional Version.', 'wp-file-upload'), WFU_PRO_VERSION_URL).'</label>';
+	$echo_str .= "\n\t\t\t\t\t\t\t".'<label style="cursor:default;">'.wfu_esc_html_a(__('Consider :upgrading: to the Professional Version.', 'wp-file-upload'), wfu_pro_url('settings')).'</label>';
 	$echo_str .= "\n\t\t\t\t\t\t\t".'<button class="button wfu-versioncompare-btn" onclick="if (!this.classList.contains(\'wfu-open\')) {this.innerText = this.getAttribute(\'data-title-open\'); this.classList.add(\'wfu-open\'); document.getElementById(\'wfu_version_comparison\').style.display = \'inline-block\';} else {this.innerText = this.getAttribute(\'data-title-closed\');  this.classList.remove(\'wfu-open\'); document.getElementById(\'wfu_version_comparison\').style.display = \'none\';}" style="vertical-align: middle;" data-title-open="'.esc_html__('Close', 'wp-file-upload').'" data-title-closed="'.esc_html__('See why', 'wp-file-upload').'">'.esc_html__('See why', 'wp-file-upload').'</button>';
 	$echo_str .= "\n\t\t\t\t\t\t".'</div>';
 	$echo_str .= "\n\t\t\t\t\t\t".'<br /><div id="wfu_version_comparison" style="display:none; background-color:lightyellow; border:1px solid yellow; margin:10px 0; padding:10px;">';
@@ -888,7 +896,7 @@ function wfu_manage_mainmenu($message = '') {
 		$echo_str .= "\n\t\t\t\t\t\t\t\t".'</div>';
 	}
 	$echo_str .= "\n\t\t\t\t\t\t\t".'</div>';
-	$echo_str .= "\n\t\t\t\t\t\t\t".'<a class="button-primary" href="'.esc_url(WFU_PRO_VERSION_URL).'">'.esc_html__('Go for the PRO version', 'wp-file-upload').'</a>';
+	$echo_str .= "\n\t\t\t\t\t\t\t".'<a class="button-primary" href="'.esc_url(wfu_pro_url('settings_compare')).'">'.esc_html__('Go for the PRO version', 'wp-file-upload').'</a>';
 	$echo_str .= "\n\t\t\t\t\t\t".'</div>';
 	$echo_str .= "\n\t\t\t\t\t".'</td>';
 	$echo_str .= "\n\t\t\t\t".'</tr>';

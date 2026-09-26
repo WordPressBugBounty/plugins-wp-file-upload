@@ -1,12 +1,8 @@
 <!--  -->
 <div class="wfu-releasenotes-container">
-	<span><strong>Version 5.1.10</strong> is a patch of the previous version for fixing a bug with email notifications.<br /><br />
-	The previous version 5.1.9 introduced some improvements on the management of the plugin's <strong>transient options</strong>.<br /><br />
-	During uploads the plugin generates transient data that are stored in the database. Since the previous version automatic clean-up operations are executed that periodically delete these transient data from the database, so that they are not accumulated.<br /><br />
-	It also introduced a new section in <strong>Maintenance Actions</strong> tab in the Dashboard area of the plugin, <strong>Transient Options</strong>, from where admins can view statistics about the plugin's transient data and manually delete them.<br /><br />
-	Please note that since version 5.0.0 the plugin name has changed to <strong>Iptanus File Upload</strong>. This is just a rebranding. The plugin continues working as before.<br /><br />
-	For more details about this version's changes please visit the <strong>Release Notes</strong> of the plugin's </span>
-	<a href="http://www.iptanus.com/wordpress-plugins/wordpress-file-upload/">support page</a><span>.</span>
+	<p class="wfu-releasenotes-summary"><strong>Version 5.2.0</strong> is a security and maintenance update. It fixes an <strong>SQL injection</strong> issue reported through Patchstack &mdash; for this reason alone, updating as soon as possible is recommended. It also corrects a number of outdated links and descriptions throughout the plugin's documentation, and adds a short dismissible note in the upload settings about where files can be sent.<br /><br />
+	The bulk of this release is in the <strong>Professional</strong> version, where every bundled library has been renewed and placed under a namespace of its own, and the cloud extensions are now built in variants matched to each site's PHP version.</p>
+	<p class="wfu-releasenotes-footer">For more details about this version's changes please visit the <strong>Release Notes</strong> of the plugin's <a href="https://www.iptanus.com/wordpress-plugins/iptanus-file-upload/?utm_source=plugin&amp;utm_medium=release_notes">support page</a>.</p>
 </div>
 <!--  -->
 <!--  -->

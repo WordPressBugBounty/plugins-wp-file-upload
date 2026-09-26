@@ -1,9 +1,9 @@
 <?php
 /*Plugin Name: Iptanus File Upload
 /*
-Plugin URI: https://www.iptanus.com/support/wordpress-file-upload
+Plugin URI: https://www.iptanus.com/wordpress-plugins/iptanus-file-upload/
 Description: <strong>This is former Wordpress File Upload plugin.</strong> It provides a simple, yet powerful, interface to upload files from a page or post.
-Version: 5.1.10
+Version: 5.2.0
 Requires at least: 3.0
 Author: Nickolas Bossinas
 Author URI: https://www.iptanus.com/nickolas
@@ -13,7 +13,7 @@ Text Domain: wp-file-upload
 Domain Path: /languages
 
 Iptanus File Upload (Wordpress Plugin)
-Copyright (C) 2010-2025 Nickolas Bossinas
+Copyright (C) 2010-2026 Nickolas Bossinas
 Contact me at https://www.iptanus.com/contact
 
 This program is free software: you can redistribute it and/or modify

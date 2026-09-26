@@ -90,6 +90,9 @@ add_action('wp_ajax_wfu_ajax_action_get_adminbrowser_page', 'wfu_ajax_action_get
 add_action('wp_ajax_wfu_ajax_action_get_remotefiles_page', 'wfu_ajax_action_get_remotefiles_page');
 add_action('wp_ajax_wfu_ajax_action_include_file', 'wfu_ajax_action_include_file');
 add_action('wp_ajax_wfu_ajax_action_update_envar', 'wfu_ajax_action_update_envar');
+//no nopriv counterpart: only an administrator can see a notice, so only an
+//administrator can dismiss one
+add_action('wp_ajax_wfu_ajax_action_dismiss_notice', 'wfu_ajax_action_dismiss_notice');
 add_action('wp_ajax_wfu_ajax_action_transfer_command', 'wfu_ajax_action_transfer_command');
 add_action('wp_ajax_wfu_ajax_action_pdusers_get_users', 'wfu_ajax_action_pdusers_get_users');
 //personal data related actions
@@ -839,7 +842,7 @@ function wordpress_file_upload_function($incomingfromhandler) {
 	// First we test that WP nonce passes the check
 	$wfu_checkpass = ( $wfu_checkpass && isset($_REQUEST["wfu_uploader_nonce"]) && wp_verify_nonce( sanitize_text_field( wp_unslash ( $_REQUEST["wfu_uploader_nonce"] ) ), "wfu-uploader-nonce" ) !== false );
 
-	$unique_id = ( isset($_POST['uniqueuploadid_'.$sid]) ? sanitize_text_field($_POST['uniqueuploadid_'.$sid]) : "" );
+	$unique_id = ( isset($_POST['uniqueuploadid_'.$sid]) ? wfu_sanitize_code($_POST['uniqueuploadid_'.$sid]) : "" );
 	//  Check that upload_id is valid
 	$wfu_checkpass = ( $wfu_checkpass && strlen($unique_id) == 10 );
 

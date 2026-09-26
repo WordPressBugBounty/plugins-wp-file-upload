@@ -946,6 +946,19 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 			$echo_str .= $dlp."\t\t".'<input id="wfu_attribute_'.esc_attr($attr).'" type="text" name="wfu_text_elements" value="'.esc_attr($def['value']).'" />';
 			if ( $def['variables'] != null ) $echo_str .= $dlp.wfu_insert_variables($def['variables'], 'wfu_variable wfu_variable_'.$attr);
 		}
+		//Cloud destinations are the main reason people move to the Professional
+		//version, but in this edition those attributes are removed entirely
+		//rather than shown disabled - so someone deciding where uploaded files
+		//should go has no way of knowing the option exists at all. This is the
+		//one place where the absence is invisible and the person reading is the
+		//one who would decide. wfu_render_notice() returns an empty string
+		//unless the notice is currently allowed, so the rules stay in one place.
+		if ( $attr == "uploadpath" )
+			$echo_str .= $dlp."\t\t".wfu_render_notice(
+				"storage",
+				__('Uploads can also go straight to Google Drive, Dropbox, OneDrive or Amazon S3 in the :Professional: version.', 'wp-file-upload'),
+				wfu_pro_url('notice_storage')
+			);
 		$echo_str .= $dlp."\t".'</div></td>';
 		if ( $def['parent'] == "" ) {
 			$echo_str .= $dlp."\t".'<td style="position:relative; vertical-align:top; padding:0;"><div class="wfu_td_div">';
