@@ -38,7 +38,7 @@ function wfu_ajax_action_send_email_notification() {
 	$sid = $arr['shortcode_id'];
 	if ( WFU_USVAR("wfu_token_".$sid) != $session_token ) die();
 	if ( $user->user_login != $arr['user_login'] ) {
-		$arr = wfu_get_params_fields_from_index($params_index.'[|][|]'.$arr['page_id'].'[|][|]'.$sid.'[|][|]'.$arr['user_login'], $session_token);
+		$arr = wfu_get_params_fields_from_index($params_index.'||'.$arr['page_id'].'||'.$sid.'||'.$arr['user_login'], $session_token);
 		if ( $user->user_login != $arr['user_login'] ) die();
 	}
 
@@ -420,14 +420,22 @@ function wfu_ajax_action_callback() {
 	if ( $params_index == "" ) die();
 	
 	$user = wp_get_current_user();
+	//the detailed session/user/request dumps in the error branches below are
+	//debugging aids (the front-end only reads them when debug mode is on); expose
+	//them only to administrators or when plugin debug mode is on, so that normal
+	//(including unauthenticated) error responses do not leak internal data.
+	$wfu_show_debug = ( WFU_VAR("WFU_DEBUG") == "ON" || current_user_can('manage_options') );
 	$arr = wfu_get_params_fields_from_index($params_index, $session_token);
 	$sid = $arr['shortcode_id'];
 	//check referrer using server sessions to avoid CSRF attacks
 	if ( WFU_USVAR("wfu_token_".$sid) != $session_token ) {
-		$echo_str = __('Session failed!', 'wp-file-upload')."<br/><br/>".__('Session Data:', 'wp-file-upload')."<br/>";
-		$echo_str .= esc_html(print_r(wfu_sanitize(WFU_USALL()), true));
-		$echo_str .= "<br/><br/>".__('Post Data:', 'wp-file-upload')."<br/>";
-		$echo_str .= esc_html(print_r(wfu_sanitize($_REQUEST), true));
+		$echo_str = __('Session failed!', 'wp-file-upload');
+		if ( $wfu_show_debug ) {
+			$echo_str .= "<br/><br/>".__('Session Data:', 'wp-file-upload')."<br/>";
+			$echo_str .= esc_html(print_r(wfu_sanitize(WFU_USALL()), true));
+			$echo_str .= "<br/><br/>".__('Post Data:', 'wp-file-upload')."<br/>";
+			$echo_str .= esc_html(print_r(wfu_sanitize($_REQUEST), true));
+		}
 		$echo_str .= 'force_errorabort_code';
 		/**
 		 * Customise Output on Session Error.
@@ -444,14 +452,17 @@ function wfu_ajax_action_callback() {
 	}
 
 	if ( $user->user_login != $arr['user_login'] ) {
-		$arr = wfu_get_params_fields_from_index($params_index.'[|][|]'.$arr['page_id'].'[|][|]'.$sid.'[|][|]'.$arr['user_login'], $session_token);
+		$arr = wfu_get_params_fields_from_index($params_index.'||'.$arr['page_id'].'||'.$sid.'||'.$arr['user_login'], $session_token);
 		if ( $user->user_login != $arr['user_login'] ) {
-			$echo_str = __('User failed!', 'wp-file-upload')."<br/><br/>".__('User Data:', 'wp-file-upload')."<br/>";
-			$echo_str .= esc_html(print_r(wfu_sanitize($user), true));
-			$echo_str .= "<br/><br/>".__('Post Data:', 'wp-file-upload')."<br/>";
-			$echo_str .= esc_html(print_r(wfu_sanitize($_REQUEST), true));
-			$echo_str .= "<br/><br/>".__('Params Data:', 'wp-file-upload')."<br/>";
-			$echo_str .= esc_html(print_r(wfu_sanitize($arr), true));
+			$echo_str = __('User failed!', 'wp-file-upload');
+			if ( $wfu_show_debug ) {
+				$echo_str .= "<br/><br/>".__('User Data:', 'wp-file-upload')."<br/>";
+				$echo_str .= esc_html(print_r(wfu_sanitize($user), true));
+				$echo_str .= "<br/><br/>".__('Post Data:', 'wp-file-upload')."<br/>";
+				$echo_str .= esc_html(print_r(wfu_sanitize($_REQUEST), true));
+				$echo_str .= "<br/><br/>".__('Params Data:', 'wp-file-upload')."<br/>";
+				$echo_str .= esc_html(print_r(wfu_sanitize($arr), true));
+			}
 			$echo_str .= 'force_errorabort_code';
 			/**
 			 * Customise Output on User Error.

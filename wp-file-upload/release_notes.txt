@@ -1,7 +1,6 @@
 <!--  -->
 <div class="wfu-releasenotes-container">
-	<p class="wfu-releasenotes-summary"><strong>Version 5.2.0</strong> is a security and maintenance update. It fixes an <strong>SQL injection</strong> issue reported through Patchstack &mdash; for this reason alone, updating as soon as possible is recommended. It also corrects a number of outdated links and descriptions throughout the plugin's documentation, and adds a short dismissible note in the upload settings about where files can be sent.<br /><br />
-	The bulk of this release is in the <strong>Professional</strong> version, where every bundled library has been renewed and placed under a namespace of its own, and the cloud extensions are now built in variants matched to each site's PHP version.</p>
+	<p class="wfu-releasenotes-summary"><strong>Version 5.2.1</strong> is a security update. It fixes an issue where a crafted value of an upload form parameter could be interpreted as a regular expression rather than as a plain identifier, and it stops upload error responses from including internal session or request details. Updating as soon as possible is recommended.</p>
 	<p class="wfu-releasenotes-footer">For more details about this version's changes please visit the <strong>Release Notes</strong> of the plugin's <a href="https://www.iptanus.com/wordpress-plugins/iptanus-file-upload/?utm_source=plugin&amp;utm_medium=release_notes">support page</a>.</p>
 </div>
 <!--  -->

@@ -6069,7 +6069,7 @@ function wfu_shortcode_attribute_definitions_adjusted($shortcode_atts) {
 function wfu_generate_current_params_index($shortcode_id, $user_login) {
 	global $post;
 	$cur_index_str = '||'.$post->ID.'||'.$shortcode_id.'||'.$user_login;
-	$cur_index_str_search = '\|\|'.$post->ID.'\|\|'.$shortcode_id.'\|\|'.$user_login;
+	$cur_index_str_search = '\|\|'.$post->ID.'\|\|'.$shortcode_id.'\|\|'.preg_quote($user_login, "/");
 	$index_str = get_option('wfu_params_index');
 	$index = explode("&&", $index_str);
 	foreach ($index as $key => $value) if ($value == "") unset($index[$key]);
@@ -6127,7 +6127,13 @@ function wfu_get_params_fields_from_index($params_index, $session_token = "") {
 	$fields = array();
 	$index_str = get_option('wfu_params_index');
 	$index = explode("&&", $index_str);
-	$index_match = preg_grep("/^".$params_index."/", $index);
+	//$params_index is an attacker-reachable identifier (it arrives from the AJAX
+	//request), so it is escaped before being used as a regex pattern; otherwise
+	//regex metacharacters would be interpreted, and a malformed pattern would make
+	//preg_grep() return false. Legitimate indexes are alphanumeric, so escaping
+	//does not change normal matching.
+	$index_match = preg_grep("/^".preg_quote($params_index, "/")."/", $index);
+	if ( !is_array($index_match) ) $index_match = array();
 	if ( count($index_match) >= 1 )
 		foreach ( $index_match as $key => $value )
 			if ( $value == "" ) unset($index_match[$key]);

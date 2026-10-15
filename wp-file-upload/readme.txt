@@ -4,7 +4,7 @@ Donate link: https://www.iptanus.com/pricing/?utm_source=wporg&utm_medium=readme
 Tags: file upload, upload form, front end upload, user uploads, webcam
 Requires at least: 3.0
 Tested up to: 7.0
-Stable tag: 5.2.0
+Stable tag: 5.2.1
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -160,6 +160,10 @@ There is an option in plugin's settings in Dashboard to relax the CSS rules, so 
 8. Browse and search uploaded files from the WordPress dashboard.
 
 == Changelog ==
+
+= 5.2.1 =
+* fixed a security issue, reported by Vidhi Parmar, where a crafted value of an upload form parameter could be interpreted as a regular expression; the upload identifier is now treated strictly as a literal value
+* upload error responses no longer include internal session or request details unless debug mode is enabled
 
 = 5.2.0 =
 * fixed an SQL injection security issue reported through Patchstack, affecting an upload identifier that was not fully sanitized
