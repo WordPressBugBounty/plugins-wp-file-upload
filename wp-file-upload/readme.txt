@@ -148,6 +148,10 @@ In the free version the upload will fail. However in the Pro version the upload 
 
 There is an option in plugin's settings in Dashboard to relax the CSS rules, so that buttons and text boxes inherit the theme's styles. If additional styling is required, this can be done using CSS. The Professional version of the plugin allows CSS rules to be embed in the shortcode.
 
+= Where do I report security bugs found in this plugin? =
+
+Please report security bugs found in the source code of the Iptanus File Upload plugin through the [Patchstack Vulnerability Disclosure Program](https://patchstack.com/database/vdp/9414720c-d9a1-4980-940f-c87b7be82185). The Patchstack team will assist you with verification, CVE assignment, and notify the developers of this plugin.
+
 == Screenshots ==
 
 1. One shortcode, and any page accepts files.
