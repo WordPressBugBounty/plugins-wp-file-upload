@@ -1,6 +1,6 @@
 <!--  -->
 <div class="wfu-releasenotes-container">
-	<p class="wfu-releasenotes-summary"><strong>Version 5.2.1</strong> is a security update. It fixes an issue where a crafted value of an upload form parameter could be interpreted as a regular expression rather than as a plain identifier, and it stops upload error responses from including internal session or request details. Updating as soon as possible is recommended.</p>
+	<p class="wfu-releasenotes-summary"><strong>Version 5.2.2</strong> is a security update. It fixes an issue where a file whose contents are HTML but whose type is detected as non-text (for example a video file carrying a hidden script) could be uploaded and then run as a script in the browser; such files are now rejected. It also fixes a critical error that could occur when deleting admin notifications in bulk or filtering them. Updating as soon as possible is recommended.</p>
 	<p class="wfu-releasenotes-footer">For more details about this version's changes please visit the <strong>Release Notes</strong> of the plugin's <a href="https://www.iptanus.com/wordpress-plugins/iptanus-file-upload/?utm_source=plugin&amp;utm_medium=release_notes">support page</a>.</p>
 </div>
 <!--  -->

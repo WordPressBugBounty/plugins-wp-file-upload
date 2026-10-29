@@ -97,7 +97,14 @@ function wfu_manage_notifications($sort, $page = 1, $only_table_rows = false, $f
 			array_push($filters_per_type[$type], $item['code']);
 		}
 	}
-	
+	//An unspecified filter type (a status-only or category-only filter, or a
+	//malformed filter value) leaves its bucket unset. Default it to the full set
+	//of codes for that type, so the meta_query clauses below never operate on a
+	//null value (a fatal TypeError on PHP 8+) and an unconstrained type matches
+	//every notification instead of none.
+	if ( empty($filters_per_type['status']) ) $filters_per_type['status'] = array('read', 'unread');
+	if ( empty($filters_per_type['category']) ) $filters_per_type['category'] = array('info', 'warning', 'error');
+
 	//define referer (with sort data) to point to this url for use by the
 	//elements
 	$referer = wfu_notifications_url($sort, $page, $filter, $admin_nonce);

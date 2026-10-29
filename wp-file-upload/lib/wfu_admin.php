@@ -690,7 +690,7 @@ function wordpress_file_upload_manage_dashboard() {
 		$referer_url = wfu_flatten_path(wfu_get_filepath_from_safe(wfu_sanitize_code($referer)));
 		if ( $referer_url === false ) $referer_url = "";
 		$match = array();
-		preg_match("/\&sort=([^&]*)&pageid=([^&]*)&filter=(.*)/", $referer_url, $match);
+		preg_match("/\&sort=([^&]*)&pageid=([^&]*)&filter=([^&]*)/", $referer_url, $match);
 		$sort = ( isset($match[1]) ? $match[1] : "" );
 		$page = ( isset($match[2]) ? $match[2] : 1 );
 		$filter = ( isset($match[3]) ? $match[3] : "all" );

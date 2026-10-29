@@ -345,6 +345,12 @@ function wfu_execute_file_security_checks($checks, $filepath, $filename, $params
  */
 function wfu_security_filecontent_checks($filepath, $filename) {
 	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	// Reject files whose leading bytes would be mime-sniffed and executed as
+	// HTML by a browser, regardless of their detected MIME type. This blocks
+	// stored-XSS polyglots (e.g. a file detected as video/3gpp that begins with
+	// an HTML marker such as "<!--" and carries an inline <script>), which the
+	// mime-based pattern scan below does not catch for non-text files.
+	if ( wfu_file_leading_bytes_are_html($filepath) ) return WFU_ERROR_ADMIN_FILE_HASSCRIPTTAGS;
 	$patterns = array();
 	// determine script patterns to be included in scan
 	$script_pattern = wfu_content_scan_script_pattern($filepath, $filename);
@@ -362,6 +368,68 @@ function wfu_security_filecontent_checks($filepath, $filename) {
 	}
 	
 	return true;
+}
+
+/**
+ * Check if a File's Leading Bytes Would Be Sniffed as HTML.
+ *
+ * Browsers that receive a file without a reliable Content-Type (or with a
+ * sniffable one) inspect its first bytes and, if these match an HTML
+ * signature, render the file as HTML inside the site's origin, executing any
+ * script it contains. A file whose detected MIME type is non-text can still be
+ * sniffed this way - for example a video/3gpp polyglot that begins with "<!--"
+ * and embeds a <script> payload - resulting in stored Cross-Site Scripting.
+ * This function reproduces the browser's leading-byte sniffing so that such
+ * files can be rejected regardless of their detected MIME type or extension.
+ *
+ * Only the leading bytes are examined because a browser mime-sniffs a file as
+ * HTML solely from its start; a marker buried deeper in a binary file is never
+ * executed, so scanning the whole file for it would only add false positives.
+ *
+ * @since 5.2.2
+ *
+ * @param string $filepath The path to the file.
+ *
+ * @return bool True if the leading bytes would be sniffed as HTML.
+ */
+function wfu_file_leading_bytes_are_html($filepath) {
+	$handle = @fopen($filepath, 'rb');
+	if ( !$handle ) return false;
+	$head = @fread($handle, 512);
+	@fclose($handle);
+	if ( $head === false || $head === "" ) return false;
+	// strip the leading whitespace bytes that browsers ignore before sniffing
+	// (tab, LF, FF, CR, space)
+	$head = ltrim($head, "\x09\x0A\x0C\x0D\x20");
+	if ( $head === "" ) return false;
+	$lower = strtolower($head);
+	// HTML comment and doctype introducers - the browser treats the file as
+	// HTML on either of these
+	if ( substr($lower, 0, 4) === "<!--" ) return true;
+	if ( substr($lower, 0, 9) === "<!doctype" ) return true;
+	// tag-based HTML/SVG signatures recognized by the browser mime-sniffing
+	// algorithm. Each matches only when followed by a tag-terminating byte
+	// (whitespace or '>'), so "<a " and "<a>" match while "<audio" or
+	// "<article" do not falsely trigger on unrelated data.
+	$tag_signatures = array(
+		"<html", "<head", "<script", "<iframe", "<h1", "<div", "<font",
+		"<table", "<a", "<style", "<title", "<b", "<body", "<br", "<p", "<svg"
+	);
+	foreach ( $tag_signatures as $sig ) {
+		$len = strlen($sig);
+		if ( substr($lower, 0, $len) === $sig ) {
+			$next = substr($lower, $len, 1);
+			if ( $next === "" || $next === ">" || $next === " " || $next === "\t" || $next === "\n" || $next === "\x0C" || $next === "\r" )
+				return true;
+		}
+	}
+	// markup wrapped in an XML declaration (e.g. "<?xml ...><svg onload=...>"
+	// or XHTML) that embeds script-capable tags within the sniff window
+	if ( substr($lower, 0, 5) === "<?xml" ) {
+		if ( strpos($lower, "<svg") !== false || strpos($lower, "<script") !== false || strpos($lower, "<html") !== false )
+			return true;
+	}
+	return false;
 }
 
 /**
