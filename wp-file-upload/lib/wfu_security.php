@@ -408,9 +408,15 @@ function wfu_file_leading_bytes_are_html($filepath) {
 	if ( substr($lower, 0, 4) === "<!--" ) return true;
 	if ( substr($lower, 0, 9) === "<!doctype" ) return true;
 	// tag-based HTML/SVG signatures recognized by the browser mime-sniffing
-	// algorithm. Each matches only when followed by a tag-terminating byte
-	// (whitespace or '>'), so "<a " and "<a>" match while "<audio" or
-	// "<article" do not falsely trigger on unrelated data.
+	// algorithm. A signature matches when the tag name that follows "<" is
+	// complete, i.e. the next byte is NOT a tag-name character ([A-Za-z0-9-]).
+	// The browser ends the tag name on any other byte - not only whitespace or
+	// '>' but also '/', '=', '"', ':' and so on - and sniffs the prefix as that
+	// tag, so "<h1/x>" or "<a/href=x>" are sniffed as HTML exactly like "<h1 >".
+	// Treating only whitespace and '>' as terminators (as the 5.2.2 release did)
+	// let such files pass this check while browsers still ran their payload.
+	// Requiring a complete tag name still keeps "<audio"/"<article" from
+	// matching "<a", because the next byte there is a letter.
 	$tag_signatures = array(
 		"<html", "<head", "<script", "<iframe", "<h1", "<div", "<font",
 		"<table", "<a", "<style", "<title", "<b", "<body", "<br", "<p", "<svg"
@@ -419,7 +425,12 @@ function wfu_file_leading_bytes_are_html($filepath) {
 		$len = strlen($sig);
 		if ( substr($lower, 0, $len) === $sig ) {
 			$next = substr($lower, $len, 1);
-			if ( $next === "" || $next === ">" || $next === " " || $next === "\t" || $next === "\n" || $next === "\x0C" || $next === "\r" )
+			// a tag-name character continues the name, so the signature is only
+			// a prefix of a longer (possibly unknown) tag and must not match;
+			// anything else - including end of data - terminates the name and
+			// confirms the file begins with this tag
+			$is_tagname_char = ( $next !== "" && ( ( $next >= "a" && $next <= "z" ) || ( $next >= "0" && $next <= "9" ) || $next === "-" ) );
+			if ( !$is_tagname_char )
 				return true;
 		}
 	}

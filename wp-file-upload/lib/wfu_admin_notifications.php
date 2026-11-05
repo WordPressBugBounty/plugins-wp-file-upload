@@ -116,22 +116,10 @@ function wfu_manage_notifications($sort, $page = 1, $only_table_rows = false, $f
 		'status'  => 'approve',
 		'count' => true
 		);
-	//apply filters
-	if ( $filter != 'all' ) {
-		$args['meta_query'] = array(
-			'relation' => 'AND',
-			'status_clause' => array(
-				'key' => 'status',
-				'value' => $filters_per_type['status'] + array(''),
-				'compare' => 'IN'
-			),
-			'category_clause' => array(
-				'key' => 'category',
-				'value' => $filters_per_type['category'] + array(''),
-				'compare' => 'IN'
-			),
-		);
-	}
+	//apply filters (shared with the listing query and the across-all-pages
+	//bulk operations, see wfu_notifications_filter_meta_query)
+	$meta_query = wfu_notifications_filter_meta_query($filter);
+	if ( $meta_query !== null ) $args['meta_query'] = $meta_query;
 	$notifications_count = get_comments( $args );
 	$filters['all']['count'] = $notifications_count;
 	//get unread notifications count from database and update filters
@@ -243,22 +231,10 @@ function wfu_manage_notifications($sort, $page = 1, $only_table_rows = false, $f
 		$args['number'] = $maxrows;
 		$args['paged'] = $page;
 	}
-	//apply filters
-	if ( $filter != 'all' ) {
-		$args['meta_query'] = array(
-			'relation' => 'AND',
-			'status_clause' => array(
-				'key' => 'status',
-				'value' => $filters_per_type['status'] + array(''),
-				'compare' => 'IN'
-			),
-			'category_clause' => array(
-				'key' => 'category',
-				'value' => $filters_per_type['category'] + array(''),
-				'compare' => 'IN'
-			),
-		);
-	}
+	//apply filters (shared with the count query and the across-all-pages bulk
+	//operations, see wfu_notifications_filter_meta_query)
+	$meta_query = wfu_notifications_filter_meta_query($filter);
+	if ( $meta_query !== null ) $args['meta_query'] = $meta_query;
 	//apply sorting
 	if ( $sort == "" ) $sort = '-date';
 	$notfsort = substr($sort, -4);
@@ -320,12 +296,16 @@ function wfu_manage_notifications($sort, $page = 1, $only_table_rows = false, $f
 		$echo_str .= "\n\t\t\t".'<input id="wfu_notifications_referer" type="hidden" value="'.esc_attr($referer_code).'" />';
 		$echo_str .= "\n\t\t\t".'<input id="wfu_notifications_nonce" type="hidden" value="'.esc_attr($notifications_nonce).'" />';
 		$echo_str .= "\n\t\t\t".'<input id="wfu_admin_nonce" type="hidden" value="'.$admin_nonce.'" />';
+		$echo_str .= "\n\t\t\t".'<input id="wfu_notifications_total_count" type="hidden" value="'.esc_attr($notifications_count).'" />';
 		$echo_str .= "\n\t\t".'</div>';
+		//"select all across pages" notice; populated and toggled by JS when the
+		//header checkbox selects every visible row and more pages exist
+		$echo_str .= "\n\t\t".'<div id="wfu_notifications_selectall_notice" class="wfu-select-all-pages" style="display:none;"></div>';
 		$echo_str .= "\n\t\t".'<table id="wfu_notifications_table" class="wfu-notifications wp-list-table widefat fixed striped">';
 		$echo_str .= "\n\t\t\t".'<thead>';
 		$echo_str .= "\n\t\t\t\t".'<tr>';
 		$echo_str .= "\n\t\t\t\t\t".'<td width="5%" class="manage-column check-column">';
-		$echo_str .= "\n\t\t\t\t\t\t".'<input id="wfu_select_all_visible" type="checkbox" />';
+		$echo_str .= "\n\t\t\t\t\t\t".'<input id="wfu_select_all_visible" type="checkbox" onchange="wfu_notifications_select_all_visible_changed()" />';
 		$echo_str .= "\n\t\t\t\t\t".'</td>';
 		$echo_str .= "\n\t\t\t\t\t".'<th scope="col" width="50%" class="manage-column column-primary">';
 		$sort_param = ( $notfsort == 'name' ? ( $order == SORT_ASC ? '-name' : 'name' ) : 'name' );
@@ -367,7 +347,7 @@ function wfu_manage_notifications($sort, $page = 1, $only_table_rows = false, $f
 		}
 		$echo_str .= "\n\t\t\t\t".'<tr class="wfu-notifications-row wfu-'.esc_attr($notf['status']).'" onmouseover="var actions=document.getElementsByName(\'wfu_notf_actions\'); for (var i=0; i<actions.length; i++) {actions[i].style.visibility=\'hidden\';} document.getElementById(\'wfu_notf_actions_'.$ii.'\').style.visibility=\'visible\'" onmouseout="var actions=document.getElementsByName(\'wfu_notf_actions\'); for (var i=0; i<actions.length; i++) {actions[i].style.visibility=\'hidden\';}">';
 		$echo_str .= "\n\t\t\t\t\t".'<th scope="row" class="check-column">';
-		$echo_str .= "\n\t\t\t\t\t\t".'<input name="'.esc_attr($key).'" class="wfu_selectors wfu_selcode_'.esc_attr($key).'" type="checkbox"  />';
+		$echo_str .= "\n\t\t\t\t\t\t".'<input name="'.esc_attr($key).'" class="wfu_selectors wfu_selcode_'.esc_attr($key).'" type="checkbox" onclick="wfu_notifications_selector_changed()" />';
 		$echo_str .= "\n\t\t\t\t\t".'</th>';
 		$echo_str .= "\n\t\t\t\t\t".'<td data-colname="'.esc_html__('Description', 'wp-file-upload').'" class="column-primary">';
 		$echo_str .= "\n\t\t\t\t\t\t".'<span>'.$description.'</span>';
@@ -418,6 +398,76 @@ function wfu_notifications_url($sort, $page, $filter, $nonce) {
 }
 
 /**
+ * Build the Notifications Filter meta_query.
+ *
+ * Translates a notifications page $filter string (e.g. "all", "unread" or
+ * "read_error") into the get_comments() meta_query that selects every
+ * notification matching that filter. This is the same clause the page's own
+ * listing query uses, so keeping it in one function lets the listing and the
+ * across-all-pages bulk operations share a single definition: the set a user
+ * deletes or marks "across all pages" is exactly the set the list would show
+ * under the active filter.
+ *
+ * A status-only or category-only (or malformed) filter leaves one type
+ * unconstrained; that type defaults to its full set of codes so the clause
+ * never runs against a null value (a fatal TypeError on PHP 8+) and matches
+ * every notification of that type instead of none.
+ *
+ * @since 5.2.3
+ *
+ * @param string $filter The filter string.
+ *
+ * @return array|null The meta_query array, or null for the "all" filter (no
+ *         constraint).
+ */
+function wfu_notifications_filter_meta_query($filter) {
+	if ( $filter == 'all' ) return null;
+	$filters_arr = explode("_", $filter);
+	$status = array_values(array_intersect(array('read', 'unread'), $filters_arr));
+	$category = array_values(array_intersect(array('info', 'warning', 'error'), $filters_arr));
+	if ( empty($status) ) $status = array('read', 'unread');
+	if ( empty($category) ) $category = array('info', 'warning', 'error');
+	return array(
+		'relation' => 'AND',
+		'status_clause' => array(
+			'key' => 'status',
+			'value' => $status + array(''),
+			'compare' => 'IN'
+		),
+		'category_clause' => array(
+			'key' => 'category',
+			'value' => $category + array(''),
+			'compare' => 'IN'
+		),
+	);
+}
+
+/**
+ * Get the IDs of all Notifications matching a Filter.
+ *
+ * Returns the comment IDs of every live (approved) notification matching the
+ * given filter, across all pages - the full set behind the page's "select all
+ * notifications" action. Uses the shared filter clause from
+ * wfu_notifications_filter_meta_query() so the result matches the listing.
+ *
+ * @since 5.2.3
+ *
+ * @param string $filter The filter string.
+ *
+ * @return array A list of notification (comment) IDs.
+ */
+function wfu_get_all_notification_ids($filter) {
+	$args = array(
+		'type'   => 'wfunotification',
+		'status' => 'approve',
+		'fields' => 'ids'
+	);
+	$meta_query = wfu_notifications_filter_meta_query($filter);
+	if ( $meta_query !== null ) $args['meta_query'] = $meta_query;
+	return get_comments( $args );
+}
+
+/**
  * Mark Notifications Read/Unread.
  *
  * This function marks a list of notifications read or unread.
@@ -452,6 +502,60 @@ function wfu_delete_notifications($keys) {
 		);
 		wp_update_comment( $commentarr );
 	}
+}
+
+/**
+ * Mark All Notifications Read/Unread (across all pages).
+ *
+ * This function marks every notification matching the given filter read or
+ * unread, not only the ones on the visible page. It resolves the matching set
+ * through the shared filter clause and reuses wfu_mark_notifications().
+ *
+ * @since 5.2.3
+ *
+ * @param string $filter The active filter string.
+ * @param string $status The new status. It can be 'read' or 'unread'.
+ *
+ * @return int The number of notifications marked.
+ */
+function wfu_mark_all_notifications($filter, $status) {
+	$ids = wfu_get_all_notification_ids($filter);
+	if ( count($ids) > 0 ) wfu_mark_notifications($ids, $status);
+	return count($ids);
+}
+
+/**
+ * Delete All Notifications (across all pages).
+ *
+ * This function deletes every notification matching the given filter, across
+ * all pages. Unlike wfu_delete_notifications() (a soft delete that only hides
+ * rows by moving them to the 'hold' status), this HARD-deletes the matching
+ * notifications - removing both the comment and its comment meta - so the
+ * database space is actually reclaimed. It is meant for clearing large
+ * accumulations that the per-page bulk delete cannot reach. It uses the same
+ * two-statement pattern as the plugin purge (wfu_purge_data), scoped to the
+ * matching IDs.
+ *
+ * @since 5.2.3
+ *
+ * @param string $filter The active filter string.
+ *
+ * @return int The number of notifications deleted.
+ */
+function wfu_delete_all_notifications($filter) {
+	global $wpdb;
+	$ids = wfu_get_all_notification_ids($filter);
+	if ( count($ids) == 0 ) return 0;
+	//sanitize to integers and build the IN list
+	$ids = array_map('intval', $ids);
+	$in = implode(",", $ids);
+	$wpdb->query( "DELETE FROM ".$wpdb->prefix."commentmeta WHERE comment_id IN (".$in.")" );
+	$wpdb->query( "DELETE FROM ".$wpdb->prefix."comments WHERE comment_ID IN (".$in.") AND comment_type = 'wfunotification'" );
+	//the raw deletes bypass WordPress' comment cache; clear it (this also bumps
+	//the comment-query 'last_changed' key) so get_comments() does not return the
+	//deleted rows when the page is re-rendered in this same request
+	clean_comment_cache( $ids );
+	return count($ids);
 }
 
 /**

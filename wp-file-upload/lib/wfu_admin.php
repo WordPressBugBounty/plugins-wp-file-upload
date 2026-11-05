@@ -64,7 +64,7 @@ function wordpress_file_upload_admin_init() {
 		//registered
 		if ( isset($ret_data['return_value']) ) return $ret_data['return_value'];
 		//continue with script and style registering
-		wp_register_style('wordpress-file-upload-admin-style', WPFILEUPLOAD_DIR.'css/wordpress_file_upload_adminstyle.css',false,'1.0','all');
+		wp_register_style('wordpress-file-upload-admin-style', WPFILEUPLOAD_DIR.'css/wordpress_file_upload_adminstyle.css',false,filemtime(ABSWPFILEUPLOAD_DIR.'css/wordpress_file_upload_adminstyle.css'),'all');
 		wp_register_style('wordpress-file-upload-adminbar-style', WPFILEUPLOAD_DIR.'css/wordpress_file_upload_adminbarstyle.css',false,'1.0','all');
 		//do not register JQuery UI css if $ret_data denotes incompatibility
 		//issues
@@ -122,7 +122,7 @@ function wordpress_file_upload_admin_init() {
 		//registered
 		if ( isset($ret_data['return_value']) ) return $ret_data['return_value'];
 		//continue with script and style registering
-		wp_register_style('wordpress-file-upload-admin-style', WPFILEUPLOAD_DIR.'css/wordpress_file_upload_adminstyle.css',false,'1.0','all');
+		wp_register_style('wordpress-file-upload-admin-style', WPFILEUPLOAD_DIR.'css/wordpress_file_upload_adminstyle.css',false,filemtime(ABSWPFILEUPLOAD_DIR.'css/wordpress_file_upload_adminstyle.css'),'all');
 		wp_register_style('wordpress-file-upload-adminbar-style', WPFILEUPLOAD_DIR.'css/wordpress_file_upload_adminbarstyle.css',false,'1.0','all');
 		//do not register JQuery UI css if $ret_data denotes incompatibility
 		//issues
@@ -234,6 +234,7 @@ function wfu_enqueue_admin_scripts() {
 		 */
 		do_action("_wfu_enqueue_admin_scripts");
 		$WFUPluginParams = array("wfu_ajax_url" => wfu_ajaxurl());
+		$WFUPluginParams["strings"] = wfu_admin_js_strings();
 		wp_localize_script( 'wordpress_file_upload_admin_script', 'WFUPluginParams', $WFUPluginParams );
 	}
 }
@@ -267,8 +268,27 @@ function wfu_enqueue_uploadedfiles_admin_scripts() {
 			wp_enqueue_style('jquery-ui-css');
 		wp_enqueue_script('wordpress_file_upload_admin_script');
 		$WFUPluginParams = array("wfu_ajax_url" => wfu_ajaxurl());
+		$WFUPluginParams["strings"] = wfu_admin_js_strings();
 		wp_localize_script( 'wordpress_file_upload_admin_script', 'WFUPluginParams', $WFUPluginParams );
 	}
+}
+
+/**
+ * Translatable strings passed to the admin JavaScript.
+ *
+ * Collected here as real gettext calls so the Languages tool extracts them
+ * into the catalogues; the admin script reads them by key from
+ * WFUPluginParams.strings instead of hardcoding English (see the
+ * wfu_notifications_* selection handlers). %d is substituted client-side.
+ */
+function wfu_admin_js_strings() {
+	return array(
+		"notif_selected_page" => __('All %d notifications on this page are selected.', 'wp-file-upload'),
+		"notif_select_all" => __('Select all %d notifications.', 'wp-file-upload'),
+		"notif_selected_all" => __('All %d notifications are selected.', 'wp-file-upload'),
+		"notif_clear" => __('Clear selection.', 'wp-file-upload'),
+		"notif_delete_all_confirm" => __('This will permanently delete ALL notifications matching the current filter, across every page. This action cannot be undone. Continue?', 'wp-file-upload'),
+	);
 }
 
 /**
@@ -676,17 +696,8 @@ function wordpress_file_upload_manage_dashboard() {
 		$echo_str = wfu_manage_notifications($sort, $page, false, $filter);
 	}
 	elseif ( ( $action == 'mark_notifications_read' || $action == 'mark_notifications_unread' || $action == 'delete_notifications' ) && $key != "" && $nonce != "" ) {
-		$keys_raw = explode(",", substr($key, 5));
-		$keys = array();
-		foreach ( $keys_raw as $ikey ) {
-			$k = wfu_sanitize_int($ikey);
-			if ( $k === $ikey ) array_push($keys, $k);
-		}
-		if ( count($keys) > 0 ) {
-			if ( $action == 'mark_notifications_read' ) wfu_mark_notifications($keys, 'read');
-			elseif ( $action == 'mark_notifications_unread' ) wfu_mark_notifications($keys, 'unread');
-			else wfu_delete_notifications($keys);
-		}
+		//recover the page's sort/pagination/filter from the (signed) referer; the
+		//filter also scopes the across-all-pages operations below
 		$referer_url = wfu_flatten_path(wfu_get_filepath_from_safe(wfu_sanitize_code($referer)));
 		if ( $referer_url === false ) $referer_url = "";
 		$match = array();
@@ -694,6 +705,26 @@ function wordpress_file_upload_manage_dashboard() {
 		$sort = ( isset($match[1]) ? $match[1] : "" );
 		$page = ( isset($match[2]) ? $match[2] : 1 );
 		$filter = ( isset($match[3]) ? $match[3] : "all" );
+		if ( $key === "all" ) {
+			//"select all across pages": act on every notification matching the
+			//active filter, not just the IDs on the visible page
+			if ( $action == 'mark_notifications_read' ) wfu_mark_all_notifications($filter, 'read');
+			elseif ( $action == 'mark_notifications_unread' ) wfu_mark_all_notifications($filter, 'unread');
+			else wfu_delete_all_notifications($filter);
+		}
+		else {
+			$keys_raw = explode(",", substr($key, 5));
+			$keys = array();
+			foreach ( $keys_raw as $ikey ) {
+				$k = wfu_sanitize_int($ikey);
+				if ( $k === $ikey ) array_push($keys, $k);
+			}
+			if ( count($keys) > 0 ) {
+				if ( $action == 'mark_notifications_read' ) wfu_mark_notifications($keys, 'read');
+				elseif ( $action == 'mark_notifications_unread' ) wfu_mark_notifications($keys, 'unread');
+				else wfu_delete_notifications($keys);
+			}
+		}
 		wfu_reset_unread_admin_notification_stats();
 		$echo_str = wfu_manage_notifications($sort, $page, false, $filter);
 	}
