@@ -398,41 +398,42 @@ function wfu_file_leading_bytes_are_html($filepath) {
 	$head = @fread($handle, 512);
 	@fclose($handle);
 	if ( $head === false || $head === "" ) return false;
-	// strip the leading whitespace bytes that browsers ignore before sniffing
-	// (tab, LF, FF, CR, space)
-	$head = ltrim($head, "\x09\x0A\x0C\x0D\x20");
+	// Strip the leading bytes a browser ignores before sniffing. Chromium's
+	// SniffForHTML() trims with base::TrimWhitespaceASCII(), whose ASCII
+	// whitespace set is tab, LF, vertical-tab (\x0B), FF, CR and space. The
+	// \x0B was missing before 5.2.4, so a file beginning with "\x0B<!--" slipped
+	// past this check while Chromium trimmed the \x0B and sniffed the "<!--" as
+	// HTML. We strip every byte <= 0x20 (a superset of that whitespace set) so no
+	// other control or whitespace byte a browser might trim can reopen the hole.
+	$len = strlen($head);
+	$start = 0;
+	while ( $start < $len && ord($head[$start]) <= 0x20 ) $start++;
+	$head = substr($head, $start);
 	if ( $head === "" ) return false;
 	$lower = strtolower($head);
 	// HTML comment and doctype introducers - the browser treats the file as
 	// HTML on either of these
 	if ( substr($lower, 0, 4) === "<!--" ) return true;
 	if ( substr($lower, 0, 9) === "<!doctype" ) return true;
-	// tag-based HTML/SVG signatures recognized by the browser mime-sniffing
-	// algorithm. A signature matches when the tag name that follows "<" is
-	// complete, i.e. the next byte is NOT a tag-name character ([A-Za-z0-9-]).
-	// The browser ends the tag name on any other byte - not only whitespace or
-	// '>' but also '/', '=', '"', ':' and so on - and sniffs the prefix as that
-	// tag, so "<h1/x>" or "<a/href=x>" are sniffed as HTML exactly like "<h1 >".
-	// Treating only whitespace and '>' as terminators (as the 5.2.2 release did)
-	// let such files pass this check while browsers still ran their payload.
-	// Requiring a complete tag name still keeps "<audio"/"<article" from
-	// matching "<a", because the next byte there is a letter.
+	// Tag-based HTML signatures recognized by the browser mime-sniffing
+	// algorithm (net/base/mime_sniffer.cc, kSniffableTags). The browser matches
+	// each of these as a plain case-insensitive PREFIX of the content
+	// (MatchMagicNumber() -> base::StartsWith(..., INSENSITIVE_ASCII)); it does
+	// NOT require the tag name to be "complete". So "<bx>", "<ax>", "<h1x>" and
+	// "<article>" all begin with the <b>/<a>/<h1> prefixes and are sniffed and
+	// rendered as HTML. Releases 5.2.2/5.2.3 only matched a signature when the
+	// following byte was not a tag-name character ([a-z0-9-]), which let exactly
+	// those files pass this check while browsers still ran their payload. We now
+	// match the way the browser does - any content beginning with one of these
+	// prefixes is treated as HTML. ("<svg" is not in the browser's table but is
+	// kept as a conservative extra, since an SVG rendered as a document can carry
+	// inline script.)
 	$tag_signatures = array(
 		"<html", "<head", "<script", "<iframe", "<h1", "<div", "<font",
 		"<table", "<a", "<style", "<title", "<b", "<body", "<br", "<p", "<svg"
 	);
 	foreach ( $tag_signatures as $sig ) {
-		$len = strlen($sig);
-		if ( substr($lower, 0, $len) === $sig ) {
-			$next = substr($lower, $len, 1);
-			// a tag-name character continues the name, so the signature is only
-			// a prefix of a longer (possibly unknown) tag and must not match;
-			// anything else - including end of data - terminates the name and
-			// confirms the file begins with this tag
-			$is_tagname_char = ( $next !== "" && ( ( $next >= "a" && $next <= "z" ) || ( $next >= "0" && $next <= "9" ) || $next === "-" ) );
-			if ( !$is_tagname_char )
-				return true;
-		}
+		if ( substr($lower, 0, strlen($sig)) === $sig ) return true;
 	}
 	// markup wrapped in an XML declaration (e.g. "<?xml ...><svg onload=...>"
 	// or XHTML) that embeds script-capable tags within the sniff window

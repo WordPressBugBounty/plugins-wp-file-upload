@@ -4,7 +4,7 @@ Donate link: https://www.iptanus.com/pricing/?utm_source=wporg&utm_medium=readme
 Tags: file upload, upload form, front end upload, user uploads, webcam
 Requires at least: 3.0
 Tested up to: 7.1
-Stable tag: 5.2.3
+Stable tag: 5.2.4
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -164,6 +164,9 @@ Please report security bugs found in the source code of the Iptanus File Upload 
 8. Browse and search uploaded files from the WordPress dashboard.
 
 == Changelog ==
+
+= 5.2.4 =
+* fixed a security issue, reported by peppa through Patchstack, that bypassed the HTML-content upload protection by beginning a file with a vertical-tab character or with an incomplete HTML tag name (for example <bx>); the detection now matches the way browsers sniff files as HTML, so such files are reliably rejected
 
 = 5.2.3 =
 * fixed a security issue, reported by netwind through Patchstack, that bypassed the HTML-content upload protection added in 5.2.2 when the opening HTML tag ended with a character other than a space (for example a slash); such files are now reliably detected and rejected

@@ -1,6 +1,6 @@
 <!--  -->
 <div class="wfu-releasenotes-container">
-	<p class="wfu-releasenotes-summary"><strong>Version 5.2.3</strong> is a security update. It closes a way to bypass the protection added in 5.2.2, where a file could still be crafted so that its HTML contents were run as a script in the browser; such files are now reliably detected and rejected. It also adds the ability to mark or delete all admin notifications across every page in a single action. Updating as soon as possible is recommended.</p>
+	<p class="wfu-releasenotes-summary"><strong>Version 5.2.4</strong> is a security update. It closes two further ways to bypass the HTML-content upload protection, where a file could be crafted so that its HTML contents were run as a script in the browser; the detection now matches the way browsers sniff files as HTML, so such files are reliably detected and rejected. Updating as soon as possible is recommended.</p>
 	<p class="wfu-releasenotes-footer">For more details about this version's changes please visit the <strong>Release Notes</strong> of the plugin's <a href="https://www.iptanus.com/wordpress-plugins/iptanus-file-upload/?utm_source=plugin&amp;utm_medium=release_notes">support page</a>.</p>
 </div>
 <!--  -->
