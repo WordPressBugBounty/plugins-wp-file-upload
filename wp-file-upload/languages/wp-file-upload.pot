@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iptanus File Upload\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 17:39+0200\n"
+"POT-Creation-Date: 2026-11-17 12:09+0200\n"
 "PO-Revision-Date: 2018-12-22 19:37+0200\n"
 "Last-Translator: nickboss <info@iptanus.com>\n"
 "Language-Team: Iptanus Team <info@iptanus.com>\n"
@@ -6475,47 +6475,47 @@ msgid ""
 "policy) of the uploader shortcode."
 msgstr ""
 
-#: lib/wfu_functions.php:7786
+#: lib/wfu_functions.php:7865
 msgid "Iptanus File Upload Consent Status"
 msgstr ""
 
-#: lib/wfu_functions.php:7789
+#: lib/wfu_functions.php:7868
 msgid "Consent Status"
 msgstr ""
 
-#: lib/wfu_functions.php:7791
+#: lib/wfu_functions.php:7870
 msgid "You have given your consent to store personal data."
 msgstr ""
 
-#: lib/wfu_functions.php:7791
+#: lib/wfu_functions.php:7870
 msgid "You have denied to store personal data."
 msgstr ""
 
-#: lib/wfu_functions.php:7791
+#: lib/wfu_functions.php:7870
 msgid "You have not answered to consent yet."
 msgstr ""
 
-#: lib/wfu_functions.php:7797
+#: lib/wfu_functions.php:7876
 msgid "Change status to"
 msgstr ""
 
-#: lib/wfu_functions.php:7799
+#: lib/wfu_functions.php:7878
 msgid "No change"
 msgstr ""
 
-#: lib/wfu_functions.php:7801 lib/wfu_functions.php:7809
+#: lib/wfu_functions.php:7880 lib/wfu_functions.php:7888
 msgid "Revoke Consent"
 msgstr ""
 
-#: lib/wfu_functions.php:7802 lib/wfu_functions.php:7806
+#: lib/wfu_functions.php:7881 lib/wfu_functions.php:7885
 msgid "Clear Consent"
 msgstr ""
 
-#: lib/wfu_functions.php:7805 lib/wfu_functions.php:7810
+#: lib/wfu_functions.php:7884 lib/wfu_functions.php:7889
 msgid "Give Consent"
 msgstr ""
 
-#: lib/wfu_functions.php:8549
+#: lib/wfu_functions.php:8628
 msgid "Dismiss this notice."
 msgstr ""
 

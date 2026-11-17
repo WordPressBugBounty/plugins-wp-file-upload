@@ -1,6 +1,6 @@
 <!--  -->
 <div class="wfu-releasenotes-container">
-	<p class="wfu-releasenotes-summary"><strong>Version 5.2.4</strong> is a security update. It closes two further ways to bypass the HTML-content upload protection, where a file could be crafted so that its HTML contents were run as a script in the browser; the detection now matches the way browsers sniff files as HTML, so such files are reliably detected and rejected. Updating as soon as possible is recommended.</p>
+	<p class="wfu-releasenotes-summary"><strong>Version 5.2.5</strong> is a security update. It fixes an issue where information entered in the uploader's user fields could be read by unauthenticated visitors through the WordPress media REST interface, when the uploaded files were also added to the Media Library or attached to posts. Updating as soon as possible is recommended.</p>
 	<p class="wfu-releasenotes-footer">For more details about this version's changes please visit the <strong>Release Notes</strong> of the plugin's <a href="https://www.iptanus.com/wordpress-plugins/iptanus-file-upload/?utm_source=plugin&amp;utm_medium=release_notes">support page</a>.</p>
 </div>
 <!--  -->

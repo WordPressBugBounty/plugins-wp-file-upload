@@ -1745,13 +1745,11 @@ function wfu_media_editor_properties() {
 	if ( $plugin_options["mediacustom"] != "1" ) return;
 	
 	$post = get_post();
-	$meta = wp_get_attachment_metadata( $post->ID );
-	
+	$userdata = wfu_get_media_userdata( $post->ID );
+
 	$echo_str = "";
-	if ( isset($meta["WFU User Data"]) && is_array($meta["WFU User Data"]) ) {
-		foreach ( $meta["WFU User Data"] as $label => $value )
-			$echo_str .= '<div class="misc-pub-section misc-pub-userdata">'.esc_html($label).': <strong>'.esc_html($value).'</strong></div>';
-	}
+	foreach ( $userdata as $field )
+		$echo_str .= '<div class="misc-pub-section misc-pub-userdata">'.esc_html($field["label"]).': <strong>'.esc_html($field["value"]).'</strong></div>';
 	echo $echo_str;
 }
 

@@ -699,6 +699,21 @@ function wfu_erase_userdata($username) {
 		$table_name2 = $wpdb->prefix . "wfu_userdata";
 		$table_name3 = $wpdb->prefix . "wfu_dbxqueue";
 
+		//also remove any legacy copies of the user's userdata that may still
+		//exist in attachment metadata of Media attachments created before
+		//version 5.2.5 (the userdata is no longer stored there)
+		$filerecs = $wpdb->get_results("SELECT idlog, filedata FROM $table_name1 WHERE uploaduserid = ".$user->ID);
+		foreach ( $filerecs as $filerec ) {
+			$filedata = wfu_get_filedata_from_rec($filerec);
+			if ( $filedata != null && isset($filedata["media"]["attach_id"]) ) {
+				$meta = wp_get_attachment_metadata($filedata["media"]["attach_id"]);
+				if ( isset($meta["WFU User Data"]) ) {
+					unset($meta["WFU User Data"]);
+					wp_update_attachment_metadata($filedata["media"]["attach_id"], $meta);
+				}
+			}
+		}
+
 		$count = $wpdb->query("DELETE FROM $table_name2 WHERE uploadid in (SELECT uploadid FROM $table_name1 WHERE uploaduserid = ".$user->ID.")");
 		$count += $wpdb->query("UPDATE $table_name1 SET uploaduserid = 0 WHERE uploaduserid = ".$user->ID);
 	}

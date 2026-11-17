@@ -104,6 +104,8 @@ add_action( 'edit_user_profile_update', 'wfu_update_consent_profile_fields' );
 add_action( 'wfu_daily_scheduled_events', 'wfu_execute_daily_tasks' );
 //Media editor custom properties
 if ( is_admin() ) add_action( 'attachment_submitbox_misc_actions', 'wfu_media_editor_properties', 11 );
+//strip any legacy uploader userdata from public REST media responses
+add_filter( 'rest_prepare_attachment', 'wfu_rest_strip_userdata_meta', 10, 3 );
 //register admin filter to check consent status before upload
 add_filter("wfu_before_upload", "wfu_consent_ask_server_handler", 10, 2);
 //register internal filter that is executed before upload for classic uploader

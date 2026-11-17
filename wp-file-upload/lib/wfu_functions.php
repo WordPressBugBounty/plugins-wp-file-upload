@@ -6891,9 +6891,12 @@ function wfu_process_media_insert($file_path, $userdata_fields, $page_id){
 	// If file is an image, process the default thumbnails for previews
 	require_once(ABSPATH . 'wp-admin/includes/image.php');
 	$attach_data = wp_generate_attachment_metadata( $attach_id, $file_path );
-	// Add userdata as attachment metadata
-	foreach ( $userdata_fields as $userdata_field )
-		$attach_data["WFU User Data"][$userdata_field["label"]] = $userdata_field["value"];
+	// Note: the uploader userdata is deliberately NOT stored in the attachment
+	// metadata, because WordPress exposes attachment metadata publicly through
+	// the REST API media_details field, which would disclose the submitted
+	// userdata to unauthenticated visitors. The userdata is already stored
+	// privately in the plugin's own wfu_userdata table by wfu_log_action()
+	// earlier in the upload flow.
 	$update_attach = wp_update_attachment_metadata( $attach_id, $attach_data );
 	// link attachment with file in plugin's database
 	$filedata = wfu_get_filedata($file_path, true);
@@ -6903,9 +6906,85 @@ function wfu_process_media_insert($file_path, $userdata_fields, $page_id){
 			"attach_id"	=> $attach_id
 		);
 		wfu_save_filedata_from_id($filedata["general"]["idlog"], $filedata);
+		// store a private (non-REST) link from the attachment back to its plugin
+		// file record, so that wfu_media_editor_properties() can show the
+		// userdata in the Media Library without exposing it publicly
+		update_post_meta( $attach_id, '_wfu_idlog', $filedata["general"]["idlog"] );
 	}
 
-	return $attach_id;	
+	return $attach_id;
+}
+
+/**
+ * Get Uploader Userdata of a Media Attachment.
+ *
+ * This function retrieves the uploader userdata associated with a Media Library
+ * attachment that was created by the plugin. The userdata is read from the
+ * plugin's private store through the attachment's _wfu_idlog link. For
+ * attachments created before version 5.2.5, when the userdata was still stored
+ * in the attachment metadata, it falls back to reading it from there.
+ *
+ * @since 5.2.5
+ *
+ * @redeclarable
+ *
+ * @param int $attach_id The ID of the Media attachment.
+ *
+ * @return array A list of userdata fields, each an array with keys "label" and
+ *               "value".
+ */
+function wfu_get_media_userdata($attach_id) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	$userdata = array();
+	$idlog = get_post_meta($attach_id, '_wfu_idlog', true);
+	if ( $idlog !== "" && $idlog !== false ) {
+		// retrieve the userdata from the plugin's private store
+		$fields = wfu_get_userdata_from_id($idlog);
+		foreach ( $fields as $field )
+			array_push($userdata, array("label" => $field["property"], "value" => $field["value"]));
+	}
+	else {
+		// fallback for attachments created before version 5.2.5, when userdata
+		// was stored in the attachment metadata
+		$meta = wp_get_attachment_metadata($attach_id);
+		if ( isset($meta["WFU User Data"]) && is_array($meta["WFU User Data"]) )
+			foreach ( $meta["WFU User Data"] as $label => $value )
+				array_push($userdata, array("label" => $label, "value" => $value));
+	}
+
+	return $userdata;
+}
+
+/**
+ * Strip Uploader Userdata From Public REST Media Responses.
+ *
+ * WordPress exposes attachment metadata to unauthenticated visitors through the
+ * REST API media_details field. Before version 5.2.5 the plugin stored uploader
+ * userdata in the attachment metadata, so attachments created then still carry
+ * a "WFU User Data" key that WordPress would disclose publicly. This filter
+ * removes that key from the REST response for anyone who is not allowed to edit
+ * the attachment, so the userdata of already existing attachments is not
+ * exposed.
+ *
+ * @since 5.2.5
+ *
+ * @redeclarable
+ *
+ * @param WP_REST_Response $response The response object.
+ * @param WP_Post $post The attachment post.
+ * @param WP_REST_Request $request The request object.
+ *
+ * @return WP_REST_Response The filtered response object.
+ */
+function wfu_rest_strip_userdata_meta($response, $post, $request) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	$data = $response->get_data();
+	if ( isset($data["media_details"]["WFU User Data"]) && !current_user_can("edit_post", $post->ID) ) {
+		unset($data["media_details"]["WFU User Data"]);
+		$response->set_data($data);
+	}
+
+	return $response;
 }
 
 /**
