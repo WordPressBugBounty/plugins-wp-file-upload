@@ -1,6 +1,6 @@
 <!--  -->
 <div class="wfu-releasenotes-container">
-	<p class="wfu-releasenotes-summary"><strong>Version 5.2.5</strong> is a security update. It fixes an issue where information entered in the uploader's user fields could be read by unauthenticated visitors through the WordPress media REST interface, when the uploaded files were also added to the Media Library or attached to posts. Updating as soon as possible is recommended.</p>
+	<p class="wfu-releasenotes-summary"><strong>Version 5.3.0</strong> improves how the plugin works together with full-page caching and minification plugins. Pages that do not contain an uploader are no longer kept out of the cache, the uploader keeps working even when its page is served from the cache, and its scripts are now more resilient to the Javascript minification that some caching plugins perform. These improvements apply whether the plugin keeps its upload sessions in cookies or in PHP sessions, and the uploader no longer needs the <em>unsafe-eval</em> Content Security Policy permission to run.</p>
 	<p class="wfu-releasenotes-footer">For more details about this version's changes please visit the <strong>Release Notes</strong> of the plugin's <a href="https://www.iptanus.com/wordpress-plugins/iptanus-file-upload/?utm_source=plugin&amp;utm_medium=release_notes">support page</a>.</p>
 </div>
 <!--  -->

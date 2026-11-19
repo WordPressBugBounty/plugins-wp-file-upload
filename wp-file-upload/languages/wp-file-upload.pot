@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iptanus File Upload\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-17 12:09+0200\n"
+"POT-Creation-Date: 2026-11-19 16:11+0200\n"
 "PO-Revision-Date: 2018-12-22 19:37+0200\n"
 "Last-Translator: nickboss <info@iptanus.com>\n"
 "Language-Team: Iptanus Team <info@iptanus.com>\n"
@@ -102,190 +102,205 @@ msgstr ""
 msgid "Version"
 msgstr ""
 
-#: lib/wfu_admin.php:949
+#: lib/wfu_admin.php:952
 msgid "Iptanus Services Server Unreachable Error of WFU Plugin"
 msgstr ""
 
-#: lib/wfu_admin.php:955
+#: lib/wfu_admin.php:959
+#, php-format
+msgid "Version %s is available and fixes a security issue."
+msgstr ""
+
+#: lib/wfu_admin.php:960
 #, php-format
 msgid ""
 "Version %s of the plugin is available. Go to Plugins page of your Dashboard "
 "to update to the latest version."
 msgstr ""
 
-#: lib/wfu_admin.php:956
+#: lib/wfu_admin.php:962
+msgid "What changed"
+msgstr ""
+
+#: lib/wfu_admin.php:963
 msgid ""
 "Please note that you are using a custom version of the plugin. If you "
 "upgrade to the newest version, custom changes will be lost."
 msgstr ""
 
-#: lib/wfu_admin.php:961
+#: lib/wfu_admin.php:968
 msgid "You have the latest version."
 msgstr ""
 
-#: lib/wfu_admin.php:962
+#: lib/wfu_admin.php:969
 msgid "(Please note that your version is custom)"
 msgstr ""
 
-#: lib/wfu_admin.php:971
+#: lib/wfu_admin.php:978
 msgid "Server Environment"
 msgstr ""
 
-#: lib/wfu_admin.php:974
+#: lib/wfu_admin.php:981
 msgid "(Your server supports files up to 1 Exabyte, practically unlimited)"
 msgstr ""
 
-#: lib/wfu_admin.php:975
+#: lib/wfu_admin.php:982
 msgid "(Your server does not support files larger than 2GB)"
 msgstr ""
 
-#: lib/wfu_admin.php:976
+#: lib/wfu_admin.php:983
 msgid "Unknown"
 msgstr ""
 
-#: lib/wfu_admin.php:976
+#: lib/wfu_admin.php:983
 msgid "(The maximum file size supported by the server cannot be determined)"
 msgstr ""
 
-#: lib/wfu_admin.php:981
+#: lib/wfu_admin.php:988
 msgid "PHP Version"
 msgstr ""
 
-#: lib/wfu_admin.php:992
+#: lib/wfu_admin.php:999
 msgid "Home Domain"
 msgstr ""
 
-#: lib/wfu_admin.php:1000
+#: lib/wfu_admin.php:1007
 msgid "Release Notes"
 msgstr ""
 
-#: lib/wfu_admin.php:1044
+#: lib/wfu_admin.php:1034
+msgid ""
+"Has this plugin been useful? Please consider leaving a :review: on WordPress."
+"org - it helps more than you would think."
+msgstr ""
+
+#: lib/wfu_admin.php:1072
 msgid ""
 "This menu item exists to show the plugin's shortcode composer when editing "
 "pages or posts."
 msgstr ""
 
-#: lib/wfu_admin.php:1092
+#: lib/wfu_admin.php:1120
 msgid "Main"
 msgstr ""
 
-#: lib/wfu_admin.php:1093
+#: lib/wfu_admin.php:1121
 msgid "Settings"
 msgstr ""
 
-#: lib/wfu_admin.php:1101
+#: lib/wfu_admin.php:1129
 #, php-format
 msgid "You have %s unread notification"
 msgid_plural "You have %s unread notifications"
 msgstr[0] ""
 msgstr[1] ""
 
-#: lib/wfu_admin.php:1102 lib/wfu_admin.php:1104
+#: lib/wfu_admin.php:1130 lib/wfu_admin.php:1132
 #: lib/wfu_admin_notifications.php:278 lib/wfu_attributes.php:162
 msgid "Notifications"
 msgstr ""
 
-#: lib/wfu_admin.php:1105
+#: lib/wfu_admin.php:1133
 msgid "File Browser"
 msgstr ""
 
-#: lib/wfu_admin.php:1105
+#: lib/wfu_admin.php:1133
 msgid "File browser"
 msgstr ""
 
-#: lib/wfu_admin.php:1106
+#: lib/wfu_admin.php:1134
 msgid "View Log"
 msgstr ""
 
-#: lib/wfu_admin.php:1106
+#: lib/wfu_admin.php:1134
 msgid "View log"
 msgstr ""
 
-#: lib/wfu_admin.php:1108 lib/wfu_admin_settings.php:211
+#: lib/wfu_admin.php:1136 lib/wfu_admin_settings.php:211
 #: lib/wfu_attributes.php:168
 msgid "Personal Data"
 msgstr ""
 
-#: lib/wfu_admin.php:1108
+#: lib/wfu_admin.php:1136
 msgid "Personal data"
 msgstr ""
 
-#: lib/wfu_admin.php:1110
+#: lib/wfu_admin.php:1138
 msgid "Maintenance Actions"
 msgstr ""
 
-#: lib/wfu_admin.php:1110
+#: lib/wfu_admin.php:1138
 msgid "Maintenance actions"
 msgstr ""
 
-#: lib/wfu_admin.php:1144
+#: lib/wfu_admin.php:1172
 msgid "Debug Logging is ON"
 msgstr ""
 
-#: lib/wfu_admin.php:1160
+#: lib/wfu_admin.php:1188
 msgid "Click to review it."
 msgstr ""
 
-#: lib/wfu_admin.php:1163
+#: lib/wfu_admin.php:1191
 msgid "error"
 msgstr ""
 
-#: lib/wfu_admin.php:1164
+#: lib/wfu_admin.php:1192
 msgid "warning"
 msgstr ""
 
-#: lib/wfu_admin.php:1165
+#: lib/wfu_admin.php:1193
 #, php-format
 msgid "You have unread %s notifications. Click to review them."
 msgstr ""
 
-#: lib/wfu_admin.php:1180
+#: lib/wfu_admin.php:1208
 msgid "Iptanus File Upload Control Panel"
 msgstr ""
 
-#: lib/wfu_admin.php:1306
+#: lib/wfu_admin.php:1334
 msgid "Uploader Instances"
 msgstr ""
 
-#: lib/wfu_admin.php:1387
+#: lib/wfu_admin.php:1415
 msgid "Press"
 msgstr ""
 
-#: lib/wfu_admin.php:1388
+#: lib/wfu_admin.php:1416
 #, php-format
 msgid "to get started and add the %s in a page"
 msgstr ""
 
-#: lib/wfu_admin.php:1389
+#: lib/wfu_admin.php:1417
 msgid "Add Plugin Instance"
 msgstr ""
 
-#: lib/wfu_admin.php:1389
+#: lib/wfu_admin.php:1417
 msgid "here"
 msgstr ""
 
-#: lib/wfu_admin.php:1393
+#: lib/wfu_admin.php:1421
 msgid "please wait..."
 msgstr ""
 
-#: lib/wfu_admin.php:1395
+#: lib/wfu_admin.php:1423
 #, php-format
 msgid "Add %s to"
 msgstr ""
 
-#: lib/wfu_admin.php:1395 lib/wfu_constants.php:53 lib/wfu_constants.php:232
+#: lib/wfu_admin.php:1423 lib/wfu_constants.php:53 lib/wfu_constants.php:232
 msgid "Page"
 msgstr ""
 
-#: lib/wfu_admin.php:1395
+#: lib/wfu_admin.php:1423
 msgid "Post"
 msgstr ""
 
-#: lib/wfu_admin.php:1408 lib/wfu_admin_browser.php:1468
+#: lib/wfu_admin.php:1436 lib/wfu_admin_browser.php:1468
 msgid "Ok"
 msgstr ""
 
-#: lib/wfu_admin.php:1409 lib/wfu_admin.php:1695 lib/wfu_admin_browser.php:716
+#: lib/wfu_admin.php:1437 lib/wfu_admin.php:1723 lib/wfu_admin_browser.php:716
 #: lib/wfu_admin_browser.php:800 lib/wfu_admin_browser.php:1023
 #: lib/wfu_admin_browser.php:1133 lib/wfu_admin_browser.php:1249
 #: lib/wfu_admin_browser.php:1469 lib/wfu_admin_composer.php:487
@@ -294,62 +309,62 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-#: lib/wfu_admin.php:1415
+#: lib/wfu_admin.php:1443
 msgid "ID"
 msgstr ""
 
 #. $echo_str .= "\n\t\t\t\t\t".'<td style="padding: 5px 5px 5px 10px; text-align:center;">'.$id.'</td>';
-#: lib/wfu_admin.php:1421 lib/wfu_admin.php:1464
+#: lib/wfu_admin.php:1449 lib/wfu_admin.php:1492
 msgid "Contained In"
 msgstr ""
 
-#: lib/wfu_admin.php:1424 lib/wfu_admin.php:1465
+#: lib/wfu_admin.php:1452 lib/wfu_admin.php:1493
 msgid "Page/Post Title"
 msgstr ""
 
-#: lib/wfu_admin.php:1427 lib/wfu_admin.php:1466
+#: lib/wfu_admin.php:1455 lib/wfu_admin.php:1494
 msgid "Shortcode"
 msgstr ""
 
-#: lib/wfu_admin.php:1440
+#: lib/wfu_admin.php:1468
 #, php-format
 msgid "ID: %s"
 msgstr ""
 
-#: lib/wfu_admin.php:1443
+#: lib/wfu_admin.php:1471
 msgid "Sidebar"
 msgstr ""
 
-#: lib/wfu_admin.php:1451
+#: lib/wfu_admin.php:1479
 #, php-format
 msgid "Instance #%s"
 msgstr ""
 
-#: lib/wfu_admin.php:1454
+#: lib/wfu_admin.php:1482
 msgid "Edit this shortcode"
 msgstr ""
 
-#: lib/wfu_admin.php:1454 lib/wfu_admin_composer.php:407
+#: lib/wfu_admin.php:1482 lib/wfu_admin_composer.php:407
 msgid "Edit"
 msgstr ""
 
-#: lib/wfu_admin.php:1458
+#: lib/wfu_admin.php:1486
 msgid "Delete this shortcode"
 msgstr ""
 
-#: lib/wfu_admin.php:1458 lib/wfu_admin.php:1694 lib/wfu_admin_browser.php:539
+#: lib/wfu_admin.php:1486 lib/wfu_admin.php:1722 lib/wfu_admin_browser.php:539
 #: lib/wfu_admin_browser.php:1022 lib/wfu_admin_notifications.php:288
 #: lib/wfu_admin_notifications.php:361 lib/wfu_constants.php:57
 msgid "Delete"
 msgstr ""
 
-#: lib/wfu_admin.php:1461 lib/wfu_admin_browser.php:408
+#: lib/wfu_admin.php:1489 lib/wfu_admin_browser.php:408
 #: lib/wfu_admin_browser.php:476 lib/wfu_admin_log.php:155
 #: lib/wfu_admin_notifications.php:365 lib/wfu_admin_uploadedfiles.php:335
 msgid "Show more details"
 msgstr ""
 
-#: lib/wfu_admin.php:1685 lib/wfu_admin_browser.php:702
+#: lib/wfu_admin.php:1713 lib/wfu_admin_browser.php:702
 #: lib/wfu_admin_browser.php:774 lib/wfu_admin_browser.php:1003
 #: lib/wfu_admin_browser.php:1118 lib/wfu_admin_browser.php:1229
 #: lib/wfu_admin_browser.php:1415 lib/wfu_admin_browser.php:1417
@@ -358,20 +373,20 @@ msgstr ""
 msgid "go back"
 msgstr ""
 
-#: lib/wfu_admin.php:1685 lib/wfu_admin_composer.php:165
+#: lib/wfu_admin.php:1713 lib/wfu_admin_composer.php:165
 msgid "Go to Main Menu"
 msgstr ""
 
-#: lib/wfu_admin.php:1687
+#: lib/wfu_admin.php:1715
 msgid "Delete Shortcode"
 msgstr ""
 
-#: lib/wfu_admin.php:1692
+#: lib/wfu_admin.php:1720
 #, php-format
 msgid "Are you sure that you want to delete shortcode for %s ?\""
 msgstr ""
 
-#: lib/wfu_admin.php:1692
+#: lib/wfu_admin.php:1720
 msgid "Position"
 msgstr ""
 
@@ -1074,8 +1089,19 @@ msgstr ""
 
 #: lib/wfu_admin_composer.php:959
 msgid ""
+"The Professional version can upload :multiple: files at once, including "
+"whole folders."
+msgstr ""
+
+#: lib/wfu_admin_composer.php:965
+msgid ""
 "Uploads can also go straight to Google Drive, Dropbox, OneDrive or Amazon S3 "
 "in the :Professional: version."
+msgstr ""
+
+#: lib/wfu_admin_composer.php:971
+msgid ""
+"The Professional version can also add uploaded images to a :NextGEN: Gallery."
 msgstr ""
 
 #. browser default values
@@ -1748,27 +1774,27 @@ msgstr[1] ""
 msgid "Files per page"
 msgstr ""
 
-#: lib/wfu_ajaxactions.php:432
+#: lib/wfu_ajaxactions.php:473
 msgid "Session failed!"
 msgstr ""
 
-#: lib/wfu_ajaxactions.php:434
+#: lib/wfu_ajaxactions.php:475
 msgid "Session Data:"
 msgstr ""
 
-#: lib/wfu_ajaxactions.php:436 lib/wfu_ajaxactions.php:461
+#: lib/wfu_ajaxactions.php:477 lib/wfu_ajaxactions.php:502
 msgid "Post Data:"
 msgstr ""
 
-#: lib/wfu_ajaxactions.php:457
+#: lib/wfu_ajaxactions.php:498
 msgid "User failed!"
 msgstr ""
 
-#: lib/wfu_ajaxactions.php:459
+#: lib/wfu_ajaxactions.php:500
 msgid "User Data:"
 msgstr ""
 
-#: lib/wfu_ajaxactions.php:463
+#: lib/wfu_ajaxactions.php:504
 msgid "Params Data:"
 msgstr ""
 
@@ -1782,16 +1808,16 @@ msgstr ""
 #. *
 #. * @param string $echo_str The return of the function.
 #.
-#: lib/wfu_ajaxactions.php:954
+#: lib/wfu_ajaxactions.php:995
 msgid "Parent folder is not valid! Cannot retrieve subfolder list."
 msgstr ""
 
 #. store translatable strings
-#: lib/wfu_ajaxactions.php:1150 lib/wfu_constants.php:166
+#: lib/wfu_ajaxactions.php:1191 lib/wfu_constants.php:166
 msgid "File does not exist!"
 msgstr ""
 
-#: lib/wfu_ajaxactions.php:1151 lib/wfu_constants.php:167
+#: lib/wfu_ajaxactions.php:1192 lib/wfu_constants.php:167
 msgid "Could not download file!"
 msgstr ""
 
@@ -4328,11 +4354,11 @@ msgstr ""
 msgid "Are you sure you want to delete these files?"
 msgstr ""
 
-#: lib/wfu_constants.php:230 lib/wfu_functions.php:6624
+#: lib/wfu_constants.php:230 lib/wfu_functions.php:6697
 msgid "Bulk Actions"
 msgstr ""
 
-#: lib/wfu_constants.php:231 lib/wfu_functions.php:6628
+#: lib/wfu_constants.php:231 lib/wfu_functions.php:6701
 msgid "Apply"
 msgstr ""
 
@@ -6475,47 +6501,47 @@ msgid ""
 "policy) of the uploader shortcode."
 msgstr ""
 
-#: lib/wfu_functions.php:7865
+#: lib/wfu_functions.php:8104
 msgid "Iptanus File Upload Consent Status"
 msgstr ""
 
-#: lib/wfu_functions.php:7868
+#: lib/wfu_functions.php:8107
 msgid "Consent Status"
 msgstr ""
 
-#: lib/wfu_functions.php:7870
+#: lib/wfu_functions.php:8109
 msgid "You have given your consent to store personal data."
 msgstr ""
 
-#: lib/wfu_functions.php:7870
+#: lib/wfu_functions.php:8109
 msgid "You have denied to store personal data."
 msgstr ""
 
-#: lib/wfu_functions.php:7870
+#: lib/wfu_functions.php:8109
 msgid "You have not answered to consent yet."
 msgstr ""
 
-#: lib/wfu_functions.php:7876
+#: lib/wfu_functions.php:8115
 msgid "Change status to"
 msgstr ""
 
-#: lib/wfu_functions.php:7878
+#: lib/wfu_functions.php:8117
 msgid "No change"
 msgstr ""
 
-#: lib/wfu_functions.php:7880 lib/wfu_functions.php:7888
+#: lib/wfu_functions.php:8119 lib/wfu_functions.php:8127
 msgid "Revoke Consent"
 msgstr ""
 
-#: lib/wfu_functions.php:7881 lib/wfu_functions.php:7885
+#: lib/wfu_functions.php:8120 lib/wfu_functions.php:8124
 msgid "Clear Consent"
 msgstr ""
 
-#: lib/wfu_functions.php:7884 lib/wfu_functions.php:7889
+#: lib/wfu_functions.php:8123 lib/wfu_functions.php:8128
 msgid "Give Consent"
 msgstr ""
 
-#: lib/wfu_functions.php:8628
+#: lib/wfu_functions.php:8867
 msgid "Dismiss this notice."
 msgstr ""
 

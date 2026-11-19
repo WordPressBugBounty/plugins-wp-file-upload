@@ -171,7 +171,48 @@ function wfu_ajax_action_send_email_notification() {
 	 */
 	$echo_str = apply_filters('_wfu_ajax_action_send_email_notification', $echo_str);
 	
-	die(esc_html($echo_str)); 
+	die(esc_html($echo_str));
+}
+
+/**
+ * Issue a fresh uploader handshake (cache compatibility).
+ *
+ * This public (nopriv) endpoint is called by the uploader on initialization so
+ * that the uploader works even when its page HTML was served frozen from a
+ * full-page cache. It returns a fresh session token and uploader nonce bound to
+ * the visitor's own user-state bucket and, for a logged-out visitor that has no
+ * plugin cookie yet, sets the cookie now (admin-ajax always runs real PHP and is
+ * never cached, so the Set-Cookie header is honoured and the uploader page
+ * itself can stay cookie-free and cacheable). Because it mints the nonce it
+ * cannot itself be nonce-gated; like ask_server it trusts only the cookie /
+ * session bucket and has no side effect beyond issuing this visitor's own token.
+ * The params_index is cache-safe (stable per page/sid) and stays as rendered in
+ * the page, so it is not part of the handshake.
+ *
+ * @since 5.3.0
+ *
+ * @global string $wfu_user_state_handler The defined User State handler.
+ */
+function wfu_ajax_action_handshake() {
+	global $wfu_user_state_handler;
+	if ( !isset($_REQUEST['sid']) ) wp_send_json_error();
+	$sid = sanitize_text_field( $_REQUEST['sid'] );
+	if ( $sid == "" ) wp_send_json_error();
+	//for a logged-out visitor with no plugin cookie yet, establish one now so the
+	//upload can be correlated to this visitor's user-state bucket (logged-in users
+	//are keyed off the WP login session token and need no plugin cookie)
+	if ( $wfu_user_state_handler == "dboption" && WFU_VAR("WFU_US_DBOPTION_BASE") == "cookies"
+		&& !is_user_logged_in() && wfu_get_session_cookie() == "" )
+		wfu_set_session_cookie();
+	//ensure a session token exists in this visitor's bucket (mirrors render at
+	//wfu_loader.php wordpress_file_upload_function)
+	$token_sid = 'wfu_token_'.$sid;
+	if ( !WFU_USVAR_exists($token_sid) || WFU_USVAR($token_sid) == "" )
+		WFU_USVAR_store($token_sid, uniqid(mt_rand(), TRUE));
+	wp_send_json(array(
+		"session_token" => wfu_sanitize_base64dotted(WFU_USVAR($token_sid)),
+		"nonce" => wp_create_nonce('wfu-uploader-nonce')
+	));
 }
 
 /**

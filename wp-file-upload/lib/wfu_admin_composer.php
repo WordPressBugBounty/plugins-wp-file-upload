@@ -946,18 +946,30 @@ function wfu_shortcode_composer($data = '', $shortcode_tag = 'wordpress_file_upl
 			$echo_str .= $dlp."\t\t".'<input id="wfu_attribute_'.esc_attr($attr).'" type="text" name="wfu_text_elements" value="'.esc_attr($def['value']).'" />';
 			if ( $def['variables'] != null ) $echo_str .= $dlp.wfu_insert_variables($def['variables'], 'wfu_variable wfu_variable_'.$attr);
 		}
-		//Cloud destinations are the main reason people move to the Professional
-		//version, but in this edition those attributes are removed entirely
-		//rather than shown disabled - so someone deciding where uploaded files
-		//should go has no way of knowing the option exists at all. This is the
-		//one place where the absence is invisible and the person reading is the
-		//one who would decide. wfu_render_notice() returns an empty string
-		//unless the notice is currently allowed, so the rules stay in one place.
+		//Several capabilities exist only in the Professional version and are
+		//removed from this edition rather than shown disabled, so the person
+		//configuring the uploader never learns they exist. A short notice next
+		//to the most relevant free setting restores that visibility.
+		//wfu_render_notice() returns an empty string unless the notice is
+		//currently allowed, so all the timing and dismissal rules stay in one
+		//place, and only one notice can appear within the allowed interval.
 		if ( $attr == "uploadpath" )
+			$echo_str .= $dlp."\t\t".wfu_render_notice(
+				"multiple",
+				__('The Professional version can upload :multiple: files at once, including whole folders.', 'wp-file-upload'),
+				wfu_pro_url('notice_multiple')
+			);
+		elseif ( $attr == "ftpinfo" )
 			$echo_str .= $dlp."\t\t".wfu_render_notice(
 				"storage",
 				__('Uploads can also go straight to Google Drive, Dropbox, OneDrive or Amazon S3 in the :Professional: version.', 'wp-file-upload'),
 				wfu_pro_url('notice_storage')
+			);
+		elseif ( $attr == "medialink" )
+			$echo_str .= $dlp."\t\t".wfu_render_notice(
+				"nextgen",
+				__('The Professional version can also add uploaded images to a :NextGEN: Gallery.', 'wp-file-upload'),
+				wfu_pro_url('notice_nextgen')
 			);
 		$echo_str .= $dlp."\t".'</div></td>';
 		if ( $def['parent'] == "" ) {

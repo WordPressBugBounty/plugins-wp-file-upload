@@ -57,6 +57,15 @@ add_action('admin_menu', 'wordpress_file_upload_add_admin_pages');
 if ( !is_admin() ) {
 	add_action( 'wp_enqueue_scripts', 'wfu_enqueue_frontpage_scripts' );
 	add_action( 'wp_enqueue_scripts', 'wfu_enqueue_materialui_frontpage_scripts', 9999999999 );
+	//cache compatibility (@since 5.3.0): lazily set the guest user-state cookie
+	//only on pages that render the uploader/file-browser shortcode, so that all
+	//other pages stay cookie-free and cacheable by full-page cache plugins
+	add_action( 'template_redirect', 'wfu_maybe_set_guest_cookie' );
+	//cache compatibility (@since 5.3.0): in a legacy PHP-session user-state mode,
+	//start the session only on pages that render the uploader/file-browser
+	//shortcode, so that all other pages emit no site-wide PHPSESSID cookie and stay
+	//cacheable by full-page cache plugins
+	add_action( 'template_redirect', 'wfu_maybe_start_frontend_session' );
 }
 //add admin bar menu item of new uploaded files
 add_action( 'wp_before_admin_bar_render', 'wfu_admin_toolbar_new_uploads', 999 );
@@ -69,6 +78,11 @@ add_action('wp_ajax_wfu_ajax_action', 'wfu_ajax_action_callback');
 add_action('wp_ajax_nopriv_wfu_ajax_action', 'wfu_ajax_action_callback');
 add_action('wp_ajax_wfu_ajax_action_ask_server', 'wfu_ajax_action_ask_server');
 add_action('wp_ajax_nopriv_wfu_ajax_action_ask_server', 'wfu_ajax_action_ask_server');
+//cache compatibility (@since 5.3.0): uncached handshake that mints a fresh
+//session token + uploader nonce (and a guest cookie if needed) on uploader init,
+//so the uploader works from a page served frozen by a full-page cache
+add_action('wp_ajax_wfu_ajax_action_handshake', 'wfu_ajax_action_handshake');
+add_action('wp_ajax_nopriv_wfu_ajax_action_handshake', 'wfu_ajax_action_handshake');
 add_action('wp_ajax_wfu_ajax_action_cancel_upload', 'wfu_ajax_action_cancel_upload');
 add_action('wp_ajax_nopriv_wfu_ajax_action_cancel_upload', 'wfu_ajax_action_cancel_upload');
 add_action('wp_ajax_wfu_ajax_action_send_email_notification', 'wfu_ajax_action_send_email_notification');
@@ -381,7 +395,14 @@ function wordpress_file_upload_handler($incomingfrompost) {
 	//process incoming attributes assigning defaults if required
 	$defs_indexed = wfu_shortcode_attribute_definitions_adjusted($incomingfrompost);
 	$incomingfrompost = shortcode_atts($defs_indexed, $incomingfrompost);
+	//cache compatibility (@since 5.3.0): in a legacy PHP-session user-state mode,
+	//ensure the session is started before the form is generated, for placements the
+	//template_redirect shortcode scan cannot see (widget/block/do_shortcode). No-op
+	//in the default cookie mode or when headers are already sent.
+	wfu_ensure_frontend_session_rendertime();
 	//run function that actually does the work of the plugin
+	//(the uploader establishes its guest cookie through the init handshake, so no
+	//render-time cookie is set here - that keeps uploader pages cacheable)
 	$wordpress_file_upload_output = wordpress_file_upload_function($incomingfrompost);
 	//send back text to replace shortcode in post
 	return $wordpress_file_upload_output;
@@ -405,10 +426,20 @@ function wordpress_file_upload_browser_handler($incomingfrompost) {
 	$defs_indexed = array();
 	foreach ( $defs as $def ) $defs_indexed[$def["attribute"]] = $def["value"];
 	$incomingfrompost = shortcode_atts($defs_indexed, $incomingfrompost);
+	//cache compatibility (@since 5.3.0): ensure a logged-out visitor has a
+	//user-state cookie before the file viewer (guest filter) is generated, for
+	//placements the template_redirect shortcode scan cannot see. Returns "" when
+	//nothing is needed.
+	$wfu_cookie_js = wfu_ensure_guest_cookie_rendertime();
+	//cache compatibility (@since 5.3.0): in a legacy PHP-session user-state mode,
+	//ensure the session is started before the file viewer (guest filter) is
+	//generated, for placements the template_redirect scan cannot see. No-op in the
+	//default cookie mode or when headers are already sent.
+	wfu_ensure_frontend_session_rendertime();
 	//run function that actually does the work of the plugin
 	$wordpress_file_upload_browser_output = wordpress_file_upload_browser_function($incomingfrompost);
 	//send back text to replace shortcode in post
-	return $wordpress_file_upload_browser_output;
+	return $wfu_cookie_js.$wordpress_file_upload_browser_output;
 }
 
 /**

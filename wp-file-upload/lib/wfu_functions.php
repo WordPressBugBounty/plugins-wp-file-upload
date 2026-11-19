@@ -965,6 +965,30 @@ function wfu_esc_html_a($text, $href, $open_in_new_tab = true, $title = "", $esc
 }
 
 /**
+ * Tag an Admin Link With Campaign Parameters.
+ *
+ * Adds the tracking parameters that let us tell, in analytics, which link
+ * inside the plugin's admin pages a visitor followed. Every admin link uses
+ * the same scheme: utm_source=plugin, utm_medium=admin and a utm_campaign
+ * from a small fixed set (pricing, account, docs, release-notes). An optional
+ * utm_content names the individual link within a campaign, without enlarging
+ * that fixed set.
+ *
+ * @since 5.3.0
+ *
+ * @param string $url The base URL to tag.
+ * @param string $campaign The campaign: pricing, account, docs or release-notes.
+ * @param string $content Optional. Names the individual link within the
+ *        campaign. Default "".
+ * @return string The tagged URL.
+ */
+function wfu_admin_utm_url($url, $campaign, $content = "") {
+	$args = array( 'utm_source' => 'plugin', 'utm_medium' => 'admin', 'utm_campaign' => $campaign );
+	if ( $content !== "" ) $args['utm_content'] = $content;
+	return add_query_arg( $args, $url );
+}
+
+/**
  * Unescape Double Percent.
  *
  * Unescapes percent symbol by converting double percent (%%) to single (%). It
@@ -1894,24 +1918,73 @@ function wfu_get_plugin_version() {
  * Get Plugin's Latest Version.
  *
  * This function gets the plugin's latest version from Iptanus Services Server.
+ * The server is asked for the extended answer, which also reports whether the
+ * latest version is a security release. Older servers that do not understand
+ * the request simply answer with the bare version string, so the call stays
+ * backward compatible.
  *
  * @since 2.4.6
+ * @since 5.3.0 Asks the server for the extended answer and adds the $extended
+ *        parameter so callers can also read the security-release flag.
  *
  * @redeclarable
  *
- * @return string The plugin's latest version.
+ * @param bool $extended Optional. If true an array with keys 'version' and
+ *        'security_release' is returned instead of the bare version string.
+ *        Default false.
+ * @return string|array The plugin's latest version, or an array when $extended
+ *         is true.
  */
-function wfu_get_latest_version() {
+function wfu_get_latest_version($extended = false) {
 	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
 	$postfields = array();
 	$postfields['action'] = 'wfuca_check_latest_version_free';
 	$postfields['version_hash'] = WFU_VERSION_HASH;
+	$postfields['extended'] = '1';
 	$url = ( $plugin_options["altserver"] == "1" && trim(WFU_VAR("WFU_ALT_IPTANUS_SERVER")) != "" ? ( trim(WFU_VAR("WFU_ALT_VERSION_SERVER")) != "" ? trim(WFU_VAR("WFU_ALT_VERSION_SERVER")) : trim(WFU_VAR("WFU_ALT_IPTANUS_SERVER")).'/wp-admin/admin-ajax.php' ) : WFU_VERSION_SERVER_URL );
 	$result = null;
 	if ( WFU_VAR("WFU_DISABLE_VERSION_CHECK") != "true" )
 		$result = wfu_post_request($url, $postfields, false, false, 10);
-	return $result;
+	return wfu_parse_latest_version_response($result, $extended);
+}
+
+/**
+ * Parse The Latest Version Server Response.
+ *
+ * The version server answers either with a bare version string (older servers,
+ * or the _wfu_get_latest_version filter) or, when asked for the extended
+ * answer, with a JSON object { "version": ..., "security_release": ... }. This
+ * function accepts either form, so the caller does not need to know which
+ * server replied.
+ *
+ * @since 5.3.0
+ *
+ * @param mixed $raw The raw server response (string, null or false).
+ * @param bool $extended If true an array with keys 'version' and
+ *        'security_release' is returned, otherwise just the version string.
+ * @return string|array The version string, or the array when $extended is true.
+ */
+function wfu_parse_latest_version_response($raw, $extended = false) {
+	$version = "";
+	$security = false;
+	if ( is_string($raw) ) {
+		//trim only to detect and decode the JSON answer; the plain string is
+		//returned untouched so that a non-version sentinel (e.g. the single
+		//space the Standalone edition returns to suppress the check) is
+		//preserved and does not read as an empty, unreachable response.
+		$trimmed = trim($raw);
+		if ( substr($trimmed, 0, 1) == "{" ) {
+			$data = json_decode($trimmed, true);
+			if ( is_array($data) && isset($data["version"]) ) {
+				$version = (string)$data["version"];
+				$security = ( isset($data["security_release"]) && $data["security_release"] === true );
+			}
+		}
+		else $version = $raw;
+	}
+	if ( $extended ) return array( "version" => $version, "security_release" => $security );
+	return $version;
 }
 
 /**
@@ -7248,9 +7321,163 @@ function wfu_initialize_user_state() {
 	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	global $wfu_user_state_handler;
 	if ( $wfu_user_state_handler == "dboption" && WFU_VAR("WFU_US_DBOPTION_BASE") == "cookies" ) {
-		if ( wfu_get_session_cookie() == "" ) wfu_set_session_cookie();
+		//cache compatibility (@since 5.3.0): the plugin cookie is no longer set on
+		//every request here. A site-wide Set-Cookie prevents full-page cache
+		//plugins from caching any page. Logged-in users are now keyed off the WP
+		//login session token (see wfu_get_session_id), so they need no plugin
+		//cookie; guests get the cookie lazily, only on pages that render the
+		//uploader or file-browser shortcode (wfu_maybe_set_guest_cookie on
+		//template_redirect, with a render-time fallback in the shortcode handlers).
 	}
-	elseif ( WFU_VAR("WFU_US_SESSION_LEGACY") == "true" && !headers_sent() && ( function_exists("session_status") ? ( PHP_SESSION_ACTIVE !== session_status() ) : ( session_id() == "" ) ) ) { session_start(); }
+	//cache compatibility (@since 5.3.0): in a legacy PHP-session user-state mode the
+	//session is started eagerly only in wp-admin and on admin-ajax.php requests (both
+	//is_admin()). Starting it on every front-end page sent a site-wide PHPSESSID
+	//Set-Cookie that stopped full-page caches from caching any page. Front-end
+	//uploader/file-browser pages start the session lazily instead
+	//(wfu_maybe_start_frontend_session on template_redirect, with a render-time
+	//fallback in the shortcode handlers), so plain pages stay session-free.
+	elseif ( WFU_VAR("WFU_US_SESSION_LEGACY") == "true" && is_admin() && !headers_sent() && ( function_exists("session_status") ? ( PHP_SESSION_ACTIVE !== session_status() ) : ( session_id() == "" ) ) ) { session_start(); }
+}
+
+/**
+ * Lazily set the guest user-state cookie on file-browser pages.
+ *
+ * Cache-compatibility (@since 5.3.0). Hooked on template_redirect so that a real
+ * Set-Cookie header can still be sent (headers are not yet flushed at that
+ * point). It sets the plugin cookie only for a logged-out visitor, only when the
+ * currently queried singular post actually contains the file-browser shortcode,
+ * so that every other page stays cookie-free and therefore cacheable. (The
+ * uploader no longer needs this: it establishes its cookie through the init
+ * handshake, wfu_ajax_action_handshake, which keeps uploader pages cacheable
+ * too.) File-browser placements that has_shortcode() cannot see (widget / block /
+ * do_shortcode) are covered by the render-time fallback
+ * wfu_ensure_guest_cookie_rendertime().
+ *
+ * @since 5.3.0
+ *
+ * @global string $wfu_user_state_handler The defined User State handler.
+ *
+ * @redeclarable
+ */
+function wfu_maybe_set_guest_cookie() {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	global $wfu_user_state_handler;
+	if ( !( $wfu_user_state_handler == "dboption" && WFU_VAR("WFU_US_DBOPTION_BASE") == "cookies" ) ) return;
+	if ( is_user_logged_in() ) return;
+	if ( wfu_get_session_cookie() != "" ) return;
+	if ( !is_singular() ) return;
+	$post = get_post();
+	if ( !$post ) return;
+	//the uploader establishes its own cookie lazily through the init handshake
+	//(wfu_ajax_action_handshake), which keeps uploader pages cookie-free and so
+	//cacheable; only the file browser still needs the cookie set at render time.
+	if ( has_shortcode($post->post_content, "wordpress_file_upload_browser") )
+		wfu_set_session_cookie();
+}
+
+/**
+ * Lazily start the PHP session on uploader/file-browser pages.
+ *
+ * Cache-compatibility (@since 5.3.0) for the legacy PHP-session user-state modes
+ * (handler "session", or handler "dboption" with base "session", when
+ * WFU_US_SESSION_LEGACY is "true"). In those modes the session was previously
+ * started on every request via wfu_initialize_user_state(), which emitted a
+ * site-wide PHPSESSID Set-Cookie and prevented full-page caches from caching any
+ * page. That eager start now runs only in wp-admin / admin-ajax; this callback,
+ * hooked on template_redirect (before output, so the cookie header can still be
+ * sent), starts the session on a front-end page only when it actually renders the
+ * uploader or the file-browser shortcode, leaving every other page session-free
+ * and cacheable. Unlike the guest-cookie helper it does not skip logged-in users,
+ * because the session modes key every user by session_id(). Placements that
+ * has_shortcode() cannot see (widget / block / do_shortcode) are covered by the
+ * render-time fallback wfu_ensure_frontend_session_rendertime().
+ *
+ * @since 5.3.0
+ *
+ * @global string $wfu_user_state_handler The defined User State handler.
+ *
+ * @redeclarable
+ */
+function wfu_maybe_start_frontend_session() {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	global $wfu_user_state_handler;
+	if ( !( WFU_VAR("WFU_US_SESSION_LEGACY") == "true" && ( $wfu_user_state_handler != "dboption" || WFU_VAR("WFU_US_DBOPTION_BASE") == "session" ) ) ) return;
+	if ( headers_sent() ) return;
+	if ( function_exists("session_status") ? ( PHP_SESSION_ACTIVE === session_status() ) : ( session_id() != "" ) ) return;
+	if ( !is_singular() ) return;
+	$post = get_post();
+	if ( !$post ) return;
+	if ( has_shortcode($post->post_content, "wordpress_file_upload") || has_shortcode($post->post_content, "wordpress_file_upload_browser") )
+		session_start();
+}
+
+/**
+ * Ensure a guest user-state cookie exists at shortcode render time.
+ *
+ * Cache-compatibility fallback (@since 5.3.0) for the uploader/file-browser
+ * placed via widget, block or do_shortcode(), which the template_redirect scan
+ * in wfu_maybe_set_guest_cookie() cannot detect. By render time headers are
+ * usually already sent, so the cookie value is seeded into $_COOKIE for the
+ * current request (so the form's session token is stored under it) and, when a
+ * real header can no longer be sent, an inline script is returned for the caller
+ * to embed so the browser carries the cookie on the subsequent upload/download
+ * AJAX. Returns an empty string when nothing needs to be done (logged-in user,
+ * cookie already present, or a real header was set).
+ *
+ * @since 5.3.0
+ *
+ * @global string $wfu_user_state_handler The defined User State handler.
+ *
+ * @redeclarable
+ *
+ * @return string Inline script to embed in the shortcode output, or "".
+ */
+function wfu_ensure_guest_cookie_rendertime() {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	global $wfu_user_state_handler;
+	if ( !( $wfu_user_state_handler == "dboption" && WFU_VAR("WFU_US_DBOPTION_BASE") == "cookies" ) ) return "";
+	if ( is_user_logged_in() ) return "";
+	if ( wfu_get_session_cookie() != "" ) return "";
+	$cookie = wfu_create_random_string(32);
+	$_COOKIE[WPFILEUPLOAD_COOKIE] = $cookie;
+	$life = intval(WFU_VAR("WFU_US_COOKIE_LIFE")) * 3600;
+	$path = defined("COOKIEPATH") ? COOKIEPATH : '/';
+	//mirror wfu_set_session_cookie() exactly for the header path
+	$domain = defined("COOKIE_DOMAIN") ? COOKIE_DOMAIN : '/';
+	if ( !headers_sent() ) {
+		setcookie(WPFILEUPLOAD_COOKIE, $cookie, time() + $life, $path, $domain, false, false);
+		return "";
+	}
+	//headers already flushed: set the cookie client-side for the upload/download AJAX
+	$cookiestr = WPFILEUPLOAD_COOKIE."=".$cookie."; expires=".gmdate("D, d M Y H:i:s", time() + $life)." GMT; path=".$path.( ( $domain != '' && $domain != '/' ) ? "; domain=".$domain : "" );
+	return "<script>try{document.cookie=".wp_json_encode($cookiestr).";}catch(wfu_e){}</script>";
+}
+
+/**
+ * Ensure the PHP session is started at shortcode render time.
+ *
+ * Cache-compatibility fallback (@since 5.3.0) for the legacy PHP-session user-state
+ * modes, covering uploader/file-browser placements the template_redirect scan in
+ * wfu_maybe_start_frontend_session() cannot detect (widget / block / do_shortcode).
+ * It is a no-op in the default cookie mode, when a session is already active, or
+ * when headers have already been sent (the session cookie can no longer be set then
+ * - the uploader still works because the AJAX handshake, which runs on admin-ajax,
+ * establishes the session and returns PHPSESSID). Called before the shortcode output
+ * is generated so render-time user-state writes land in the session.
+ *
+ * @since 5.3.0
+ *
+ * @global string $wfu_user_state_handler The defined User State handler.
+ *
+ * @redeclarable
+ */
+function wfu_ensure_frontend_session_rendertime() {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	global $wfu_user_state_handler;
+	if ( !( WFU_VAR("WFU_US_SESSION_LEGACY") == "true" && ( $wfu_user_state_handler != "dboption" || WFU_VAR("WFU_US_DBOPTION_BASE") == "session" ) ) ) return;
+	if ( headers_sent() ) return;
+	if ( function_exists("session_status") ? ( PHP_SESSION_ACTIVE === session_status() ) : ( session_id() != "" ) ) return;
+	session_start();
 }
 
 /**
@@ -7479,8 +7706,20 @@ function wfu_get_session_id() {
 			session_write_close();
 		}
 	}
-	elseif ( $wfu_user_state_handler == "dboption" && WFU_VAR("WFU_US_DBOPTION_BASE") == "cookies" )
-		$key = wfu_get_session_cookie();
+	elseif ( $wfu_user_state_handler == "dboption" && WFU_VAR("WFU_US_DBOPTION_BASE") == "cookies" ) {
+		//cache compatibility (@since 5.3.0): for logged-in users derive the user
+		//state key from the WordPress login session token instead of a plugin
+		//cookie. This keeps the key per-browser (one token per login/device), sets
+		//no plugin cookie for logged-in users, and stays consistent across render,
+		//AJAX, log records and the file browser because they all resolve the key
+		//through this function. Guests continue to use the plugin cookie.
+		$key = "";
+		if ( is_user_logged_in() && function_exists("wp_get_session_token") ) {
+			$wp_token = wp_get_session_token();
+			if ( $wp_token != "" ) $key = "u".hash("sha256", $wp_token);
+		}
+		if ( $key == "" ) $key = wfu_get_session_cookie();
+	}
 	return $key;
 }
 
@@ -8494,19 +8733,19 @@ function wfu_curl_read_response_header($curl, $header) {
  * Returns the address of the Professional version, tagged so that we can tell
  * which link a visitor followed. Without this every visit looks the same and
  * there is no way to know whether a purchase started from the wordpress.org
- * listing, from the plugin's settings page or from a notice.
+ * listing, from the plugin's settings page or from a notice. The Pro links all
+ * share the 'pricing' campaign; the individual link is kept in utm_content.
  *
  * @since 5.2.0
+ * @since 5.3.0 Aligned with the common admin link scheme (utm_medium=admin,
+ *        utm_campaign=pricing); $content is now reported as utm_content.
  *
- * @param string $medium Identifies the individual link, e.g. 'settings' or
+ * @param string $content Identifies the individual link, e.g. 'settings' or
  *        'notice_storage'.
  * @return string The URL.
  */
-function wfu_pro_url($medium) {
-	return add_query_arg(
-		array( 'utm_source' => 'plugin', 'utm_medium' => $medium ),
-		WFU_PRO_VERSION_URL
-	);
+function wfu_pro_url($content) {
+	return wfu_admin_utm_url( WFU_PRO_VERSION_URL, 'pricing', $content );
 }
 
 /**

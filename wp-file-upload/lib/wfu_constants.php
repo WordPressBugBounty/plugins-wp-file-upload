@@ -516,6 +516,12 @@ DEFINE("WFU_VERSION_HASH", '9npWpXMhAQ5e6AGJ5zqbaPxLk9ePD3eSu3WKeN9p89E9wmgL2PHt
 DEFINE("WFU_DOWNLOADER_URL", WPFILEUPLOAD_DIR."wfu_file_downloader.php");
 DEFINE("WFU_IPTANUS_SERVER_UNREACHABLE_ARTICLE", 'https://www.iptanus.com/iptanus-services-server-unreachable-error-wfu-plugin/');
 DEFINE("WFU_IPTANUS_HOOKS_AND_SESSION", 'https://www.iptanus.com/wordpress-file-upload-hooks-and-session/');
+//release notes section of the plugin page; the "What changed" link in the
+//Dashboard version row points here. The section marks which versions carried
+//a security fix. The #sec-release-notes fragment is added by the caller after
+//the tracking parameters, so that the query string stays before the fragment.
+DEFINE("WFU_RELEASE_NOTES_URL", 'https://www.iptanus.com/wordpress-plugins/iptanus-file-upload/');
+DEFINE("WFU_RELEASE_NOTES_FRAGMENT", 'sec-release-notes');
 DEFINE("WFU_WP_GALLERY_SHORTCODE", 'https://codex.wordpress.org/Gallery_Shortcode');
 //alternative insecure server
 DEFINE("WFU_SERVICES_SERVER_ALT_URL", 'http://services.iptanus.com');
@@ -535,6 +541,13 @@ DEFINE("WFU_PRO_VERSION_URL", 'https://www.iptanus.com/product/iptanus-file-uplo
 DEFINE("WFU_NOTICE_GRACE_PERIOD", 7 * 24 * 3600);
 //at most one notice in this period, across all notices
 DEFINE("WFU_NOTICE_MIN_INTERVAL", 30 * 24 * 3600);
+//the review request waits until the plugin has clearly been useful: it is shown
+//only after this long since activation and after this many successful uploads
+DEFINE("WFU_REVIEW_MIN_AGE", 30 * 24 * 3600);
+DEFINE("WFU_REVIEW_MIN_UPLOADS", 25);
+//WordPress.org reviews page for the plugin; no tracking parameters, they are
+//stripped on wordpress.org and would mean nothing there
+DEFINE("WFU_WPORG_REVIEWS_URL", 'https://wordpress.org/support/plugin/wp-file-upload/reviews/');
 //define images
 DEFINE("WFU_IMAGE_ADMIN_HELP", WPFILEUPLOAD_DIR.'images/help_16.png');
 DEFINE("WFU_IMAGE_ADMIN_RESTOREDEFAULT", WPFILEUPLOAD_DIR.'images/restore_16.png');

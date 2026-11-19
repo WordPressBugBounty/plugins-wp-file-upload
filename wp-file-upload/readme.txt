@@ -4,7 +4,7 @@ Donate link: https://www.iptanus.com/pricing/?utm_source=wporg&utm_medium=readme
 Tags: file upload, upload form, front end upload, user uploads, webcam
 Requires at least: 3.0
 Tested up to: 7.1
-Stable tag: 5.2.5
+Stable tag: 5.3.0
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -164,6 +164,15 @@ Please report security bugs found in the source code of the Iptanus File Upload 
 8. Browse and search uploaded files from the WordPress dashboard.
 
 == Changelog ==
+
+= 5.3.0 =
+* improved compatibility with full-page cache plugins: the plugin no longer sets its user-state cookie on every page, so pages that do not contain an uploader or file browser can now be cached, and the uploader itself keeps working even when its page is served from the cache - on load it obtains a fresh upload session from the server instead of relying on values embedded in the cached page
+* made the uploader's inline Javascript more resilient to the aggressive Javascript minification and combination that some cache plugins perform, which could previously cause Javascript errors on the uploader page
+* extended the caching improvement to the alternative "Session" user-state mode, which no longer starts a PHP session (and the site-wide PHPSESSID cookie) on pages that do not contain an uploader or file browser
+* removed the use of eval-style Javascript (new Function) from the uploader's core upload code, so the uploader now works on sites whose Content Security Policy does not allow 'unsafe-eval'
+* the Dashboard now points out when an available update is a security release and adds a "What changed" link to the release notes, so security updates are easier to recognise and act on
+* added an occasional, dismissible request on the plugin's Dashboard to leave a review on WordPress.org, shown only after the plugin has been installed for a while and has handled a number of uploads
+* added short, dismissible hints next to a few settings that mention related capabilities available in the Professional version
 
 = 5.2.5 =
 * fixed a security issue, reported by HyeonGyun Yim through Patchstack, where data entered in the uploader's user fields was stored in the Media attachment's metadata (when media or post linking was enabled) and could be read by unauthenticated visitors through the WordPress media REST endpoint; the plugin no longer stores this data in the attachment metadata and also strips it from REST responses for files uploaded before this version

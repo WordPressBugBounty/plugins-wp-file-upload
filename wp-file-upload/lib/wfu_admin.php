@@ -941,18 +941,25 @@ function wfu_manage_mainmenu($message = '') {
 	$echo_str .= "\n\t\t\t\t\t\t".'<label style="font-weight:bold; cursor:default;">'.$cur_version.'</label>';
 	$echo_str .= "\n\t\t\t\t\t".'</td>';
 	$echo_str .= "\n\t\t\t\t\t".'<td>';
-	$lat_version = wfu_get_latest_version();
+	$lat_info = wfu_get_latest_version(true);
+	$lat_version = $lat_info['version'];
+	$lat_security = $lat_info['security_release'];
+	$lat_rn_url = wfu_admin_utm_url( WFU_RELEASE_NOTES_URL, 'release-notes' ).'#'.WFU_RELEASE_NOTES_FRAGMENT;
 	$ret = wfu_compare_versions($cur_version, $lat_version);
 	if ( $lat_version == "" && WFU_VAR("WFU_DISABLE_VERSION_CHECK") != "true" ) {
 		$echo_str .= "\n\t\t\t\t\t\t".'<div style="display:inline-block; background-color:transparent; padding:0 0 0 4px; color:red;">';
 		$echo_str .= "\n\t\t\t\t\t\t\t".'<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 200 800" version="1.1" style="background:transparent; border-radius:13px; padding:2px; vertical-align:middle; border: 2px solid red; fill:red;"><path d="M 110,567 L 90,567 L 42,132 C 40,114 40,100 40,90 C 40,70 45,49 56,35 C 70,22 83,15 100,15 C 117,15 130,22 144,35 C 155,49 160,70 160,90 C 160,100 160,114 158,132 z M 100,640 A 60,60 0 1,1 100,760 A 60,60 0 1,1 100,640 z"/></svg>';
-		$warning_text = wfu_esc_html_a(WFU_WARNING_IPTANUS_SERVER_UNREACHABLE, WFU_IPTANUS_SERVER_UNREACHABLE_ARTICLE, true, __('Iptanus Services Server Unreachable Error of WFU Plugin', 'wp-file-upload'));
+		$warning_text = wfu_esc_html_a(WFU_WARNING_IPTANUS_SERVER_UNREACHABLE, wfu_admin_utm_url(WFU_IPTANUS_SERVER_UNREACHABLE_ARTICLE, 'docs'), true, __('Iptanus Services Server Unreachable Error of WFU Plugin', 'wp-file-upload'));
 		$echo_str .= "\n\t\t\t\t\t\t\t".'<label style="cursor:default;">'.$warning_text.'</label>';
 		$echo_str .= "\n\t\t\t\t\t\t".'</div>';
 	}
 	elseif ( $ret['status'] && $ret['result'] == 'lower' ) {
 		$echo_str .= "\n\t\t\t\t\t\t".'<div style="display:inline-block; background-color:bisque; padding:0 0 0 4px; border-left:3px solid lightcoral;">';
+		if ( $lat_security )
+			$echo_str .= "\n\t\t\t\t\t\t\t".'<label style="cursor:default; font-weight:bold; display:block;">'.sprintf(esc_html__('Version %s is available and fixes a security issue.', 'wp-file-upload'), '<strong>'.$lat_version.'</strong>').'</label>';
 		$echo_str .= "\n\t\t\t\t\t\t\t".'<label style="cursor:default;">'.sprintf(esc_html__('Version %s of the plugin is available. Go to Plugins page of your Dashboard to update to the latest version.', 'wp-file-upload'), '<strong>'.$lat_version.'</strong>').'</label>';
+		if ( $lat_security )
+			$echo_str .= ' <label style="cursor:default;">&middot; <a target="_blank" href="'.esc_url($lat_rn_url).'">'.esc_html__('What changed', 'wp-file-upload').'</a></label>';
 		if ( $ret['custom'] ) $echo_str .= '<label style="cursor:default; color: purple;"> <em>'.esc_html__('Please note that you are using a custom version of the plugin. If you upgrade to the newest version, custom changes will be lost.', 'wp-file-upload').'</em></label>';
 		$echo_str .= "\n\t\t\t\t\t\t".'</div>';
 	}
@@ -1008,6 +1015,27 @@ function wfu_manage_mainmenu($message = '') {
 	$echo_str .= "\n\t\t\t\t".'</tr>';
 	$echo_str .= "\n\t\t\t".'</tbody>';
 	$echo_str .= "\n\t\t".'</table>';
+
+	//ask for a WordPress.org review, but only once the plugin has clearly been
+	//useful - a notice shown too early is dismissed on sight. The notice
+	//framework already enforces admins-only, permanent dismissal and the
+	//one-notice-per-interval rule; on top of that the review waits for a minimum
+	//age and a minimum number of successful uploads. The upload count is only
+	//queried once the cheaper checks have passed.
+	if ( wfu_notice_allowed("review") ) {
+		$review_state = wfu_get_notice_state();
+		$review_old_enough = ( $review_state["installed"] == 0 || time() - $review_state["installed"] >= WFU_REVIEW_MIN_AGE );
+		if ( $review_old_enough ) {
+			global $wpdb;
+			$review_uploads = (int)$wpdb->get_var('SELECT COUNT(idlog) FROM '.$wpdb->prefix.'wfu_log WHERE action = \'upload\'');
+			if ( $review_uploads >= WFU_REVIEW_MIN_UPLOADS )
+				$echo_str .= "\n\t\t".wfu_render_notice(
+					"review",
+					__('Has this plugin been useful? Please consider leaving a :review: on WordPress.org - it helps more than you would think.', 'wp-file-upload'),
+					WFU_WPORG_REVIEWS_URL
+				);
+		}
+	}
 
 	$echo_str .= wfu_manage_instances();
 
