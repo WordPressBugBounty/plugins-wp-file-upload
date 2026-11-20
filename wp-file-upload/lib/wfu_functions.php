@@ -7716,7 +7716,13 @@ function wfu_get_session_id() {
 		$key = "";
 		if ( is_user_logged_in() && function_exists("wp_get_session_token") ) {
 			$wp_token = wp_get_session_token();
-			if ( $wp_token != "" ) $key = "u".hash("sha256", $wp_token);
+			//the derived key is stored wherever a session id is stored, most
+			//tightly in the wfu_log "sessionid" column (varchar(40)); keep it to
+			//32 characters - a "u" prefix plus 31 hex digits - matching the length
+			//of a standard PHP session id, so the key fits and the log INSERT does
+			//not fail under MySQL strict mode. 124 bits stay collision-safe for a
+			//per-login key.
+			if ( $wp_token != "" ) $key = "u".substr(hash("sha256", $wp_token), 0, 31);
 		}
 		if ( $key == "" ) $key = wfu_get_session_cookie();
 	}

@@ -4,7 +4,7 @@ Donate link: https://www.iptanus.com/pricing/?utm_source=wporg&utm_medium=readme
 Tags: file upload, upload form, front end upload, user uploads, webcam
 Requires at least: 3.0
 Tested up to: 7.1
-Stable tag: 5.3.0
+Stable tag: 5.3.1
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -164,6 +164,9 @@ Please report security bugs found in the source code of the Iptanus File Upload 
 8. Browse and search uploaded files from the WordPress dashboard.
 
 == Changelog ==
+
+= 5.3.1 =
+* fixed an issue where files uploaded by logged-in users were saved to the server but not recorded in the plugin's database, so they did not appear in the "Uploaded Files" list or in file browsers; uploading a file with the same name as an existing one could also remove the existing entry from the list - uploads by visitors who were not logged in were not affected
 
 = 5.3.0 =
 * improved compatibility with full-page cache plugins: the plugin no longer sets its user-state cookie on every page, so pages that do not contain an uploader or file browser can now be cached, and the uploader itself keeps working even when its page is served from the cache - on load it obtains a fresh upload session from the server instead of relying on values embedded in the cached page
