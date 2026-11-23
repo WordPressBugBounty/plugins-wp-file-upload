@@ -1494,7 +1494,7 @@ function wfu_file_details($file_code, $messagestatus, $invoker = '') {
 	$echo_str .= "\n\t\t\t\t\t\t\t".'<label>'.esc_html__('Uploaded From Page', 'wp-file-upload').'</label>';
 	$echo_str .= "\n\t\t\t\t\t\t".'</th>';
 	$echo_str .= "\n\t\t\t\t\t\t".'<td>';
-	$echo_str .= "\n\t\t\t\t\t\t\t".'<input type="text" value="'.sanitize_text_field(get_the_title($filerec->pageid)).' ('.$filerec->pageid.')'.'" readonly="readonly" style="width:50%;" />';
+	$echo_str .= "\n\t\t\t\t\t\t\t".'<input type="text" value="'.esc_attr(get_the_title($filerec->pageid).' ('.$filerec->pageid.')').'" readonly="readonly" style="width:50%;" />';
 	$echo_str .= "\n\t\t\t\t\t\t".'</td>';
 	$echo_str .= "\n\t\t\t\t\t".'</tr>';
 	if ( $is_admin ) {

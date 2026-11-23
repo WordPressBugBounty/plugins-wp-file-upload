@@ -4,7 +4,7 @@ Donate link: https://www.iptanus.com/pricing/?utm_source=wporg&utm_medium=readme
 Tags: file upload, upload form, front end upload, user uploads, webcam
 Requires at least: 3.0
 Tested up to: 7.1
-Stable tag: 5.3.1
+Stable tag: 5.3.2
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -164,6 +164,10 @@ Please report security bugs found in the source code of the Iptanus File Upload 
 8. Browse and search uploaded files from the WordPress dashboard.
 
 == Changelog ==
+
+= 5.3.2 =
+* fixed a security issue, reported independently by crow through Wordfence and by Kang MinSeok (AhnLab) through Patchstack, that under specific Personal Data and email notification settings could let an unauthenticated visitor make the plugin delete arbitrary files on the server, or overwrite a file outside the upload folder
+* fixed a security issue, reported by dzaku through Patchstack, where userdata field labels and the uploading page's title shown on the file details admin page were not properly escaped, allowing a user with Contributor-level access to run scripts in the browser of an administrator viewing the content
 
 = 5.3.1 =
 * fixed an issue where files uploaded by logged-in users were saved to the server but not recorded in the plugin's database, so they did not appear in the "Uploaded Files" list or in file browsers; uploading a file with the same name as an existing one could also remove the existing entry from the list - uploads by visitors who were not logged in were not affected

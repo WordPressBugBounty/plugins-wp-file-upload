@@ -3962,7 +3962,7 @@ this.initField = function(props) {
 				l2.setAttribute("for", f2.id);
 			}
 			f2.value = items[i];
-			l2.innerHTML = items[i];
+			l2.textContent = items[i];
 			var w = document.createElement("DIV");
 			w.className = "file_userdata_radio_wrapper";
 			if (pos == "top") {
@@ -4043,7 +4043,7 @@ this.initField = function(props) {
 			if (i > 0)
 				o2 = o.cloneNode(true);
 			o2.value = items[i];
-			o2.innerHTML = items[i];
+			o2.textContent = items[i];
 			o2.selected = (o2.value == props.default);
 			o2.style.display = "block";
 			if (i > 0) field.appendChild(o2);
@@ -4055,7 +4055,7 @@ this.initField = function(props) {
 		for (var i = 0; i < items.length; i++) {
 			var o2 = o.cloneNode(true);
 			o2.value = items[i];
-			o2.innerHTML = items[i];
+			o2.textContent = items[i];
 			o2.selected = (o2.value == props.default);
 			o2.style.display = "block";
 			field.appendChild(o2);

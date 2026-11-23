@@ -1719,7 +1719,16 @@ function wfu_init_run_js_script() {
 function wfu_PHP_array_to_JS_object($arr) {
 	$ret = "";
 	foreach ( $arr as $prop => $value ) {
-		if ( is_string($value) ) $ret .= ( $ret == "" ? "" : ", " )."$prop: \"".esc_html($value)."\"";
+		//string values are emitted as a JSON-encoded Javascript string literal
+		//(quotes included) rather than esc_html() wrapped in manual quotes:
+		//esc_html() does not escape a backslash, so a value ending in "\" used to
+		//escape its own closing quote and let the following text run as code, and
+		//a literal "<"/">" in the value survived esc_html() and was later
+		//decoded to "<"/">" by the Javascript string parser. wp_json_encode()
+		//escapes the backslash and, with the JSON_HEX_* flags, the <, >, &, ' and "
+		//characters, so the value cannot break out of the string or the inline
+		//<script> (CVE/XSS, Patchstack report).
+		if ( is_string($value) ) $ret .= ( $ret == "" ? "" : ", " ).$prop.": ".wp_json_encode($value, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
 		elseif ( is_numeric($value) ) $ret .= ( $ret == "" ? "" : ", " )."$prop: $value";
 		elseif ( is_bool($value) ) $ret .= ( $ret == "" ? "" : ", " )."$prop: ".( $value ? "true" : "false" );
 	}
@@ -5399,6 +5408,33 @@ function wfu_get_option($option, $default, $type = "array") {
 }
 
 /**
+ * Sanitize a Plugin Option Item Name.
+ *
+ * Option items are stored concatenated inside a single option value, each one
+ * wrapped in delimiters as [item_name]item_value{item_name} (see
+ * wfu_get_option_item() below). An item name is sometimes derived from
+ * unauthenticated request data - most notably the handshake "sid", which becomes
+ * the "wfu_token_<sid>" item name. If a name were allowed to contain the
+ * delimiter characters [ ] { }, an attacker who controls both the name and the
+ * value of an item they may legitimately write could embed a forged delimiter
+ * pair for a different, fixed item name inside their own write and plant
+ * counterfeit records (e.g. a forged WFU_Consent_Data or filedata_<id> record)
+ * that a later read of that fixed name would match. These four characters never
+ * appear in a legitimate item name, so they are stripped here and the function
+ * is applied on both read and write: genuine names are left untouched while a
+ * name can no longer carry an embedded delimiter pair, which closes the forgery.
+ *
+ * @since 5.3.2
+ *
+ * @param string $item The item name to sanitize.
+ *
+ * @return string The item name with the delimiter characters removed.
+ */
+function wfu_sanitize_option_item_name($item) {
+	return str_replace(array('[', ']', '{', '}'), '', $item);
+}
+
+/**
  * Get Plugin Option Item.
  *
  * This function gets an option item from the website's Options table. Option
@@ -5422,6 +5458,7 @@ function wfu_get_option($option, $default, $type = "array") {
  */
 function wfu_get_option_item($option, $item) {
 	global $wpdb;
+	$item = wfu_sanitize_option_item_name($item);
 	$table_name1 = $wpdb->prefix . "options";
 	$val = $wpdb->get_var($wpdb->prepare("SELECT SQL_NO_CACHE IF (COUNT(option_value) = 0, NULL, IF (INSTR(option_value, %s) > 0, SUBSTRING_INDEX(SUBSTRING_INDEX(option_value, %s, -1), %s,  1), NULL)) FROM $table_name1 WHERE option_name = %s", '['.$item.']', '['.$item.']', '{'.$item.'}', $option));
 	//wfu_debug_log("read:".$item." value:".$val."\n");
@@ -5447,6 +5484,7 @@ function wfu_get_option_item($option, $item) {
  */
 function wfu_option_item_exists($option, $item) {
 	global $wpdb;
+	$item = wfu_sanitize_option_item_name($item);
 	$table_name1 = $wpdb->prefix . "options";
 	$exists = $wpdb->get_var($wpdb->prepare("SELECT SQL_NO_CACHE IF (COUNT(option_value) = 0, NULL, IF (INSTR(option_value, %s) > 0, TRUE, FALSE)) FROM $table_name1 WHERE option_name = %s", '['.$item.']', $option));
 	return $exists;
@@ -5722,6 +5760,7 @@ function wfu_remove_queue($queue_id) {
  */
 function wfu_update_option_item($option, $item, $value, $autoload_option = null) {
 	global $wpdb;
+	$item = wfu_sanitize_option_item_name($item);
 	$table_name1 = $wpdb->prefix . "options";
 
 	$autoload = wfu_get_option_autoload($option, $autoload_option);
@@ -5790,6 +5829,7 @@ function wfu_delete_option($option) {
  */
 function wfu_delete_option_item($option, $item) {
 	global $wpdb;
+	$item = wfu_sanitize_option_item_name($item);
 	$table_name1 = $wpdb->prefix . "options";
 	$timeout = time();
 	$val = false;

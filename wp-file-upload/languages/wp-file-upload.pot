@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iptanus File Upload\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 11:23+0200\n"
+"POT-Creation-Date: 2026-11-23 12:54+0200\n"
 "PO-Revision-Date: 2018-12-22 19:37+0200\n"
 "Last-Translator: nickboss <info@iptanus.com>\n"
 "Language-Team: Iptanus Team <info@iptanus.com>\n"
@@ -4354,11 +4354,11 @@ msgstr ""
 msgid "Are you sure you want to delete these files?"
 msgstr ""
 
-#: lib/wfu_constants.php:230 lib/wfu_functions.php:6697
+#: lib/wfu_constants.php:230 lib/wfu_functions.php:6737
 msgid "Bulk Actions"
 msgstr ""
 
-#: lib/wfu_constants.php:231 lib/wfu_functions.php:6701
+#: lib/wfu_constants.php:231 lib/wfu_functions.php:6741
 msgid "Apply"
 msgstr ""
 
@@ -6501,47 +6501,47 @@ msgid ""
 "policy) of the uploader shortcode."
 msgstr ""
 
-#: lib/wfu_functions.php:8110
+#: lib/wfu_functions.php:8150
 msgid "Iptanus File Upload Consent Status"
 msgstr ""
 
-#: lib/wfu_functions.php:8113
+#: lib/wfu_functions.php:8153
 msgid "Consent Status"
 msgstr ""
 
-#: lib/wfu_functions.php:8115
+#: lib/wfu_functions.php:8155
 msgid "You have given your consent to store personal data."
 msgstr ""
 
-#: lib/wfu_functions.php:8115
+#: lib/wfu_functions.php:8155
 msgid "You have denied to store personal data."
 msgstr ""
 
-#: lib/wfu_functions.php:8115
+#: lib/wfu_functions.php:8155
 msgid "You have not answered to consent yet."
 msgstr ""
 
-#: lib/wfu_functions.php:8121
+#: lib/wfu_functions.php:8161
 msgid "Change status to"
 msgstr ""
 
-#: lib/wfu_functions.php:8123
+#: lib/wfu_functions.php:8163
 msgid "No change"
 msgstr ""
 
-#: lib/wfu_functions.php:8125 lib/wfu_functions.php:8133
+#: lib/wfu_functions.php:8165 lib/wfu_functions.php:8173
 msgid "Revoke Consent"
 msgstr ""
 
-#: lib/wfu_functions.php:8126 lib/wfu_functions.php:8130
+#: lib/wfu_functions.php:8166 lib/wfu_functions.php:8170
 msgid "Clear Consent"
 msgstr ""
 
-#: lib/wfu_functions.php:8129 lib/wfu_functions.php:8134
+#: lib/wfu_functions.php:8169 lib/wfu_functions.php:8174
 msgid "Give Consent"
 msgstr ""
 
-#: lib/wfu_functions.php:8873
+#: lib/wfu_functions.php:8913
 msgid "Dismiss this notice."
 msgstr ""
 
